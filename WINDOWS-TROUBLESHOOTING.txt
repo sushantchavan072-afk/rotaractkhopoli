@@ -1,0 +1,32 @@
+WINDOWS SETUP AND TROUBLESHOOTING
+=================================
+1. Right-click the ZIP and select Extract All. Do not run files inside ZIP preview.
+2. Open the extracted folder named .
+3. Double-click START-WINDOWS-KEEP-OPEN.cmd.
+4. Wait for npm install on the first run. This requires internet.
+5. Once the message "Ready" appears, visit http://localhost:3000.
+6. Keep the command window open while using the site.
+
+IF THE WINDOW CLOSES, RUN MANUALLY:
+A. Open the extracted  folder in File Explorer.
+B. Click the address bar, type cmd, and press Enter.
+C. Type these commands (one at a time):
+
+   node -v
+   npm -v
+   npm install
+   npm run dev
+
+Any errors will remain visible. Screenshot or copy them to troubleshoot.
+
+Common problems:
+- 'node is not recognized': Install Node.js LTS from https://nodejs.org/
+  then reopen cmd.
+- 'npm is not recognized': Reinstall Node.js with npm selected.
+- 'package.json not found': You are in the wrong folder or have not extracted ZIP.
+- 'cannot find module next': Run npm install and wait for it to finish.
+- npm network or certificate errors: Check connectivity, firewall, VPN/proxy.
+- Port 3000 occupied: Check the port address printed by Next.js; it may use 3001.
+
+The site requires Node.js and npm; you cannot run the JSX source by opening
+page.jsx or index.html in a browser. Backend forms remain demo-only.
