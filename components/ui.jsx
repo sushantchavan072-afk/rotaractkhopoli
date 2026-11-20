@@ -479,6 +479,29 @@ export function NoteWall() {
   );
 }
 
+/* ---------------------------------------------------------------- Hover to expand */
+
+/**
+ * Wrapper that opens the <details> inside it when a mouse rests on it (after a short pause, so
+ * passing over it while scrolling does nothing). It stays open; "Show less" closes it.
+ * Touch screens keep the tap-to-open button.
+ */
+export function HoverOpen({ as: Tag = 'div', className = '', children, delay = 250 }) {
+  const timer = useRef(0);
+  const onEnter = (e) => {
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    const box = e.currentTarget;
+    window.clearTimeout(timer.current);
+    timer.current = window.setTimeout(() => {
+      const d = box.querySelector('details');
+      if (d && !d.open) d.open = true;
+    }, delay);
+  };
+  const onLeave = () => window.clearTimeout(timer.current);
+  useEffect(() => () => window.clearTimeout(timer.current), []);
+  return <Tag className={className} onMouseEnter={onEnter} onMouseLeave={onLeave}>{children}</Tag>;
+}
+
 /* ---------------------------------------------------------------- FAQs */
 
 export function FaqList({ items, firstOpen = true }) {

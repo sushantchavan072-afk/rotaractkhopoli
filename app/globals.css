@@ -434,6 +434,13 @@ section:nth-of-type(6n) .eyebrow-dot { background: var(--interact); }
 .quote-card { margin: 0; border: 1px solid var(--line); border-radius: var(--radius); padding: 36px; display: flex; flex-direction: column; gap: 22px; }
 .stars { display: flex; gap: 6px; color: #ffc107; }
 .quote-card blockquote { margin: 0; font-size: 20px; line-height: 1.6; color: var(--muted); flex: 1; }
+/* Testimonials: long quotes show four lines and expand while the mouse is over the card */
+@media (hover: hover) and (pointer: fine) {
+  .quote-card { transition: transform .35s ease, box-shadow .35s ease, border-color .35s ease; }
+  .quote-card blockquote { max-height: 6.4em; overflow: hidden; transition: max-height .5s ease, color .3s; -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent); mask-image: linear-gradient(180deg, #000 70%, transparent); }
+  .quote-card:hover { transform: translateY(-6px) scale(1.02); box-shadow: 0 22px 44px rgba(0,0,0,.08); border-color: transparent; z-index: 2; }
+  .quote-card:hover blockquote { max-height: 30em; color: var(--ink); -webkit-mask-image: none; mask-image: none; }
+}
 .quote-card figcaption { display: flex; gap: 12px; align-items: center; }
 .quote-card figcaption > span:last-child { display: flex; flex-direction: column; font-size: 13px; color: var(--muted); }
 .quote-card figcaption strong { font-size: 15px; font-weight: 600; color: var(--ink); }
@@ -930,6 +937,13 @@ section:nth-of-type(6n) .eyebrow-dot { background: var(--interact); }
 .leader-letter p { font-size: 16.5px; line-height: 1.75; color: var(--text-2); margin-bottom: 1em; }
 .leader-greeting { font-weight: 600; color: var(--ink) !important; }
 .leader-letter details { margin-top: 4px; }
+/* Smoothly unfold the rest of the message (browsers without support just open it) */
+:root { interpolate-size: allow-keywords; }
+.leader-letter details::details-content { block-size: 0; overflow: hidden; transition: block-size .6s ease, content-visibility .6s allow-discrete; }
+.leader-letter details[open]::details-content { block-size: auto; }
+@media (prefers-reduced-motion: reduce) { .leader-letter details::details-content { transition: none; } }
+.leader-letter { transition: box-shadow .35s ease; }
+@media (hover: hover) and (pointer: fine) { .leader-letter:hover { box-shadow: 0 18px 40px rgba(0,0,0,.06); } }
 .leader-letter summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-weight: 600; font-size: 15px; padding: 10px 20px; border-radius: 30px; border: 1px solid var(--line-strong); margin-bottom: 18px; transition: background .2s, border-color .2s; }
 .leader-letter summary::-webkit-details-marker { display: none; }
 .leader-letter summary:hover { border-color: var(--ink); }
@@ -976,16 +990,20 @@ main, .footer { position: relative; z-index: 1; }
 /* A thin Rotary family rule above the footer's bottom line: Rotary blue, gold, Rotaract cranberry, Interact blue */
 .footer-bottom::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; border-radius: 2px; background: linear-gradient(90deg, var(--rotary-blue), var(--rotary-gold), var(--rotaract), var(--interact)); opacity: .85; }
 
-/* ---------- Custom cursor (components/ui/custom-cursor.tsx) ---------- */
-@media (pointer: fine) {
-  html.custom-cursor, html.custom-cursor * { cursor: none !important; }
-  html.custom-cursor :is(input:not([type='checkbox']):not([type='radio']):not([type='submit']):not([type='button']), textarea, [contenteditable='true']) { cursor: text !important; }
-}
-.cursor-arrow { position: fixed; left: 0; top: 0; z-index: 300; pointer-events: none; opacity: 0; color: var(--rotary-blue); transition: opacity .1s ease-out, color .2s; will-change: transform, opacity; }
-.cursor-arrow svg { display: block; transform-origin: 1px 1px; transition: transform .2s ease; filter: drop-shadow(0 1px 1.5px rgba(0,0,0,.25)); }
-.cursor-arrow[data-state='link'] { color: var(--rotaract); }
-.cursor-arrow[data-state='link'] svg { transform: scale(1.25); }
-.cursor-sparks { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 299; pointer-events: none; }
+/* ---------- Custom cursor (components/ui/custom-cursor.tsx), as on rotaractscop.org ---------- */
+@media (pointer: fine) { html.custom-cursor, html.custom-cursor * { cursor: none !important; } }
+.cursor-arrow { position: fixed; left: 0; top: 0; z-index: 200; pointer-events: none; opacity: 0; color: hsl(220 65% 22%); transition: opacity .1s ease-out; will-change: transform, opacity; }
+.cursor-arrow svg { display: block; width: 14px; height: 14px; }
+.cursor-sparks { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 100; pointer-events: none; user-select: none; }
+
+/* ---------- Touch: no blue flash or text selection when tapping links and buttons ---------- */
+html { -webkit-tap-highlight-color: transparent; }
+a, button, summary, label, [role='button'], .btn, .nav-pill, .nav-cta, .card-btn, .menu-toggle { -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; }
+@media (hover: none) { a:focus:not(:focus-visible), button:focus:not(:focus-visible) { outline: none; box-shadow: none; } }
+::selection { background: rgba(212, 19, 103, .16); }
+/* A thin Rotary family rule above the footer's bottom line: Rotary blue, gold, Rotaract cranberry, Interact blue */
+.footer-bottom::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; border-radius: 2px; background: linear-gradient(90deg, var(--rotary-blue), var(--rotary-gold), var(--rotaract), var(--interact)); opacity: .85; }
+
 
 /* ---------- Leave a note (Reviews page, "Share your experience") ---------- */
 .note-head { text-align: center; max-width: 640px; margin: 0 auto 48px; display: flex; flex-direction: column; align-items: center; }
@@ -1019,7 +1037,7 @@ main, .footer { position: relative; z-index: 1; }
 .note-empty-pin { display: block; width: 38px; height: 38px; margin: 0 auto 14px; border-radius: 50%; border: 2px solid var(--line-strong); background: var(--surface); }
 .note-list { list-style: none; margin: 0; padding: 8px 0 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 30px 24px; }
 .note { position: relative; background: var(--note-bg); border-radius: 6px 6px 18px 6px; padding: 30px 20px 18px; min-height: 190px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 10px 24px rgba(0,0,0,.08); transform: rotate(var(--tilt, 0deg)); transition: transform .25s, box-shadow .25s; animation: note-in .45s cubic-bezier(.2,.8,.2,1.2) both; }
-.note:hover { transform: rotate(0deg) translateY(-4px); box-shadow: 0 16px 32px rgba(0,0,0,.12); }
+.note:hover { transform: rotate(0deg) translateY(-6px) scale(1.05); box-shadow: 0 20px 38px rgba(0,0,0,.14); z-index: 2; }
 @keyframes note-in { from { opacity: 0; transform: translateY(-14px) scale(.92) rotate(var(--tilt, 0deg)); } }
 .note-pin { position: absolute; top: 10px; left: 50%; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; background: var(--coral); box-shadow: inset -2px -2px 0 rgba(0,0,0,.18), 0 2px 3px rgba(0,0,0,.2); }
 .note-remove { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; border-radius: 50%; border: 0; background: rgba(255,255,255,.55); color: #1d1d1d; display: grid; place-items: center; opacity: .7; transition: opacity .2s, background .2s; }

@@ -64,17 +64,21 @@ The site is **light mode only**.
 - Nothing is redrawn while the mouse is still, and the animation stops while the tab is hidden.
 - Touch screens and visitors who prefer reduced motion see only the plain dots.
 
-**Cursor** (`components/ui/custom-cursor.tsx`):
-- On mouse and trackpad devices, the system pointer is replaced by a small Rotary-blue arrow.
-- Over links and buttons it turns cranberry and grows slightly. Clicking gives a small spark burst.
-- Text fields keep the normal text cursor.
-- Touch screens and reduced-motion visitors keep the system cursor.
+**Cursor** (`components/ui/custom-cursor.tsx`), matched to rotaractscop.org:
+- On mouse and trackpad devices, the system pointer is replaced by a 14px navy arrow.
+- Every click gives a small pink spark burst.
+- Phones and tablets keep their normal behaviour. Tapping no longer flashes a blue box or selects text.
+
+**Hover to expand:**
+- Leader messages (RI President, District Governor, DRR) unfold to the full message when the mouse rests on them (`HoverOpen` in `components/ui.jsx`). "Show less" folds them again, and on phones the button still opens them.
+- Testimonial cards show long quotes in full while the mouse is over them.
+- Notes on the Reviews page wall lift and grow when hovered.
 
 **Rotary family colours** (`--rotary-blue`, `--rotary-gold`, `--rotaract`, `--interact` and their light tints, at the top of `app/globals.css`) are used alongside the Kindora palette:
 - section label dots, and the blue card tint;
 - the leader cards: Rotary blue for the RI President, Rotary gold for the District Governor, Rotaract cranberry for the DRR;
 - the number cards: Rotary gold and blue on the Rotary page, cranberry on the District page;
-- the event partner badge, the line above the footer's bottom row, text selection, the cursor, the glow and the trail.
+- the event partner badge, the line above the footer's bottom row, text selection, the glow and the trail.
 
 ### Why there is TypeScript but no Tailwind or shadcn
 

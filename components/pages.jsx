@@ -19,7 +19,7 @@ import {
   postsNewestFirst, PAGE_SIZE, riPresident, drr, districtGovernor,
 } from '../data/club';
 import {
-  Btn, Eyebrow, Intro, Section, PageHero, Photo, FaqList, FaqSearch, MailForm, NoteWall, SocialLinks,
+  Btn, Eyebrow, Intro, Section, PageHero, Photo, FaqList, FaqSearch, MailForm, NoteWall, HoverOpen, SocialLinks,
   EventCard, EventsExplorer, EventStatus, EventActions, FamilyLogos, LogoMarquee,
 } from './ui';
 
@@ -783,7 +783,7 @@ function LeaderCard({ leader, eyebrow, tone = 'coral', preview = 3 }) {
         </div>
       </div>
       {leader.message?.length > 0 && (
-        <div className="leader-letter">
+        <HoverOpen className="leader-letter">
           <h3>Message from the {leader.short}</h3>
           {leader.greeting && <p className="leader-greeting">{leader.greeting}</p>}
           {shown.map((para) => <p key={para.slice(0, 48)}>{para}</p>)}
@@ -794,7 +794,7 @@ function LeaderCard({ leader, eyebrow, tone = 'coral', preview = 3 }) {
               <Signoff lines={leader.signoff} />
             </details>
           ) : <Signoff lines={leader.signoff} />}
-        </div>
+        </HoverOpen>
       )}
     </article>
   );
