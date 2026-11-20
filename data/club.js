@@ -58,9 +58,9 @@ export const clubFacts = [
 
 /** District 3131 family logos (Rotaract, Rotary, Interact) in public/images/logos. */
 export const FAMILY_LOGOS = [
-  { src: '/images/logos/rotaract-district-3131.png', alt: 'Rotaract District 3131', w: 790, h: 276, href: '/district-3131' },
-  { src: '/images/logos/rotary-district-3131.png', alt: 'Rotary District 3131', w: 743, h: 286, href: '/rotary-information' },
-  { src: '/images/logos/interact-district-3131.png', alt: 'Interact District 3131', w: 754, h: 276, href: null },
+  { src: '/images/logos/rotaract-district-3131.png', alt: 'Rotaract District 3131', w: 790, h: 277, href: '/district-3131' },
+  { src: '/images/logos/rotary-district-3131.png', alt: 'Rotary District 3131', w: 741, h: 286, href: '/rotary-information' },
+  { src: '/images/logos/interact-district-3131.png', alt: 'Interact District 3131', w: 753, h: 277, href: null },
 ];
 
 export const NAV = [
@@ -242,19 +242,53 @@ export const faqGroups = [
 export const allFaqs = faqGroups.flatMap((g) => g.items);
 
 /* ---------------- District & Rotary ---------------- */
+/**
+ * Leaders for the current Rotary year (RIY 2026-27).
+ * photo: file in public/images/leaders/ (leave empty to show initials).
+ * message: paste the leader's message here; the message block appears only when this is filled in.
+ */
+export const riPresident = {
+  name: 'Olayinka Hakeem Babalola',
+  role: 'President, Rotary International',
+  year: 'RIY 2026-27',
+  theme: 'Create Lasting Impact',
+  photo: '/images/leaders/ri-president.jpg',
+  message: [], // TODO(club): paragraphs of the RI President's message
+};
+
+export const drr = {
+  name: 'Dr. Karishma Awari',
+  role: 'District Rotaract Representative (DRR)',
+  district: 'Rotaract District 3131',
+  year: 'RIY 2026-27',
+  photo: '', // TODO(club): e.g. '/images/leaders/drr.jpg'
+  message: [], // TODO(club): paragraphs of the DRR's message
+};
+
 export const district = {
   name: 'Rotaract District 3131',
   website: 'https://www.rotaractdistrict3131.org/',
-  intro: 'Our district brings together the Rotaract clubs of the Pune and Raigad regions. It works hand in hand with Rotary International District 3131 to help young leaders take on bigger projects than any one club could manage alone.',
+  intro: 'Rotaract District 3131 brings together the Rotaract clubs of the Pune and Raigad regions of Maharashtra. Working hand in hand with Rotary International District 3131, it helps young leaders take on bigger projects than any one club could manage alone.',
+  about: [
+    'Rotary groups its clubs into districts so that clubs in the same region can learn from each other, run joint projects and share resources. District 3131 was formed in the Rotary year 2008-09, when the old District 3130 was divided in two, and today it covers the Pune and Raigad revenue districts of Maharashtra.',
+    'The district is home to more than 100 Rotaract clubs and over 2,700 Rotaractors. Some clubs are based in colleges and universities, while others, like Rotaract Club of Khopoli, are community based and open to young people from every background in their town.',
+    'Each year the district is led by a District Rotaract Representative (DRR), supported by a district council of Rotaractors who look after training, projects, public image and club support. The DRR works closely with the Rotary District Governor and the district Rotaract committee.',
+  ],
   facts: [
     { label: 'Formation and scope', value: 'Formed in 2008-09 when the old District 3130 was split in two. It covers the Pune and Raigad revenue districts of Maharashtra.' },
     { label: 'Membership and reach', value: 'More than 100 clubs and over 2,700 Rotaractors, from college students to young professionals.' },
     { label: 'Leadership, fellowship and service', value: 'Clubs organise their work into avenues such as community, professional, club and international service. Rotaract is open from 18 upwards, with no upper age limit.' },
   ],
+  roles: [
+    { title: 'Training new leaders', body: 'District trainings and assemblies prepare each incoming club president, secretary and board before their Rotaract year begins.' },
+    { title: 'District-wide projects', body: 'Clubs join forces on service projects and campaigns that reach far more people than a single club could.' },
+    { title: 'Fellowship and events', body: 'Conferences, sports meets and inter-club meetings help Rotaractors across Pune and Raigad meet and work together.' },
+    { title: 'Support and reporting', body: 'The district council supports clubs through the year and gathers their project reports for Rotary International.' },
+  ],
   stats: [
-    { value: '100+', label: 'Rotaract clubs' },
-    { value: '2,700+', label: 'Rotaractors' },
-    { value: '2008-09', label: 'District formed' },
+    { value: '100+', label: 'Rotaract clubs in the district' },
+    { value: '2,700+', label: 'Rotaractors across Pune and Raigad' },
+    { value: '2008-09', label: 'Rotary year the district was formed' },
     { value: '2', label: 'Revenue districts covered' },
   ],
 };
@@ -262,23 +296,39 @@ export const district = {
 export const rotary = {
   name: 'Rotary International',
   website: 'https://www.rotary.org/who-we-are',
-  intro: 'Rotary is a worldwide network of people who volunteer their time and skills to improve their communities. Every Rotaract club, including ours, is part of it.',
-  vision: 'People uniting worldwide to create lasting change in their communities and in themselves.',
-  founded: 'Rotary started in Chicago in 1905. More than a century later it connects professionals of every background who meet, plan and act on local and global problems.',
-  mission: 'Serve others, promote integrity, and build understanding, goodwill and peace through a fellowship of business, professional and community leaders.',
-  stats: [
-    { value: '1.2M', label: 'Rotary and Rotaract members' },
-    { value: '200+', label: 'Countries and geographical areas' },
-    { value: '1905', label: 'Year Rotary was founded' },
+  founded: '23 February 1905',
+  intro: 'Rotary is a worldwide network of neighbours, friends and professionals who volunteer their time and skills to improve their communities. Every Rotaract club, including ours, is part of the Rotary family.',
+  history: [
+    'Rotary began on 23 February 1905 in Chicago, USA, when attorney Paul Harris met three friends, Gustavus Loehr, Silvester Schiele and Hiram Shorey, to form a club where professionals from different fields could exchange ideas and build lasting friendships. The name "Rotary" came from their early habit of rotating meetings between members\' offices.',
+    'The idea spread quickly. Clubs opened across the United States and then around the world, and the organisation became Rotary International. Today Rotary members work together on local projects in their own towns and on global causes such as the long fight to end polio.',
+    'Rotary also runs programmes for young people. Interact, for students aged 12 to 18, started in 1962, and Rotaract, for young adults, started in 1968. In 2019 Rotary International made Rotaract a type of membership in its own right and removed the upper age limit.',
   ],
+  vision: 'Together, we see a world where people unite and take action to create lasting change across the globe, in our communities, and in ourselves.',
+  mission: 'We provide service to others, promote integrity, and advance world understanding, goodwill and peace through our fellowship of business, professional and community leaders.',
+  stats: [
+    { value: '1905', label: 'Year Rotary was founded, in Chicago' },
+    { value: '1.2M+', label: 'Rotary members worldwide' },
+    { value: '46,000+', label: 'Rotary clubs' },
+    { value: '200+', label: 'Countries and geographical areas' },
+  ],
+  timeline: [
+    { year: '1905', text: 'Paul Harris and three friends hold the first Rotary meeting in Chicago on 23 February.' },
+    { year: '1917', text: 'An endowment is created that grows into The Rotary Foundation, which funds Rotary projects worldwide.' },
+    { year: '1932', text: 'Rotarian Herbert J. Taylor writes The Four-Way Test, Rotary\'s simple code of ethics.' },
+    { year: '1962', text: 'The first Interact club is formed, giving school students a way to serve.' },
+    { year: '1968', text: 'The first Rotaract club is chartered, opening Rotary to young adults.' },
+    { year: '1985', text: 'Rotary launches PolioPlus, its commitment to immunise every child against polio.' },
+    { year: '2019', text: 'Rotaract becomes a type of Rotary International membership, with no upper age limit.' },
+  ],
+  fourWayTest: ['Is it the TRUTH?', 'Is it FAIR to all concerned?', 'Will it build GOODWILL and BETTER FRIENDSHIPS?', 'Will it be BENEFICIAL to all concerned?'],
   areasOfFocus: [
-    'Peacebuilding and conflict prevention',
-    'Disease prevention and treatment',
-    'Water, sanitation and hygiene',
-    'Maternal and child health',
-    'Basic education and literacy',
-    'Community economic development',
-    'Environment',
+    { name: 'Peacebuilding and conflict prevention', body: 'Training leaders and communities to prevent conflict and build peace.' },
+    { name: 'Disease prevention and treatment', body: 'Improving access to healthcare and fighting diseases such as polio.' },
+    { name: 'Water, sanitation and hygiene', body: 'Bringing clean water, toilets and hygiene education to communities.' },
+    { name: 'Maternal and child health', body: 'Helping mothers and young children get the care they need.' },
+    { name: 'Basic education and literacy', body: 'Supporting schools, teachers and adult learning so everyone can read and write.' },
+    { name: 'Community economic development', body: 'Creating opportunities for people to earn a living and grow local economies.' },
+    { name: 'Environment', body: 'Protecting and restoring the natural world that communities depend on.' },
   ],
 };
 

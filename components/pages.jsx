@@ -16,7 +16,7 @@ import {
   coreMembers, boardOfDirectors, chairpersons, uniqueMemberCount, initials, testimonials,
   allFaqs, faqGroups, district, rotary, sponsorTiers, joinCommitments, rotaractYear,
   membersWithRoles, eventsForAvenue, SITE_URL, FAMILY_LOGOS, values, volunteerReasons, waysToHelp,
-  postsNewestFirst, PAGE_SIZE,
+  postsNewestFirst, PAGE_SIZE, riPresident, drr,
 } from '../data/club';
 import {
   Btn, Eyebrow, Intro, Section, PageHero, Photo, FaqList, FaqSearch, MailForm, SocialLinks,
@@ -441,12 +441,12 @@ export function About() {
 
       <Section>
         <Intro center label="Our impact" title="Since our charter, the club has kept showing up" />
-        <dl className="impact-band">
-          <div><dd>2020</dd><dt>Year the club was chartered</dt></div>
-          <div><dd>{events.length}</dd><dt>Projects this Rotaract year</dt></div>
-          <div><dd>{avenues.length}</dd><dt>Avenues of service</dt></div>
-          <div><dd>{uniqueMemberCount}+</dd><dt>Office bearers and chairs</dt></div>
-        </dl>
+        <StatCards stats={[
+          { value: '2020', label: 'Year the club was chartered' },
+          { value: String(events.length), label: 'Projects this Rotaract year' },
+          { value: String(avenues.length), label: 'Avenues of service' },
+          { value: `${uniqueMemberCount}+`, label: 'Office bearers and chairs' },
+        ]} />
       </Section>
 
       <Section>
@@ -772,16 +772,63 @@ export function Gallery() {
 
 /* ======================= District & Rotary ======================= */
 
+/** Yellow statistic cards: each figure in its own card, in the same yellow design. */
+function StatCards({ stats }) {
+  return (
+    <dl className={`stat-cards is-${stats.length}`}>
+      {stats.map((st) => <div key={st.label}><dd>{st.value}</dd><dt>{st.label}</dt></div>)}
+    </dl>
+  );
+}
+
+/** A leader's photo, title, theme and (once provided) message. */
+function LeaderCard({ leader, eyebrow, tone = 'coral' }) {
+  return (
+    <div className={`leader-card is-${tone}`}>
+      <div className="leader-photo"><Photo src={leader.photo || undefined} alt={leader.name} label={initials(leader.name)} sizes="(max-width: 900px) 80vw, 420px" /></div>
+      <div className="leader-copy">
+        <Eyebrow>{eyebrow}</Eyebrow>
+        <h2>{leader.name}</h2>
+        <p className="leader-role">{leader.role}{leader.district ? `, ${leader.district}` : ''} · {leader.year}</p>
+        {leader.theme && (
+          <div className="leader-theme"><small>Presidential theme {leader.year}</small><strong>“{leader.theme}”</strong></div>
+        )}
+        {leader.message?.length > 0 && (
+          <div className="leader-message">
+            <h3>Message from the {leader.role.includes('President') ? 'RI President' : 'DRR'}</h3>
+            {leader.message.map((para) => <p key={para.slice(0, 40)}>{para}</p>)}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function District() {
   return (
     <>
       <PageHero eyebrow="Our district" title={district.name} desc={district.intro} logo={FAMILY_LOGOS[0]}>
         <Btn href={district.website} icon={false}>Visit the District Website</Btn>
       </PageHero>
-      <Section><dl className="impact-band">{district.stats.map((s) => <div key={s.label}><dd>{s.value}</dd><dt>{s.label}</dt></div>)}</dl></Section>
+      <Section><StatCards stats={district.stats} /></Section>
       <Section>
-        <Intro center label="About the district" title="Where Khopoli fits in" description="Our club takes part in district projects, trainings and fellowships alongside clubs across Pune and Raigad." />
+        <LeaderCard leader={drr} eyebrow="District Rotaract Representative" tone="green" />
+      </Section>
+      <Section>
+        <div className="about-text">
+          <div><Eyebrow>About the district</Eyebrow><h2>What a Rotaract district does</h2></div>
+          <div className="prose">{district.about.map((para) => <p key={para.slice(0, 30)}>{para}</p>)}</div>
+        </div>
+      </Section>
+      <Section>
+        <Intro center label="At a glance" title="Where Khopoli fits in" description="Our club takes part in district projects, trainings and fellowships alongside clubs across Pune and Raigad." />
         <div className="value-grid">{district.facts.map((f, i) => <div className="value" key={f.label}><span className={`way-icon c-${i % 3}`}><Globe2 size={20} aria-hidden="true" /></span><h3>{f.label}</h3><p>{f.value}</p></div>)}</div>
+      </Section>
+      <Section>
+        <Intro center label="How the district helps" title="Four ways the district supports its clubs" />
+        <div className="ways-grid is-four">
+          {district.roles.map((r, i) => <div className="way" key={r.title}><span className={`way-icon c-${i % 3}`} aria-hidden="true">{i + 1}</span><h3>{r.title}</h3><p>{r.body}</p></div>)}
+        </div>
       </Section>
       <CommunityCTA />
     </>
@@ -794,17 +841,38 @@ export function RotaryInfo() {
       <PageHero eyebrow="Rotary International" title="People of action, since 1905" desc={rotary.intro} logo={FAMILY_LOGOS[1]}>
         <Btn href={rotary.website} icon={false}>Visit Rotary.org</Btn>
       </PageHero>
-      <Section><dl className="impact-band is-three">{rotary.stats.map((s) => <div key={s.label}><dd>{s.value}</dd><dt>{s.label}</dt></div>)}</dl></Section>
+      <Section><StatCards stats={rotary.stats} /></Section>
       <Section>
-        <div className="value-grid">
-          {[['Vision', rotary.vision], ['Who Rotary is', rotary.founded], ['Mission', rotary.mission]].map(([t, d], i) => (
+        <LeaderCard leader={riPresident} eyebrow={`RI President ${riPresident.year}`} />
+      </Section>
+      <Section>
+        <div className="about-text">
+          <div><Eyebrow>Our history</Eyebrow><h2>Founded on {rotary.founded} in Chicago</h2></div>
+          <div className="prose">{rotary.history.map((para) => <p key={para.slice(0, 30)}>{para}</p>)}</div>
+        </div>
+      </Section>
+      <Section>
+        <Intro center label="Milestones" title="From one meeting to a worldwide network" />
+        <ol className="timeline">{rotary.timeline.map((t) => <li key={t.year}><strong>{t.year}</strong><p>{t.text}</p></li>)}</ol>
+      </Section>
+      <Section>
+        <div className="value-grid is-two">
+          {[['Our vision', rotary.vision], ['Our mission', rotary.mission]].map(([t, d], i) => (
             <div className="value" key={t}><span className={`way-icon c-${i % 3}`}><Sparkles size={20} aria-hidden="true" /></span><h3>{t}</h3><p>{d}</p></div>
           ))}
         </div>
       </Section>
       <Section>
-        <Intro center label="Areas of focus" title="Seven causes Rotary works on worldwide" />
-        <ul className="pill-links is-static">{rotary.areasOfFocus.map((a) => <li key={a}><span><Check size={16} aria-hidden="true" /> {a}</span></li>)}</ul>
+        <div className="four-way">
+          <div><Eyebrow>Rotary&apos;s code of ethics</Eyebrow><h2>The Four-Way Test</h2><p>Of the things we think, say or do:</p></div>
+          <ol>{rotary.fourWayTest.map((q) => <li key={q}>{q}</li>)}</ol>
+        </div>
+      </Section>
+      <Section>
+        <Intro center label="Areas of focus" title="Seven causes Rotary works on worldwide" description="Rotary members and clubs focus their service on seven areas where they can make the biggest difference." />
+        <div className="focus-grid">
+          {rotary.areasOfFocus.map((a, i) => <div key={a.name}><span className={`way-icon c-${i % 3}`} aria-hidden="true"><Check size={18} /></span><h3>{a.name}</h3><p>{a.body}</p></div>)}
+        </div>
         <p className="small-note center">Summarised from <a href={rotary.website} target="_blank" rel="noreferrer">rotary.org</a>.</p>
       </Section>
       <CommunityCTA />

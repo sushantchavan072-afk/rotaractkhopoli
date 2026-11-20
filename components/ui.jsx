@@ -554,16 +554,16 @@ const REVEAL_RULES = [
   ['.gallery-item', 'zoom-in', 0, 80, 4],
   ['.faq-item', 'fade-up', 50, 100],
   ['.card-grid > *, .post-grid > *, .package-grid > *, .contact-cards > *, .avenue-grid > *', 'fade-up', 0, 100, 3],
-  ['.counters > *', 'fade-up', 50, 100],
+  ['.counters > *, .stat-cards > *', 'fade-up', 50, 100],
   ['.wide-banner-card', 'zoom-in', 150],
   ['.section-intro, .split-intro, .team-head, .strip-title, .page-hero-inner, .faq-head, .cta-band, .detail-hero .container > *', 'fade-up', 150],
   ['.metric-grid, .story-block > *', 'fade-up', 100],
-  ['.ways-grid, .value-grid, .logo-strip, .impact-band, .facts-grid, .green-counter, .yellow-band, .featured-card, .page-hero-wide, .form-layout > *, .donate-grid > *, .prose.narrow, .filters, .notice-banner, .pill-links', 'fade-up', 200],
+  ['.leader-card, .about-text, .timeline, .four-way, .focus-grid, .ways-grid, .value-grid, .logo-strip, .impact-band, .facts-grid, .green-counter, .yellow-band, .featured-card, .page-hero-wide, .form-layout > *, .donate-grid > *, .prose.narrow, .filters, .notice-banner, .pill-links', 'fade-up', 200],
   ['.footer-top', 'fade-up', 150],
 ];
 
 /** Numbers that count up when they scroll into view (like Kindora's stats). Years and ranges are left alone. */
-const COUNT_SELECTOR = '.metric-card > strong, .stat-boxes b, .counters strong, .impact-band dd, .green-counter strong, .hero-info-card b, .outcome-grid dd';
+const COUNT_SELECTOR = '.metric-card > strong, .stat-boxes b, .counters strong, .impact-band dd, .stat-cards dd, .green-counter strong, .hero-info-card b, .outcome-grid dd';
 
 function countUp(el) {
   const final = el.textContent;
