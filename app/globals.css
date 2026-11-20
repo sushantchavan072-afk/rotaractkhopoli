@@ -175,7 +175,7 @@ section:nth-of-type(3n+2) .eyebrow-dot { background: var(--coral); }
 .avatar { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 14px; color: var(--accent); flex: none; }
 .home-hero h1 { font-size: clamp(3rem, 5.2vw, 4.9rem); line-height: 1.12; font-weight: 500; letter-spacing: -0.02em; margin: 0 0 26px; }
 .home-hero .lead { max-width: 500px; margin-bottom: 34px; }
-.home-hero-art { position: relative; margin-top: 20px; min-height: 860px; border-radius: 36px; overflow: hidden; background: #dfe9e3; /* ends 3px past the Join the Club button */ margin-right: -3px; }
+.home-hero-art { position: relative; margin-top: 20px; min-height: 860px; border-radius: 36px; overflow: hidden; background: #dfe9e3; /* ends 5px past the Join the Club button */ margin-right: -5px; }
 .home-hero-art > .photo, .home-hero-art > .photo-fallback { position: absolute; inset: 0; }
 .hero-quote, .story-reel, .hero-info-card, .hero-small-tag { position: absolute; z-index: 2; }
 .hero-quote { top: 24%; left: 15%; max-width: 380px; border-radius: 40px; background: #fff; padding: 10px 22px 10px 10px; display: flex; gap: 12px; align-items: center; }
