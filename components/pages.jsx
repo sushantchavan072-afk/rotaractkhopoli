@@ -722,7 +722,9 @@ export function Reviews() {
   return (
     <>
       <PageHero eyebrow="Voices of support" title="Hear from those who believe in our mission" desc="Members, partners and beneficiaries on working with Rotaract Club of Khopoli." />
-      {testimonials.length ? <Testimonials intro={false} /> : (
+      {testimonials.length > 0 && <Testimonials intro={false} />}
+      <CommunityCTA />
+      {testimonials.length === 0 && (
         <Section>
           <div className="form-layout">
             <div className="prose">
@@ -750,7 +752,6 @@ export function Reviews() {
           </div>
         </Section>
       )}
-      <CommunityCTA />
     </>
   );
 }
@@ -832,13 +833,6 @@ export function District() {
       </PageHero>
       <Section><StatCards stats={district.stats} /></Section>
       <Section>
-        <Intro center label="District leadership" title={`Leading District 3131 in ${drr.year}`} description="The District Rotaract Representative leads the district's Rotaract clubs, alongside the Rotary District Governor." />
-        <div className="leader-stack">
-          <LeaderCard leader={drr} eyebrow="District Rotaract Representative" tone="green" />
-          <LeaderCard leader={districtGovernor} eyebrow="Rotary District Governor" tone="sun" />
-        </div>
-      </Section>
-      <Section>
         <div className="about-text">
           <div><Eyebrow>About the district</Eyebrow><h2>What a Rotaract district does</h2></div>
           <div className="prose">{district.about.map((para) => <p key={para.slice(0, 30)}>{para}</p>)}</div>
@@ -854,6 +848,10 @@ export function District() {
           {district.roles.map((r, i) => <div className="way" key={r.title}><span className={`way-icon c-${i % 3}`} aria-hidden="true">{i + 1}</span><h3>{r.title}</h3><p>{r.body}</p></div>)}
         </div>
       </Section>
+      <Section>
+        <Intro center label="District leadership" title={`Leading Rotaract District 3131 in ${drr.year}`} description="The District Rotaract Representative leads the district's Rotaract clubs through the Rotary year." />
+        <LeaderCard leader={drr} eyebrow="District Rotaract Representative" tone="green" />
+      </Section>
       <CommunityCTA />
     </>
   );
@@ -866,9 +864,6 @@ export function RotaryInfo() {
         <Btn href={rotary.website} icon={false}>Visit Rotary.org</Btn>
       </PageHero>
       <Section><StatCards stats={rotary.stats} /></Section>
-      <Section>
-        <LeaderCard leader={riPresident} eyebrow={`RI President ${riPresident.year}`} preview={4} />
-      </Section>
       <Section>
         <div className="about-text">
           <div><Eyebrow>Our history</Eyebrow><h2>Founded on {rotary.founded} in Chicago</h2></div>
@@ -899,6 +894,13 @@ export function RotaryInfo() {
         </div>
         <p className="small-note center">Summarised from <a href={rotary.website} target="_blank" rel="noreferrer">rotary.org</a>.</p>
       </Section>
+      <Section>
+        <Intro center label="Rotary leadership" title={`Leading Rotary in ${riPresident.year}`} description="The President of Rotary International and the Governor of Rotary District 3131, our sponsoring Rotary district." />
+        <div className="leader-stack">
+          <LeaderCard leader={riPresident} eyebrow={`RI President ${riPresident.year}`} preview={4} />
+          <LeaderCard leader={districtGovernor} eyebrow="Rotary District 3131 Governor" tone="sun" />
+        </div>
+      </Section>
       <CommunityCTA />
     </>
   );
@@ -928,6 +930,7 @@ export function Join() {
           {joinCommitments.map((c, i) => <li className="value" key={c.title}><span className={`way-icon c-${i % 3}`} aria-hidden="true">{i + 1}</span><h3>{c.title}</h3><p>{c.body}</p></li>)}
         </ol>
       </Section>
+      <FaqBox items={faqGroups[1].items} />
       <Section>
         <div className="form-layout">
           <div className="prose">
@@ -957,7 +960,6 @@ export function Join() {
           />
         </div>
       </Section>
-      <FaqBox items={faqGroups[1].items} />
     </>
   );
 }
@@ -1006,36 +1008,9 @@ export function BodApplication() {
 export function Sponsorship() {
   return (
     <>
-      <section className="donate-hero">
-        <div className="container donate-grid">
-          <div>
-            <Eyebrow>Sponsorship</Eyebrow>
-            <h1>Support us and make a difference in Khopoli</h1>
-            <p className="lead">Sponsorship pays for materials, transport and venues. Every rupee is accounted for in the project report, and we send it to you whether or not you ask.</p>
-            <ul className="check-list">
-              <li><Check size={18} aria-hidden="true" /> A written report for every project you fund</li>
-              <li><Check size={18} aria-hidden="true" /> Your logo on project creatives and banners</li>
-              <li><Check size={18} aria-hidden="true" /> In-kind support acknowledged exactly like funding</li>
-            </ul>
-          </div>
-          <div id="enquiry">
-            <MailForm
-              title="Sponsorship form"
-              intro="Fill in the form and a board member will get back to you. Contributions big or small help the club serve Khopoli."
-              subject="Sponsorship enquiry"
-              submitLabel="Send Enquiry"
-              fields={[
-                { name: 'name', label: 'Your full name', required: true, placeholder: 'Full name', autoComplete: 'name' },
-                { name: 'organisation', label: 'Organisation', required: true, placeholder: 'Business or organisation', autoComplete: 'organization' },
-                { name: 'email', label: 'Your email', type: 'email', required: true, placeholder: 'you@company.com', autoComplete: 'email' },
-                { name: 'phone', label: 'Phone', type: 'tel', required: true, pattern: '[0-9]{10}', title: 'Enter a 10-digit phone number', autoComplete: 'tel-national' },
-                { name: 'tier', label: 'Choose how you would like to help', options: [...sponsorTiers.map((t) => t.name), 'In-kind support', 'Not sure yet'] },
-                { name: 'message', label: 'Anything we should know?', rows: 4, placeholder: 'A project, budget or idea you have in mind.' },
-              ]}
-            />
-          </div>
-        </div>
-      </section>
+      <PageHero layout="split" eyebrow="Sponsorship" title="Support us and make a difference in Khopoli" desc="Sponsorship pays for materials, transport and venues. Every rupee is accounted for in the project report, and we send it to you whether or not you ask.">
+        <Btn href="#enquiry" icon={false}>Become a Sponsor</Btn>
+      </PageHero>
       <Section>
         <Intro center label="Partnership packages" title="You can contribute through our partnership packages" description="Amounts are set per project rather than fixed, because a plantation drive and a skills workshop cost very different things." />
         <div className="package-grid">
@@ -1054,11 +1029,37 @@ export function Sponsorship() {
       <ResultsBlocks />
       <VolunteerBlock />
       <NumbersBlock />
+      <Section id="enquiry">
+        <div className="form-layout">
+          <div className="prose">
+            <Eyebrow>Sponsorship enquiry</Eyebrow>
+            <h2>Tell us how you would like to help</h2>
+            <ul className="check-list">
+              <li><Check size={18} aria-hidden="true" /> A written report for every project you fund</li>
+              <li><Check size={18} aria-hidden="true" /> Your logo on project creatives and banners</li>
+              <li><Check size={18} aria-hidden="true" /> In-kind support acknowledged exactly like funding</li>
+            </ul>
+            <ContactMethods />
+          </div>
+          <MailForm
+            title="Sponsorship form"
+            intro="Fill in the form and a board member will get back to you. Contributions big or small help the club serve Khopoli."
+            subject="Sponsorship enquiry"
+            submitLabel="Send Enquiry"
+            fields={[
+              { name: 'name', label: 'Your full name', required: true, placeholder: 'Full name', autoComplete: 'name' },
+              { name: 'organisation', label: 'Organisation', required: true, placeholder: 'Business or organisation', autoComplete: 'organization' },
+              { name: 'email', label: 'Your email', type: 'email', required: true, placeholder: 'you@company.com', autoComplete: 'email' },
+              { name: 'phone', label: 'Phone', type: 'tel', required: true, pattern: '[0-9]{10}', title: 'Enter a 10-digit phone number', autoComplete: 'tel-national' },
+              { name: 'tier', label: 'Choose how you would like to help', options: [...sponsorTiers.map((t) => t.name), 'In-kind support', 'Not sure yet'] },
+              { name: 'message', label: 'Anything we should know?', rows: 4, placeholder: 'A project, budget or idea you have in mind.' },
+            ]}
+          />
+        </div>
+      </Section>
     </>
   );
 }
-
-/* ======================= Contact ======================= */
 
 export function Contact() {
   return (
@@ -1078,7 +1079,8 @@ export function Contact() {
           </div>
         </div>
       </Section>
-      <Section>
+      <FaqBox />
+      <Section id="message">
         <div className="form-layout">
           <div>
             <Intro label="Get in touch" title="Why reach out to Rotaract Khopoli?" description="Whether you want to volunteer, join, partner or simply ask a question, a board member will reply personally." />
@@ -1102,7 +1104,6 @@ export function Contact() {
           />
         </div>
       </Section>
-      <FaqBox />
     </>
   );
 }

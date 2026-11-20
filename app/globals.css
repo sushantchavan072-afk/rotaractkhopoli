@@ -33,6 +33,8 @@
   /* Segoe UI from the visitor's device (built into every Windows PC; Microsoft's licence does not allow
      hosting the font files on a website). Other devices fall back to their closest system font. */
   --font: 'Segoe UI', 'Segoe UI Variable Text', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Roboto, Arial, sans-serif;
+  /* Headings, hero and large figures: Urbanist (Kindora's typeface, self-hosted). Body text: Segoe UI. */
+  --font-head: 'Urbanist Variable', 'Urbanist', 'Segoe UI', Arial, sans-serif;
   --focus: 0 0 0 3px #fff, 0 0 0 6px #1a5fd0;
 }
 
@@ -44,7 +46,7 @@ img { max-width: 100%; display: block; }
 a { color: inherit; text-decoration: none; }
 button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; }
-h1, h2, h3, h4 { font-weight: 600; letter-spacing: -0.01em; color: var(--ink); margin: 0 0 0.5em; }
+h1, h2, h3, h4 { font-family: var(--font-head); font-weight: 600; letter-spacing: -0.01em; color: var(--ink); margin: 0 0 0.5em; }
 h1 { font-size: clamp(2.8rem, 5.4vw, 4.8rem); line-height: 1.08; }
 h2 { font-size: clamp(2rem, 3.4vw, 2.9rem); line-height: 1.18; }
 h3 { font-size: clamp(1.2rem, 1.7vw, 1.5rem); line-height: 1.25; }
@@ -1016,3 +1018,8 @@ main, .footer { position: relative; z-index: 1; }
 :root[data-theme='dark'] .tint-leaf:not(:is(.hero-info-card, .cta-band, .hero-quote) *) { background: #1d1b33; --accent: #b9b0ff; }
 :root[data-theme='dark'] .leader-card.is-sun { --lc-dark: #ffd36b; }
 :root[data-theme='dark'] .avatar-stack .avatar { border-color: var(--bg); }
+
+/* Large display figures use the heading font too */
+.metric-card > strong, .stat-cards dd, .counters strong, .impact-band dd, .green-counter strong, .mini-stats strong,
+.stat-boxes b, .outcome-grid dd, .hero-info-count b, .error-code, .timeline strong, .package strong, .leader-theme strong,
+.cta-stat b, .photo-badge strong { font-family: var(--font-head); }

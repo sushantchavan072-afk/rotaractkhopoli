@@ -1,3 +1,4 @@
+import '@fontsource-variable/urbanist';
 import './globals.css';
 import {Analytics} from '@vercel/analytics/next';
 import {Header, Footer, ScrollReveal} from '../components/ui';
