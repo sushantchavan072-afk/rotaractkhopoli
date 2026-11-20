@@ -100,9 +100,90 @@ function CommunityCTA() {
           <p>Membership is open to young adults living, studying or working in and around Khopoli. There is no campus requirement.</p>
           <div className="btn-row"><Btn href="/join">Apply for Membership</Btn><Btn href="/sponsorship" kind="outline">Partner With Us</Btn></div>
         </div>
-        <Photo src="/images/events/tree-plantation.jpg" alt="Members at the club's tree plantation drive" label="Service above self" tone={1} className="cta-photo" />
+        <Photo src="/images/cta.jpg" alt="Volunteers joining hands" label="Service above self" tone={1} className="cta-photo" />
       </div>
     </Section>
+  );
+}
+
+function MissionBlock({ gray = false }) {
+  return (
+    <Section gray={gray}>
+      <div className="volunteer-grid">
+        <div className="mission-photo">
+          <Photo src="/images/volunteer.jpg" alt="A volunteer at a community service project" label="Our mission" tone={0} className="volunteer-photo-img" />
+          <div className="mission-badge"><strong>{club.charteredOn.split(' ')[1]}</strong><span>Serving Khopoli since</span></div>
+        </div>
+        <div>
+          <Intro label="Our mission" title="Service above self, close to home" description="We bring young people in and around Khopoli together to serve the town they grew up in, and to grow as leaders while they do it." />
+          <div className="feature-list">
+            <div className="feature-row"><span className="feature-icon"><HandHeart /></span><div><h3>Serve the community</h3><p>Health, education, environment and livelihood projects planned with the people they are meant for.</p></div></div>
+            <div className="feature-row"><span className="feature-icon"><GraduationCap /></span><div><h3>Grow young leaders</h3><p>Every member owns a project, manages a budget and reports the outcome, building skills a classroom does not teach.</p></div></div>
+            <div className="feature-row"><span className="feature-icon"><Globe2 /></span><div><h3>Connect beyond Khopoli</h3><p>Joint projects with clubs across India and the global Rotary network of 1.2 million members.</p></div></div>
+          </div>
+          <div className="btn-row"><Btn href="/about">Our Story</Btn><Btn href="/events" kind="ghost">See Our Work</Btn></div>
+        </div>
+      </div>
+    </Section>
+  );
+}
+
+function GetInvolved({ gray = true }) {
+  const ways = [
+    { href: '/contact', img: '/images/volunteer.jpg', tag: 'Give your time', title: 'Volunteer at a project', copy: 'Most community projects are open to volunteers. Turn up for one drive and see how it feels.', cta: 'Volunteer' },
+    { href: '/join', img: '/images/gallery/4.jpg', tag: 'Become a Rotaractor', title: 'Join the club', copy: 'Open to anyone 18+ living, studying or working in and around Khopoli. No campus requirement.', cta: 'Apply now' },
+    { href: '/sponsorship', img: '/images/support.jpg', tag: 'Fund the work', title: 'Sponsor a project', copy: 'Back a single project or a whole avenue. Every rupee is accounted for in the project report.', cta: 'Support us' },
+  ];
+  return (
+    <Section gray={gray}>
+      <Intro center label="Get involved" title="Three ways you can make a difference" description="Whether you have an evening, a skill or a budget to give, there is a place for you in the club's work." />
+      <div className="involve-grid">
+        {ways.map((w, i) => (
+          <Link href={w.href} className="involve-card" key={w.title}>
+            <div className="involve-photo"><Photo src={w.img} alt={w.title} label={w.title} tone={i} /><span className="involve-tag">{w.tag}</span></div>
+            <div className="involve-body"><h3>{w.title}</h3><p>{w.copy}</p><span className="inline-arrow">{w.cta} <ArrowUpRight size={18} /></span></div>
+          </Link>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+function Gallery({ gray = false }) {
+  const photos = [
+    ['/images/gallery/1.jpg', 'Volunteers sorting donated supplies'],
+    ['/images/events/tree-plantation.jpg', 'Saplings ready for planting'],
+    ['/images/gallery/2.jpg', 'Children at a school session'],
+    ['/images/gallery/3.jpg', 'Hands joined in a team huddle'],
+    ['/images/events/maha-aarti.jpg', 'Diya at the Maha Aarti evening'],
+    ['/images/gallery/5.jpg', 'Smiling children'],
+    ['/images/gallery/6.jpg', 'Seedlings in a nursery tray'],
+  ];
+  return (
+    <Section gray={gray}>
+      <div className="split-intro">
+        <Intro label="Gallery" title="Moments from the field" description="Small projects, real people, and the town we grew up in." />
+        <Btn href="/events" kind="outline">View Projects</Btn>
+      </div>
+      <div className="gallery-grid">
+        {photos.map(([src, alt], i) => <figure key={src} className={`gallery-item g-${i}`}><Photo src={src} alt={alt} tone={i} /><figcaption>{alt}</figcaption></figure>)}
+      </div>
+    </Section>
+  );
+}
+
+function ImpactBand() {
+  return (
+    <section className="impact-band">
+      <div className="container">
+        {[
+          [events.length, 'Projects this year'],
+          [avenues.length, 'Avenues of service'],
+          [`${uniqueMemberCount}+`, 'Active Rotaractors'],
+          ['2020', 'Year chartered'],
+        ].map(([n, l]) => <div key={l}><strong>{n}</strong><span>{l}</span></div>)}
+      </div>
+    </section>
   );
 }
 
@@ -157,23 +238,11 @@ export function Home() {
         </div>
       </section>
 
-      <Section>
-        <Intro center label="The club in numbers" title="Projects sized to what we can finish" description="Small teams, clear owners, documented outcomes and no performative service." />
-        <div className="metrics-grid">
-          {[
-            { title: 'Projects this Rotaract year', copy: 'From Maha Aarti to tree plantation, every project with one accountable lead.', num: events.length, Icon: CalendarDays },
-            { title: 'Avenues of service', copy: 'Community, professional, club, international, PR, DEI and public image.', num: avenues.length, Icon: Sprout },
-            { title: 'Rotaractors on the board', copy: 'Core team, directors and chairs who keep the club calendar moving.', num: `${uniqueMemberCount}+`, Icon: Award },
-          ].map((d, i) => (
-            <div className={`metric metric-${i}`} key={d.title}>
-              <div className="metric-text"><h3>{d.title}</h3><p>{d.copy}</p><strong>{d.num}</strong></div>
-              <d.Icon className="metric-icon" size={120} strokeWidth={1.2} />
-            </div>
-          ))}
-        </div>
-      </Section>
+      <ImpactBand />
 
-      <Section gray>
+      <MissionBlock gray />
+
+      <Section>
         <Intro center label="Who we are" title="Young people, local problems, real follow-through" description="Rotaract is Rotary's movement for people who want to serve while they are still building their own careers." />
         <div className="results-block">
           <div className="results-copy">
@@ -201,8 +270,10 @@ export function Home() {
         </div>
       </Section>
 
+      <GetInvolved />
+
       <Section>
-        <Intro center label="Avenues" title="Seven directions the club works in" description="Every member picks an avenue. Every project has one owner." />
+        <Intro center label="Avenues" title="Seven causes we work for" description="Every member picks an avenue. Every project has one owner." />
         <AvenueGrid items={avenues.slice(0, 6)} />
         <div className="center btn-row button-margin"><Btn href="/avenues" kind="outline">Read All Avenues</Btn></div>
       </Section>
@@ -215,12 +286,7 @@ export function Home() {
         <div className="card-grid">{featured.map((e, i) => <EventCard e={e} i={i} key={e.slug} />)}</div>
       </Section>
 
-      <Section>
-        <div className="counters">
-          <div><small>ROTARACT DISTRICT 3131</small><strong>2,700+</strong><p>Rotaractors across 100+ clubs in the Pune and Raigad revenue districts, and Khopoli is one of them.</p></div>
-          <div><small>ROTARY INTERNATIONAL</small><strong>1.2M</strong><p>Rotary and Rotaract members across 200+ countries and geographical areas, connected since 1905.</p></div>
-        </div>
-      </Section>
+      <Gallery />
 
       <Section gray>
         <Intro center label="The board" title="Meet the people who keep it moving" description="The core team for the current Rotaract year." />
@@ -258,7 +324,7 @@ export function About() {
 
       <Section gray>
         <div className="volunteer-grid">
-          <Photo src="/images/events/maha-aarti.jpg" alt="Maha Aarti community evening" label="Our story" tone={2} className="volunteer-photo-img" />
+          <Photo src="/images/gallery/1.jpg" alt="Volunteers sorting essentials for families" label="Our story" tone={2} className="volunteer-photo-img" />
           <div>
             <Intro label="Our story" title="A club built during a difficult year" />
             <p>Rotaract Club of Khopoli received its charter in November 2020, when public gatherings were restricted and most service work had moved to phone calls and spreadsheets. The first projects were logistical: getting essentials to families, helping students who had lost access to classes.</p>
@@ -303,6 +369,8 @@ export function About() {
           ))}
         </div>
       </Section>
+      <GetInvolved />
+      <Gallery />
       <CommunityCTA />
     </>
   );

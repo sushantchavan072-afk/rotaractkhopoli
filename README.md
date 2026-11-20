@@ -43,7 +43,7 @@ Everything is in **`data/club.js`**: officers, events, members, avenues, FAQs an
 
 ## Photos
 
-Until a photo is added, its slot shows a soft coloured tile with a label, so nothing looks broken. To add photos, drop files into `public/images/` with these names:
+If a photo file is missing, its slot shows a soft coloured tile with a label, so nothing looks broken. To add photos, drop files into `public/images/` with these names:
 
 | File | Used for |
 |---|---|
@@ -62,3 +62,7 @@ The Join, Sponsorship and Contact forms open the visitor's email app with the me
 
 - The **Ask the club** AI chat. It needs a server-side AI key and backend.
 - The **BOD application** form and the member badge / lanyard dialogs.
+
+## Stock photos
+
+The site currently uses **temporary Unsplash stock photos**; see `public/images/CREDITS.md`. To swap in the club's own photos, replace each file and keep its name.

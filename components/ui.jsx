@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ArrowUpRight, ChevronDown, Menu, X, Plus, Minus, Mail, Phone } from 'lucide-react';
+import { ArrowUpRight, ChevronDown, Menu, X, Plus, Minus, Mail, Phone, Heart } from 'lucide-react';
 import { ALL_PAGES, NAV, club, clubEmail, officers, initials } from '../data/club';
 
 const TONES = ['#fcece5', '#e5f9eb', '#fef5d3', '#ece9f9', '#e3f0fb', '#f9e4ea'];
@@ -88,6 +88,12 @@ export function Header() {
   return (
     <header className="site-header">
       <a className="skip-link" href="#main">Skip to content</a>
+      <div className="announce-bar">
+        <div className="container">
+          <span><Heart size={14} fill="currentColor" /> Membership for the new Rotaract year is open to everyone 18+ in and around Khopoli.</span>
+          <Link href="/join">Apply now <ArrowUpRight size={14} /></Link>
+        </div>
+      </div>
       <div className="container nav-wrap">
         <Logo />
         <button className="mobile-toggle" aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} onClick={() => setOpen(!open)}>
@@ -112,6 +118,7 @@ export function Header() {
               </div>
             )}
           </div>
+          <Link href="/sponsorship" className={`nav-support ${isCurrent('/sponsorship') ? 'is-current' : ''}`}><Heart size={15} /> Support Us</Link>
           <Link href="/join" className={`nav-donate ${isCurrent('/join') ? 'is-current' : ''}`}>Join the Club <ArrowUpRight size={16} /></Link>
         </nav>
       </div>
@@ -129,6 +136,11 @@ export function Footer() {
             <Logo light />
             <p>{club.tagline}</p>
             <p className="footer-meta">Club ID {club.clubId} · Chartered {club.charteredOn} · {club.district}</p>
+            <form className="subscribe" onSubmit={(e) => { e.preventDefault(); const em = new FormData(e.currentTarget).get('email'); window.location.href = `mailto:${clubEmail}?subject=${encodeURIComponent('Please add me to club updates')}&body=${encodeURIComponent(`Please keep me posted about upcoming projects and events.\n\nEmail: ${em}`)}`; }}>
+              <label className="sr-only" htmlFor="footer-email">Email address</label>
+              <input id="footer-email" name="email" type="email" placeholder="Your email for project updates" required />
+              <button type="submit">Stay in the loop <ArrowUpRight size={16} /></button>
+            </form>
             <a className="footer-mail" href={`mailto:${clubEmail}`}><Mail size={16} /> {clubEmail}</a>
           </div>
           <FooterCol title="The Club" items={[['About us', '/about'], ['Avenues', '/avenues'], ['Members', '/members'], ['Events', '/events']]} />
