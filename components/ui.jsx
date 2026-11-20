@@ -8,7 +8,7 @@ import {
   FaArrowRight as ArrowRight, FaArrowRight as ArrowUpRight, FaChevronDown as ChevronDown, FaBars as Menu,
   FaXmark as X, FaPlus as Plus, FaRegEnvelope as Mail, FaMagnifyingGlass as Search,
   FaRegCalendarPlus as CalendarPlus, FaShareNodes as Share2, FaCheck as Check, FaInstagram as Instagram,
-  FaFacebookF as Facebook, FaLinkedinIn as Linkedin, FaYoutube as Youtube,
+  FaFacebookF as Facebook, FaLinkedinIn as Linkedin, FaYoutube as Youtube, FaSun, FaMoon,
 } from 'react-icons/fa6';
 import {
   ALL_PAGES, NAV, club, clubEmail, contact, officers, initials, FORM_ENDPOINT, FAMILY_LOGOS,
@@ -151,6 +151,48 @@ export function FamilyLogos({ title = 'Proudly part of the Rotary family in Dist
   );
 }
 
+/* ---------------------------------------------------------------- Theme */
+
+/** Current site theme, read from <html data-theme>. 'light' while rendering on the server. */
+const subscribeTheme = (cb) => {
+  const mo = new MutationObserver(cb);
+  mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  return () => mo.disconnect();
+};
+function useTheme() {
+  return useSyncExternalStore(subscribeTheme, () => document.documentElement.dataset.theme || 'light', () => 'light');
+}
+
+export function ThemeToggle({ className = '' }) {
+  const theme = useTheme();
+  const dark = theme === 'dark';
+  // Follow the device setting until the visitor picks a theme themselves.
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const onChange = (e) => {
+      let stored = null;
+      try { stored = localStorage.getItem('theme'); } catch { /* storage blocked */ }
+      if (!stored) document.documentElement.dataset.theme = e.matches ? 'dark' : 'light';
+    };
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+  const toggle = () => {
+    const next = dark ? 'light' : 'dark';
+    const root = document.documentElement;
+    root.classList.add('theme-switching');
+    root.dataset.theme = next;
+    try { localStorage.setItem('theme', next); } catch { /* storage blocked */ }
+    window.setTimeout(() => root.classList.remove('theme-switching'), 400);
+  };
+  return (
+    <button type="button" className={`theme-toggle ${className}`} onClick={toggle} aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'} title={dark ? 'Light mode' : 'Dark mode'}>
+      <FaMoon className="icon-moon" aria-hidden="true" />
+      <FaSun className="icon-sun" aria-hidden="true" />
+    </button>
+  );
+}
+
 /* ---------------------------------------------------------------- Header / footer */
 
 export function Header() {
@@ -181,10 +223,14 @@ export function Header() {
       <a className="skip-link" href="#main">Skip to content</a>
       <div className="container nav-wrap">
         <Logo />
-        <button className="menu-toggle" aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} aria-controls="main-nav" onClick={() => setOpen(!open)}>
-          {open ? <X size={22} /> : <Menu size={22} />}
-        </button>
+        <div className="header-mobile-actions">
+          <ThemeToggle />
+          <button className="menu-toggle" aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} aria-controls="main-nav" onClick={() => setOpen(!open)}>
+            {open ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
         <nav id="main-nav" className={`nav ${open ? 'is-open' : ''}`} aria-label="Main">
+          <ThemeToggle className="is-desktop" />
           <div
             className="pages-wrap"
             onMouseEnter={() => { if (!pagesOpen && window.matchMedia('(hover: hover) and (min-width: 1041px)').matches) { setPagesByHover(true); setPagesOpen(true); } }}

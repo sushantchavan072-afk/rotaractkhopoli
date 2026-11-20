@@ -53,6 +53,35 @@ Visitor statistics (Vercel Analytics, which uses no cookies) switch on automatic
 
 Kindora's `/elements` page is a template style guide, so it is not included.
 
+## Light and dark mode
+
+- The sun/moon button in the header switches themes. The choice is saved in the browser. Until a visitor picks a theme, the site follows their device setting.
+- A small script in `app/layout.jsx` applies the theme before the first paint, so the page never flashes the wrong theme.
+- Colours are CSS variables in `app/globals.css` (`--bg`, `--surface`, `--surface-2`, `--line`, `--text`, `--ink`, ...). Dark values are under `:root[data-theme='dark']`. Brand-coloured cards and white cards that sit on photos keep their light colours in both themes (the "light islands" list in the same file).
+
+## Animated background
+
+`components/ui/background-pixel-stars.tsx` draws twinkling pixel stars and the occasional shooting star on a full-screen canvas behind the page. It uses soft brand colours in light mode and bright stars on a dark grid in dark mode. It is tuned to stay light:
+
+- it draws at half resolution, scaled up with crisp pixels;
+- it runs at 16 fps, updates twinkles at 4 fps, and repaints only when something changes;
+- it stops completely while the tab is hidden;
+- it shows a single still frame for visitors who prefer reduced motion;
+- it uses fewer stars and no shooting stars on data-saver connections;
+- it debounces resizing.
+
+### Why there is TypeScript but no Tailwind or shadcn
+
+The component is TypeScript, so the project now includes TypeScript (`tsconfig.json`, with the `@/*` import alias). It also uses shadcn's convention of keeping shared UI components in `components/ui/`, so tools and copy-paste components find them at the expected path.
+
+Tailwind is **not** installed on purpose. The component only used three utility classes (`pointer-events-none fixed inset-0`), which are now the `.site-bg` rule in `globals.css`. Tailwind's base styles ("preflight") would reset this site's hand-written stylesheet. If you later want Tailwind or shadcn components anyway:
+
+```bash
+npx shadcn@latest init
+```
+
+This sets up Tailwind and `components.json`. Then check every page, because the base styles will change spacing and typography.
+
 ## Updating content (`data/club.js`)
 
 - **Club email:** set `contact.email` to a shared club inbox. Until then, forms go to the president's address.
