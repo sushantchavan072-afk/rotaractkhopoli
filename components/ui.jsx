@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  ArrowRight, ArrowUpRight, ChevronDown, Menu, X, Plus, Minus, Mail, Phone, Heart, Search,
+  ArrowRight, ArrowUpRight, ChevronDown, Menu, X, Plus, Minus, Mail, Search,
   CalendarPlus, Share2, Check, Instagram, Facebook, Linkedin, Youtube, MapPin,
 } from 'lucide-react';
 import {
@@ -79,18 +79,29 @@ export function Section({ children, tone = 'plain', id, className = '' }) {
   return <section id={id} className={`section section-${tone} ${className}`}><div className="container">{children}</div></section>;
 }
 
-export function PageHero({ eyebrow, title, desc, children, image, logo }) {
+/**
+ * Kindora-style page header.
+ * layout 'center' (default): eyebrow, title and text centred.
+ * layout 'split': eyebrow + title on the left, text + actions on the right.
+ * wideImage: a full-width rounded photo under the header (About, Join).
+ * logo: shows a logo card beside the title (District, Rotary pages).
+ */
+export function PageHero({ eyebrow, title, desc, children, layout = 'center', wideImage, logo, as: H = 'h1' }) {
   return (
-    <section className={`page-hero ${image || logo ? 'has-image' : ''}`}>
-      <div className="container page-hero-inner">
-        <div className="page-hero-copy">
-          <Eyebrow>{eyebrow}</Eyebrow>
-          <h1>{title}</h1>
-          {desc && <p>{desc}</p>}
-          {children}
+    <section className={`page-hero is-${logo ? 'split' : layout}`}>
+      <div className="container">
+        <div className="page-hero-inner">
+          <div className="page-hero-title">
+            <Eyebrow>{eyebrow}</Eyebrow>
+            <H>{title}</H>
+          </div>
+          <div className="page-hero-copy">
+            {desc && <p>{desc}</p>}
+            {children}
+          </div>
+          {logo && <div className="page-hero-logo"><Image src={logo.src} alt={logo.alt} width={logo.w} height={logo.h} priority sizes="(max-width: 900px) 80vw, 420px" /></div>}
         </div>
-        {image && <div className="page-hero-photo"><Photo src={image} alt="" label={title} priority sizes="(max-width: 900px) 100vw, 40vw" /></div>}
-        {logo && <div className="page-hero-logo"><Image src={logo.src} alt={logo.alt} width={logo.w} height={logo.h} priority sizes="(max-width: 900px) 80vw, 420px" /></div>}
+        {wideImage && <div className="page-hero-wide"><Photo src={wideImage} alt="" label={title} priority sizes="(max-width: 1240px) 100vw, 1240px" /></div>}
       </div>
     </section>
   );
@@ -133,11 +144,19 @@ export function FamilyLogos({ title = 'Proudly part of the Rotary family in Dist
 
 export function Header() {
   const pathname = usePathname();
+  const isHome = pathname === '/';
   const [open, setOpen] = useState(false);
   const [pagesOpen, setPagesOpen] = useState(false);
+  const [stuck, setStuck] = useState(false);
   // Close menus whenever the page changes (adjusting state during render, as React recommends).
   const [lastPath, setLastPath] = useState(pathname);
   if (lastPath !== pathname) { setLastPath(pathname); setOpen(false); setPagesOpen(false); }
+  useEffect(() => {
+    const onScroll = () => setStuck(window.scrollY > 120);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
   useEffect(() => {
     if (!pagesOpen) return undefined;
     const onKey = (e) => { if (e.key === 'Escape') setPagesOpen(false); };
@@ -146,28 +165,17 @@ export function Header() {
   }, [pagesOpen]);
   const isCurrent = (href) => (href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`));
   return (
-    <header className="site-header">
+    <header className={`site-header ${isHome ? 'is-overlay' : ''} ${stuck ? 'is-stuck' : ''}`}>
       <a className="skip-link" href="#main">Skip to content</a>
-      <div className="announce-bar">
-        <div className="container">
-          <span><Heart size={14} fill="currentColor" aria-hidden="true" /> Membership for the new Rotaract year is open to everyone 18+ in and around Khopoli.</span>
-          <Link href="/join">Apply Now <ArrowUpRight size={14} aria-hidden="true" /></Link>
-        </div>
-      </div>
       <div className="container nav-wrap">
         <Logo />
         <button className="menu-toggle" aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} aria-controls="main-nav" onClick={() => setOpen(!open)}>
           {open ? <X size={22} /> : <Menu size={22} />}
         </button>
         <nav id="main-nav" className={`nav ${open ? 'is-open' : ''}`} aria-label="Main">
-          {NAV.map((item) => (
-            <Link key={item.href} href={item.href} className={`nav-link ${isCurrent(item.href) ? 'is-current' : ''}`} aria-current={isCurrent(item.href) ? 'page' : undefined}>
-              {item.label}
-            </Link>
-          ))}
           <div className="pages-wrap">
-            <button type="button" className={`nav-link pages-toggle ${pagesOpen ? 'is-open' : ''}`} aria-expanded={pagesOpen} aria-controls="pages-menu" onClick={() => setPagesOpen(!pagesOpen)}>
-              More <ChevronDown size={16} aria-hidden="true" />
+            <button type="button" className={`nav-pill pages-toggle ${pagesOpen ? 'is-open' : ''}`} aria-expanded={pagesOpen} aria-controls="pages-menu" onClick={() => setPagesOpen(!pagesOpen)}>
+              All Pages <ChevronDown size={16} aria-hidden="true" />
             </button>
             {pagesOpen && <button className="dropdown-backdrop" tabIndex={-1} aria-hidden="true" onClick={() => setPagesOpen(false)} />}
             {pagesOpen && (
@@ -178,10 +186,12 @@ export function Header() {
               </div>
             )}
           </div>
-          <div className="nav-actions">
-            <Link href="/sponsorship" className="nav-support"><Heart size={15} aria-hidden="true" /> Support Us</Link>
-            <Link href="/join" className="nav-donate">Join the Club <ArrowUpRight size={16} aria-hidden="true" /></Link>
-          </div>
+          {NAV.map((item) => (
+            <Link key={item.href} href={item.href} className={`nav-pill ${isCurrent(item.href) ? 'is-current' : ''}`} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+              {item.label}
+            </Link>
+          ))}
+          <Link href="/join" className="nav-cta">Join the Club</Link>
         </nav>
       </div>
     </header>
@@ -207,23 +217,18 @@ export function Footer() {
       <div className="container">
         <div className="footer-top">
           <div className="footer-brand">
-            <Logo light />
+            <Logo />
             <p>{club.tagline}</p>
             <SubscribeForm />
           </div>
-          <FooterCol title="The Club" items={[['About us', '/about'], ['Avenues', '/avenues'], ['Events', '/events'], ['Gallery', '/gallery'], ['Members', '/members']]} />
-          <FooterCol title="Get Involved" items={[['Join the club', '/join'], ['Sponsor a project', '/sponsorship'], ['Board application', '/bod-application'], ['FAQs', '/faqs']]} />
-          <div className="footer-col">
-            <h2 className="footer-heading">Reach Us</h2>
-            <a href={`mailto:${clubEmail}`}><Mail size={15} aria-hidden="true" /> {clubEmail}</a>
-            <a href={contact.mapUrl} target="_blank" rel="noreferrer"><MapPin size={15} aria-hidden="true" /> {contact.meetingPlace}</a>
-            <Link href="/contact">Contact page</Link>
-            <SocialLinks />
-          </div>
+          <FooterCol title="Quick Links" items={[['Sponsorship', '/sponsorship'], ['About Us', '/about'], ['Events', '/events'], ['Avenues', '/avenues']]} />
+          <FooterCol title="More" items={[['Blog', '/blog'], ['Our Team', '/teams'], ['Reviews', '/reviews'], ['Gallery', '/gallery']]} />
+          <FooterCol title="Legal & Policy Links" items={[['Privacy Policy', '/privacy-policy'], ['Terms & Conditions', '/terms-and-conditions'], ['Contact Us', '/contact']]} />
         </div>
         <div className="footer-bottom">
           <span>© {new Date().getFullYear()} {club.name} · Club ID {club.clubId} · {club.district}</span>
-          <span><Link href="/privacy-policy">Privacy policy</Link> · A Rotaract club under Rotary International.</span>
+          <SocialLinks />
+          <a href={`mailto:${clubEmail}`} className="footer-mail"><Mail size={15} aria-hidden="true" /> {clubEmail}</a>
         </div>
       </div>
     </footer>
@@ -267,9 +272,10 @@ function SubscribeForm() {
   return (
     <>
       <form className="subscribe" onSubmit={onSubmit}>
+        <Mail size={18} aria-hidden="true" />
         <label className="sr-only" htmlFor="footer-email">Email address for project updates</label>
-        <input id="footer-email" name="email" type="email" placeholder="Your email for project updates" required autoComplete="email" />
-        <button type="submit">Stay in the Loop</button>
+        <input id="footer-email" name="email" type="email" placeholder="Enter your email" required autoComplete="email" />
+        <button type="submit">Subscribe</button>
       </form>
       <p className="form-status" role="status" aria-live="polite">
         {state === 'sent' && 'Thank you, you are on the list.'}
@@ -414,19 +420,20 @@ export function EventCard({ e, i = 0, headingLevel = 3 }) {
       </Link>
       <div className="event-card-body">
         <div className="event-card-meta"><span className="chip">{e.avenue}</span><EventStatus event={e} /></div>
-        <H><Link href={`/events/${e.slug}`}>{e.title}</Link></H>
+        <H>{e.title}</H>
         <p>{e.summary}</p>
         <dl className="event-card-facts">
           <div><dt>Date</dt><dd>{formatDate(e.date)}</dd></div>
           <div><dt>Venue</dt><dd>{e.venue}</dd></div>
         </dl>
-        <span className="inline-arrow" aria-hidden="true">View Event <ArrowUpRight size={18} /></span>
+        <Link href={`/events/${e.slug}`} className="card-btn">View Event<span className="sr-only">: {e.title}</span></Link>
       </div>
     </article>
   );
 }
 
-export function EventsExplorer({ events }) {
+export function EventsExplorer({ events, perPage = 6 }) {
+  const [page, setPage] = useState(1);
   const [when, setWhen] = useState('all');
   const [avenue, setAvenue] = useState('All avenues');
   const now = useNow();
@@ -445,17 +452,27 @@ export function EventsExplorer({ events }) {
       <div className="filters" role="group" aria-label="Filter events">
         <div className="segmented">
           {[['all', 'All'], ['upcoming', 'Upcoming'], ['past', 'Completed']].map(([k, l]) => (
-            <button key={k} type="button" aria-pressed={when === k} className={when === k ? 'is-active' : ''} onClick={() => setWhen(k)}>{l}</button>
+            <button key={k} type="button" aria-pressed={when === k} className={when === k ? 'is-active' : ''} onClick={() => { setWhen(k); setPage(1); }}>{l}</button>
           ))}
         </div>
         <label className="sr-only" htmlFor="avenue-filter">Filter by avenue</label>
-        <select id="avenue-filter" value={avenue} onChange={(e) => setAvenue(e.target.value)}>
+        <select id="avenue-filter" value={avenue} onChange={(e) => { setAvenue(e.target.value); setPage(1); }}>
           {avenueNames.map((a) => <option key={a}>{a}</option>)}
         </select>
       </div>
       <p className="sr-only" role="status" aria-live="polite">{list.length} events shown</p>
       {list.length ? (
-        <div className="card-grid">{list.map((e, i) => <EventCard e={e} i={i} key={e.slug} headingLevel={2} />)}</div>
+        <>
+          <div className="card-grid">{list.slice((page - 1) * perPage, page * perPage).map((e, i) => <EventCard e={e} i={i} key={e.slug} headingLevel={2} />)}</div>
+          {list.length > perPage && (
+            <nav className="pagination" aria-label="Event pages">
+              {Array.from({ length: Math.ceil(list.length / perPage) }, (_, n) => (
+                <button key={n} type="button" className={page === n + 1 ? 'is-active' : ''} aria-current={page === n + 1 ? 'page' : undefined} onClick={() => setPage(n + 1)}>{n + 1}</button>
+              ))}
+              <button type="button" aria-label="Next page" disabled={page * perPage >= list.length} onClick={() => setPage(page + 1)}><ArrowRight size={16} /></button>
+            </nav>
+          )}
+        </>
       ) : (
         <p className="empty-note">No events match these filters yet.</p>
       )}

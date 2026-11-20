@@ -1,23 +1,25 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
-  ArrowRight, CalendarDays, Clock, MapPin, Handshake, Mail, Phone, Quote, Check,
-  HandHeart, GraduationCap, Users, Globe2, Megaphone, HeartHandshake, Sparkles, Award,
+  ArrowRight, CalendarDays, Clock, MapPin, Handshake, Mail, Phone, Check, Star,
+  HandHeart, GraduationCap, Users, Globe2, Megaphone, HeartHandshake, Sparkles,
+  ShieldCheck, UserPlus, Lightbulb, Package, MessageCircle, Play,
 } from 'lucide-react';
 import {
   club, clubFacts, officers, clubEmail, contact, avenues, events, eventsNewestFirst, formatDate,
   coreMembers, boardOfDirectors, chairpersons, uniqueMemberCount, initials, testimonials,
-  faqGroups, district, rotary, sponsorTiers, joinCommitments, rotaractYear,
-  membersWithRoles, eventsForAvenue, SITE_URL, FAMILY_LOGOS,
+  allFaqs, faqGroups, district, rotary, sponsorTiers, joinCommitments, rotaractYear,
+  membersWithRoles, eventsForAvenue, SITE_URL, FAMILY_LOGOS, values, volunteerReasons, waysToHelp,
+  postsNewestFirst, PAGE_SIZE,
 } from '../data/club';
 import {
-  Btn, Eyebrow, Intro, Section, PageHero, Photo, FaqSearch, MailForm, SocialLinks,
+  Btn, Eyebrow, Intro, Section, PageHero, Photo, FaqList, FaqSearch, MailForm, SocialLinks,
   EventCard, EventsExplorer, EventStatus, EventActions, FamilyLogos,
 } from './ui';
-import Image from 'next/image';
 
-const ICONS = { HandHeart, GraduationCap, Users, Globe2, Megaphone, HeartHandshake, Sparkles };
+const ICONS = { HandHeart, GraduationCap, Users, Globe2, Megaphone, HeartHandshake, Sparkles, ShieldCheck, UserPlus, Lightbulb, Package, Handshake };
 const eventImage = (e) => `/images/events/${e.slug}.jpg`;
 /** Only point at a member photo that actually exists in /public, so missing portraits never trigger a 404. */
 const memberImage = (m) => {
@@ -27,6 +29,8 @@ const memberImage = (m) => {
 };
 const partnerCount = new Set(events.map((e) => e.partner).filter(Boolean)).size;
 const TINTS = ['rose', 'sky', 'gold'];
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const formatPostDate = (iso) => { const [y, m, d] = iso.split('-').map(Number); return `${String(d).padStart(2, '0')} ${MONTHS[m - 1]} ${y}`; };
 
 /** Every photo on the site with a caption, used by the gallery page. Replace with the club's own photos. */
 export const GALLERY = [
@@ -44,28 +48,32 @@ export const GALLERY = [
   ['/images/gallery/4.jpg', 'Fellowship among members'],
 ];
 
-/* ======================= Shared blocks ======================= */
+/* ======================= Shared Kindora-style blocks ======================= */
 
-function MemberCard({ m, i = 0 }) {
+function Pills({ children }) {
+  return <p className="pill-text"><span>{children}</span></p>;
+}
+
+function MemberCard({ m, i = 0, size = 'md' }) {
   return (
-    <div className="member-card">
-      <div className="member-photo"><Photo src={memberImage(m)} alt={m.name} tone={i} sizes="(max-width: 700px) 50vw, 220px" /></div>
+    <div className={`member-card is-${size}`}>
+      <div className="member-photo"><Photo src={memberImage(m)} alt={m.name} tone={i} sizes="(max-width: 700px) 50vw, 300px" /></div>
       <h3>{m.name}</h3>
       <ul className="member-roles">{m.roles.map((r) => <li key={r}>{r}</li>)}</ul>
     </div>
   );
 }
 
-function Testimonials({ tone = 'plain' }) {
+function Testimonials({ tone = 'plain', intro = true }) {
   if (!testimonials.length) return null;
   return (
     <Section tone={tone}>
-      <Intro center label="In their words" title="What members and partners say" />
+      {intro && <Intro center label="Voices of support" title="What people are saying" description="Members, partners and beneficiaries on working with the club." />}
       <div className="quote-grid">
         {testimonials.map((r, i) => (
           <figure className="quote-card" key={r.name}>
-            <Quote size={28} aria-hidden="true" />
-            <blockquote>{r.quote}</blockquote>
+            <div className="stars" aria-label="5 out of 5">{Array.from({ length: 5 }, (_, n) => <Star key={n} size={20} fill="currentColor" aria-hidden="true" />)}</div>
+            <blockquote>“{r.quote}”</blockquote>
             <figcaption><span className={`avatar tint-${TINTS[i % 3]}`}>{initials(r.name)}</span><span><strong>{r.name}</strong>{r.role}</span></figcaption>
           </figure>
         ))}
@@ -78,21 +86,21 @@ function AvenueGrid({ items, withCta = false, headingLevel = 3 }) {
   const H = `h${headingLevel}`;
   return (
     <div className="avenue-grid">
-      {items.map((a, i) => {
+      {items.map((a) => {
         const Icon = ICONS[a.icon] ?? HandHeart;
         return (
-          <Link href={`/avenues/${a.slug}`} key={a.slug} className={`avenue-card accent-${i % 4}`}>
-            <span className="avenue-icon"><Icon size={26} aria-hidden="true" /></span>
+          <Link href={`/avenues/${a.slug}`} key={a.slug} className="avenue-card">
+            <span className="avenue-icon"><Icon size={30} aria-hidden="true" /></span>
             <small>{a.focus}</small>
             <H>{a.name}</H>
             <p>{a.description}</p>
-            <span className="text-link">Explore the avenue <ArrowRight size={16} aria-hidden="true" /></span>
+            <span className="text-link">Explore <ArrowRight size={16} aria-hidden="true" /></span>
           </Link>
         );
       })}
       {withCta && (
         <Link href="/join" className="avenue-card avenue-card-dark">
-          <span className="avenue-icon"><Users size={26} aria-hidden="true" /></span>
+          <span className="avenue-icon"><Users size={30} aria-hidden="true" /></span>
           <small>Pick your avenue</small>
           <H>Join a project team</H>
           <p>Every member chooses an avenue and leads or co-leads at least one project a year.</p>
@@ -103,54 +111,207 @@ function AvenueGrid({ items, withCta = false, headingLevel = 3 }) {
   );
 }
 
+/** Coral "Together, we can make a difference" band (Kindora's closing CTA). */
 function CommunityCTA() {
   return (
-    <Section>
-      <div className="cta-band">
-        <div className="cta-copy">
-          <Eyebrow>Membership open</Eyebrow>
-          <h2>Bring one idea. We will help you finish it.</h2>
-          <p>Membership is open to young adults living, studying or working in and around Khopoli. There is no campus requirement.</p>
-          <div className="btn-row"><Btn href="/join">Apply for Membership</Btn><Btn href="/sponsorship" kind="outline">Partner With Us</Btn></div>
-        </div>
-        <div className="cta-photo"><Photo src="/images/cta.jpg" alt="Volunteers joining hands" label="Service above self" sizes="(max-width: 900px) 100vw, 45vw" /></div>
-      </div>
-    </Section>
-  );
-}
-
-function ImpactBand() {
-  return (
-    <section className="impact-band" aria-label="The club in numbers">
+    <section className="section cta-section">
       <div className="container">
-        {[
-          [events.length, 'Projects this year'],
-          [avenues.length, 'Avenues of service'],
-          [uniqueMemberCount, 'Office bearers & chairs'],
-          [partnerCount, 'Partner organisations'],
-        ].map(([n, l]) => <div key={l}><strong>{n}</strong><span>{l}</span></div>)}
+        <div className="cta-band">
+          <h2>Together, we can make a difference</h2>
+          <p className="cta-sub">Your time, skills and support help the club serve Khopoli.</p>
+          <div className="btn-row center-row-tight"><Btn href="/join" icon={false}>Join the Club</Btn><Btn href="/contact?about=Volunteering" kind="light" icon={false}>Become a Volunteer</Btn></div>
+          <div className="cta-stat">
+            <strong>Total people involved</strong>
+            <span>Office bearers, directors and chairs this Rotaract year</span>
+            <div className="avatar-stack" aria-hidden="true">{coreMembers.slice(0, 3).map((m, i) => <span key={m.name} className={`avatar tint-${TINTS[i]}`}>{initials(m.name)}</span>)}</div>
+            <b>{uniqueMemberCount}+ Rotaractors</b>
+          </div>
+          <div className="cta-pills"><Pills>Serving schools, the environment and local livelihoods in Khopoli.</Pills></div>
+          <div className="cta-people"><Photo src="/images/hero.jpg" alt="Young volunteers smiling together" label=" " sizes="(max-width: 900px) 100vw, 60vw" /></div>
+        </div>
       </div>
     </section>
   );
 }
 
-function GetInvolved({ tone = 'cream' }) {
-  const ways = [
-    { href: '/contact?about=Volunteering', img: '/images/gallery/1.jpg', tag: 'Give your time', title: 'Volunteer at a project', copy: 'Most community projects are open to volunteers. Turn up for one drive and see how it feels.', cta: 'Volunteer with us' },
-    { href: '/join', img: '/images/gallery/4.jpg', tag: 'Become a Rotaractor', title: 'Join the club', copy: 'Open to anyone 18+ living, studying or working in and around Khopoli. No campus requirement.', cta: 'Apply now' },
-    { href: '/sponsorship', img: '/images/support.jpg', tag: 'Fund the work', title: 'Sponsor a project', copy: 'Back a single project or a whole avenue. Every rupee is accounted for in the project report.', cta: 'Support us' },
-  ];
+function FaqBox({ items = allFaqs.slice(0, 6) }) {
+  return (
+    <section className="section faq-section">
+      <div className="container">
+        <div className="faq-box">
+          <div className="faq-head">
+            <Intro label="Questions answered" title="Frequently asked questions" />
+            <div><p>Answers to common questions about the club, membership, meetings and how Rotaract connects to Rotary.</p><Btn href="/contact" icon={false}>Contact Us</Btn></div>
+          </div>
+          <FaqList items={items} firstOpen={false} />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/** Three coloured number cards (Kindora "Programs that change lives"). */
+function MetricCards() {
+  return (
+    <Section>
+      <Intro center label="Our impact" title="Projects that change lives" description="Small teams, clear owners and documented outcomes, sized to what a young club can finish well." />
+      <div className="metric-grid">
+        <div className="metric-card is-coral">
+          <strong>{events.length}</strong>
+          <span className="metric-label">Projects this Rotaract year</span>
+          <Pills>From Maha Aarti to tree plantation, each with one accountable lead.</Pills>
+          <Link href="/events" className="metric-arrow" aria-label="See all projects"><ArrowRight size={22} /></Link>
+          <div className="metric-photo"><Photo src="/images/gallery/5.jpg" alt="" label=" " sizes="260px" /></div>
+        </div>
+        <div className="metric-card is-dark">
+          <strong>{uniqueMemberCount}+</strong>
+          <span className="metric-label">Rotaractors leading the club</span>
+          <Pills>Office bearers, directors and chairs keeping the calendar moving.</Pills>
+          <div className="metric-photo is-wide"><Photo src="/images/hero.jpg" alt="" label=" " sizes="420px" /></div>
+        </div>
+        <div className="metric-card is-yellow">
+          <strong>{avenues.length}</strong>
+          <span className="metric-label">Avenues of service</span>
+          <Pills>Community, professional, club, international, PR, DEI and public image.</Pills>
+          <div className="metric-photo is-wide"><Photo src="/images/events/tree-plantation.jpg" alt="" label=" " sizes="420px" /></div>
+        </div>
+      </div>
+    </Section>
+  );
+}
+
+/** Small bar chart card overlaid on a photo, built from real club data. */
+function ChartCard({ title, caption, bars }) {
+  const max = Math.max(...bars.map((b) => b.value), 1);
+  return (
+    <div className="chart-card">
+      <strong>{title}</strong>
+      <small>{caption}</small>
+      <div className="chart-bars" role="img" aria-label={`${title}: ${bars.map((b) => `${b.label} ${b.value}`).join(', ')}`}>
+        {bars.map((b) => <div key={b.label}><span style={{ height: `${Math.max(14, (b.value / max) * 100)}%` }} /><em>{b.label}</em></div>)}
+      </div>
+    </div>
+  );
+}
+
+function ResultsBlocks({ tone = 'plain' }) {
+  const byAvenue = [['Community Service', 'Comm.'], ['International Service', 'Intl.'], ['Professional Development', 'PD'], ['Diversity, Equity & Inclusion', 'DEI'], ['Club Service', 'Club']]
+    .map(([a, label]) => ({ label, value: events.filter((e) => e.avenue === a).length }));
+  const byMonth = ['06', '07', '08', '09', '10'].map((m) => ({ label: MONTHS[Number(m) - 1], value: events.filter((e) => e.date.slice(5, 7) === m).length }));
   return (
     <Section tone={tone}>
-      <Intro center label="Get involved" title="Three ways you can make a difference" description="Whether you have an evening, a skill or a budget to give, there is a place for you in the club's work." />
-      <div className="involve-grid">
-        {ways.map((w, i) => (
-          <Link href={w.href} className="involve-card" key={w.title}>
-            <div className="involve-photo"><Photo src={w.img} alt="" label={w.title} tone={i} sizes="(max-width: 700px) 100vw, 33vw" /><span className="chip chip-float">{w.tag}</span></div>
-            <div className="involve-body"><h3>{w.title}</h3><p>{w.copy}</p><span className="text-link">{w.cta} <ArrowRight size={16} aria-hidden="true" /></span></div>
-          </Link>
-        ))}
+      <Intro center label="Our results" title="Results that inspire change" description="Young people, local problems, real follow-through." />
+      <div className="story-block">
+        <div className="story-photo">
+          <Photo src="/images/volunteer.jpg" alt="A volunteer at a community project" label="Community Service" sizes="(max-width: 900px) 100vw, 45vw" />
+          <ChartCard title="Projects by avenue" caption="This Rotaract year" bars={byAvenue} />
+        </div>
+        <div className="story-copy">
+          <span className="chip">Community Service</span>
+          <h3>Khopoli first, planned with the people who live with the results</h3>
+          <p>Plantation drives with watering rosters, gaushala mornings and community evenings organised with local trustees.</p>
+          <div className="stat-boxes">
+            <div><span className="stat-icon tint-sky"><HandHeart size={18} aria-hidden="true" /></span><small>Community projects</small><b>{events.filter((e) => e.avenue === 'Community Service').length}</b></div>
+            <div><span className="stat-icon tint-gold"><Handshake size={18} aria-hidden="true" /></span><small>Partner organisations</small><b>{partnerCount}</b></div>
+          </div>
+        </div>
       </div>
+      <div className="story-block is-flipped">
+        <div className="story-photo">
+          <Photo src="/images/events/pd-session.jpg" alt="Members at a professional development session" label="Professional Development" sizes="(max-width: 900px) 100vw, 45vw" />
+          <ChartCard title="Projects per month" caption="June to October" bars={byMonth} />
+        </div>
+        <div className="story-copy">
+          <span className="chip">Professional & International</span>
+          <h3>Leaving the club more employable than when you joined</h3>
+          <p>Workshops, DEI sessions and joint meetings with clubs across India. Chartered in 2020, the club learned to plan carefully and finish what it starts.</p>
+          <div className="stat-boxes">
+            <div><span className="stat-icon tint-rose"><GraduationCap size={18} aria-hidden="true" /></span><small>Skills & DEI sessions</small><b>{events.filter((e) => /Professional|Diversity/.test(e.avenue)).length}</b></div>
+            <div><span className="stat-icon tint-sky"><Globe2 size={18} aria-hidden="true" /></span><small>Inter-club projects</small><b>{events.filter((e) => e.avenue === 'International Service').length}</b></div>
+          </div>
+        </div>
+      </div>
+    </Section>
+  );
+}
+
+/** Green "Discover the impact of volunteering" block. */
+function VolunteerBlock() {
+  return (
+    <Section>
+      <div className="volunteer-band">
+        <div className="volunteer-copy">
+          <h2>Discover the impact of volunteering</h2>
+          <ul>
+            {volunteerReasons.map((r) => {
+              const Icon = ICONS[r.icon] ?? HandHeart;
+              return <li key={r.title}><h3><Icon size={20} aria-hidden="true" /> {r.title}</h3><p>{r.body}</p></li>;
+            })}
+          </ul>
+        </div>
+        <p className="volunteer-lead">Most community projects are open to volunteers. Come for one drive and see how it feels.</p>
+        <div className="volunteer-photo"><Photo src="/images/gallery/4.jpg" alt="Young people at a club fellowship" label=" " sizes="(max-width: 900px) 100vw, 50vw" /></div>
+        <Link href="/gallery" className="story-reel"><span><small>See our</small><strong>photo gallery</strong></span><span className="play-button" aria-hidden="true"><Play size={16} fill="currentColor" /></span></Link>
+        <span className="volunteer-tag">Real projects, real people</span>
+      </div>
+    </Section>
+  );
+}
+
+function NumbersBlock({ tone = 'plain' }) {
+  return (
+    <Section tone={tone}>
+      <Intro center label="Our network" title="See the difference we're part of, by the numbers" description="Rotaract Club of Khopoli belongs to a district and a worldwide family of clubs." />
+      <div className="counters">
+        <div><small>Rotaract District 3131</small><strong>2,700+</strong><p>Rotaractors across 100+ clubs in the Pune and Raigad revenue districts, and Khopoli is one of them.</p></div>
+        <div><small>Rotary International</small><strong>1.2M</strong><p>Rotary and Rotaract members across 200+ countries and geographical areas, connected since 1905.</p></div>
+      </div>
+    </Section>
+  );
+}
+
+function WaysGrid({ tone = 'plain' }) {
+  return (
+    <Section tone={tone}>
+      <Intro center label="How you can help" title="Ways you can make a difference" description="Whether you have an evening, a skill or a budget to give, there is a place for you in the club's work." />
+      <div className="ways-grid">
+        {waysToHelp.map((w, i) => {
+          const Icon = ICONS[w.icon] ?? HandHeart;
+          return (
+            <div className="way" key={w.title}>
+              <span className={`way-icon c-${i % 3}`}><Icon size={20} aria-hidden="true" /></span>
+              <h3>{w.title}</h3>
+              <p>{w.body}</p>
+              <Link href={w.href} className="card-btn">{w.cta}</Link>
+            </div>
+          );
+        })}
+      </div>
+    </Section>
+  );
+}
+
+function WideBanner() {
+  return (
+    <Section>
+      <div className="wide-banner">
+        <Photo src="/images/gallery/2.jpg" alt="Children at a school session" label=" " sizes="(max-width: 1240px) 100vw, 1240px" />
+        <div className="wide-banner-card">
+          <h2>Empowering young people to lead in Khopoli</h2>
+          <p>Every member owns a project, manages a budget and reports the outcome, building skills a classroom does not teach.</p>
+          <Btn href="/join" icon={false} className="btn-block">Join the Club</Btn>
+        </div>
+      </div>
+    </Section>
+  );
+}
+
+function ProjectsSection({ tone = 'plain' }) {
+  return (
+    <Section tone={tone}>
+      <Intro center label="Our projects" title="Projects you can be part of" description="Every project is documented with dates, venue and partners." />
+      <div className="card-grid">{eventsNewestFirst.slice(0, 3).map((e, i) => <EventCard e={e} i={i} key={e.slug} />)}</div>
+      <div className="center-row"><Btn href="/events" kind="outline">View All Events</Btn></div>
     </Section>
   );
 }
@@ -181,6 +342,28 @@ function ContactMethods({ showPhone = false }) {
   );
 }
 
+function PostCard({ p, headingLevel = 3 }) {
+  const H = `h${headingLevel}`;
+  return (
+    <article className="post-card">
+      <Link href={`/blog/${p.slug}`} className="post-card-photo" tabIndex={-1} aria-hidden="true"><Photo src={p.image} alt="" label={p.title} sizes="(max-width: 900px) 100vw, 50vw" /></Link>
+      <div className="post-card-meta"><span className="tags">{p.tags.map((t) => <span className="chip chip-line" key={t}>{t}</span>)}</span><time dateTime={p.date}>{formatPostDate(p.date)}</time></div>
+      <H>{p.title}</H>
+      <p>{p.excerpt}</p>
+      <Link href={`/blog/${p.slug}`} className="card-btn">Read More<span className="sr-only">: {p.title}</span></Link>
+    </article>
+  );
+}
+
+function PostBody({ blocks }) {
+  return blocks.map((b, i) => {
+    if (b.h2) return <h2 key={i}>{b.h2}</h2>;
+    if (b.quote) return <blockquote key={i} className="quote-box">“{b.quote}”</blockquote>;
+    if (b.list) return <ul key={i} className="check-list">{b.list.map((li) => <li key={li}><Check size={18} aria-hidden="true" /> {li}</li>)}</ul>;
+    return <p key={i}>{b.p}</p>;
+  });
+}
+
 /* ======================= Home ======================= */
 
 export function Home() {
@@ -196,105 +379,35 @@ export function Home() {
               </div>
               <span>{uniqueMemberCount}+ Rotaractors serving Khopoli</span>
             </div>
-            <h1>A small town club that <span>keeps its word.</span></h1>
+            <h1>A small town club that keeps its word</h1>
             <p className="lead">{club.intro}</p>
-            <div className="btn-row"><Btn href="/join">Join the Club</Btn><Btn href="/about" kind="text">What We Do</Btn></div>
+            <div className="btn-row"><Btn href="/join">Join the Club</Btn><Link href="/about" className="learn-more">Learn More <ArrowRight size={16} aria-hidden="true" /></Link></div>
+            <FamilyLogos title="Proudly part of the Rotary family" />
           </div>
           <div className="home-hero-art">
-            <Photo src="/images/hero.jpg" alt="Young volunteers of Rotaract Club of Khopoli" label=" " priority sizes="(max-width: 900px) 100vw, 50vw" className="hero-photo" />
-            <div className="hero-quote"><span className="hero-small-avatar" aria-hidden="true">♥</span><p>Service above self, written in the voice of a small town with big plans.</p></div>
-            <Link href="/events" className="story-reel"><span><small>See what we</small><strong>did this year</strong></span><span className="play-button" aria-hidden="true"><ArrowRight size={17} /></span></Link>
+            <Photo src="/images/hero.jpg" alt="Young volunteers of Rotaract Club of Khopoli" label=" " priority sizes="(max-width: 900px) 100vw, 50vw" />
+            <div className="hero-quote"><span className="hero-small-avatar" aria-hidden="true">♥</span><p>“Service above self, written in the voice of a small town with big plans.”</p></div>
+            <Link href="/gallery" className="story-reel"><span><small>See our</small><strong>photo gallery</strong></span><span className="play-button" aria-hidden="true"><Play size={16} fill="currentColor" /></span></Link>
             <Link href={`/events/${latest.slug}`} className="hero-info-card">
-              <small>Latest project</small>
-              <strong>{latest.title}</strong>
-              <span>{formatDate(latest.date)}</span>
+              <strong>Latest project</strong>
+              <span>{latest.title}, {formatDate(latest.date)}.</span>
+              <div><span className="avatar-stack" aria-hidden="true">{coreMembers.slice(2, 5).map((m, i) => <span key={m.name} className={`avatar tint-${TINTS[i]}`}>{initials(m.name)}</span>)}</span><b>{events.length}</b></div>
             </Link>
             <div className="hero-small-tag">Chartered<br />{club.charteredOn}</div>
           </div>
         </div>
-        <div className="container"><FamilyLogos /></div>
       </section>
 
-      <ImpactBand />
-
-      <Section tone="cream">
-        <div className="split">
-          <div className="split-photo">
-            <Photo src="/images/volunteer.jpg" alt="A volunteer at a community service project" label="Our mission" sizes="(max-width: 900px) 100vw, 45vw" />
-            <div className="photo-badge"><span>Serving Khopoli since</span><strong>2020</strong></div>
-          </div>
-          <div>
-            <Intro label="Our mission" title="Service above self, close to home" description="We bring young people in and around Khopoli together to serve the town they grew up in, and to grow as leaders while they do it." />
-            <ul className="feature-list">
-              <li><span className="feature-icon tint-rose"><HandHeart size={22} aria-hidden="true" /></span><div><h3>Serve the community</h3><p>Health, education, environment and livelihood projects planned with the people they are meant for.</p></div></li>
-              <li><span className="feature-icon tint-sky"><GraduationCap size={22} aria-hidden="true" /></span><div><h3>Grow young leaders</h3><p>Every member owns a project, manages a budget and reports the outcome, building skills a classroom does not teach.</p></div></li>
-              <li><span className="feature-icon tint-gold"><Globe2 size={22} aria-hidden="true" /></span><div><h3>Connect beyond Khopoli</h3><p>Joint projects with clubs across India and the worldwide Rotary family.</p></div></li>
-            </ul>
-            <div className="btn-row"><Btn href="/about" kind="dark">Our Story</Btn><Btn href="/events" kind="text">See Our Work</Btn></div>
-          </div>
-        </div>
-      </Section>
-
-      <Section>
-        <Intro center label="What we do" title="Young people, local problems, real follow-through" description="Projects sized to what we can actually finish, and finish well." />
-        <div className="story-block">
-          <div className="story-copy">
-            <span className="chip">Community Service</span>
-            <h3>Khopoli first, planned with the people who live with the results</h3>
-            <p>Plantation drives with watering rosters, gaushala mornings and community evenings organised with local trustees.</p>
-            <div className="mini-stats"><div><strong>{events.filter((e) => e.avenue === 'Community Service').length}</strong><span>Community projects this year</span></div><div><strong>{partnerCount}</strong><span>Partner organisations</span></div></div>
-          </div>
-          <div className="story-photos">
-            <Photo src="/images/gallery/6.jpg" alt="Seedlings prepared for a plantation drive" label="Tree Plantation" tone={3} sizes="(max-width: 900px) 55vw, 30vw" />
-            <Photo src="/images/events/gau-seva.jpg" alt="Cattle at the local gaushala" label="Gau Seva" tone={2} sizes="(max-width: 900px) 45vw, 22vw" />
-          </div>
-        </div>
-        <div className="story-block is-flipped">
-          <div className="story-copy">
-            <span className="chip">Professional & International</span>
-            <h3>Leaving the club more employable than when you joined</h3>
-            <p>Workshops, DEI sessions and joint meetings with clubs across India. Chartered in 2020, when meeting at all was hard, the club learned to plan carefully and finish what it starts.</p>
-            <div className="mini-stats"><div><strong>{events.filter((e) => /Professional|Diversity/.test(e.avenue)).length}</strong><span>Skills & DEI sessions</span></div><div><strong>{events.filter((e) => e.avenue === 'International Service').length}</strong><span>Inter-club projects</span></div></div>
-          </div>
-          <div className="story-photos">
-            <Photo src="/images/events/joint-meeting.jpg" alt="Members on an online joint meeting" label="Joint Meeting" tone={1} sizes="(max-width: 900px) 55vw, 30vw" />
-            <Photo src="/images/gallery/3.jpg" alt="Members joining hands before a project" label="Fellowship" tone={0} sizes="(max-width: 900px) 45vw, 22vw" />
-          </div>
-        </div>
-      </Section>
-
-      <GetInvolved />
-
-      <Section>
-        <Intro center label="Avenues" title="Seven causes we work for" description="Every member picks an avenue. Every project has one owner." />
-        <AvenueGrid items={avenues.slice(0, 6)} />
-        <div className="center-row"><Btn href="/avenues" kind="outline">See All Avenues</Btn></div>
-      </Section>
-
-      <Section tone="cream">
-        <div className="split-intro">
-          <Intro label="Recent projects" title="What we have been up to" description="Every project is documented with dates, venue and partners." />
-          <Btn href="/events" kind="outline">All Events</Btn>
-        </div>
-        <div className="card-grid">{eventsNewestFirst.slice(0, 3).map((e, i) => <EventCard e={e} i={i} key={e.slug} />)}</div>
-      </Section>
-
-      <Section>
-        <div className="split-intro">
-          <Intro label="Gallery" title="Moments from the field" description="Small projects, real people, and the town we grew up in." />
-          <Btn href="/gallery" kind="outline">Full Gallery</Btn>
-        </div>
-        <GalleryGrid featured photos={[GALLERY[2], GALLERY[5], GALLERY[9], GALLERY[4], GALLERY[8], GALLERY[6]]} />
-      </Section>
-
-      <Section tone="cream">
-        <Intro center label={`The board, ${rotaractYear}`} title="Meet the people who keep it moving" />
-        <div className="member-grid">{coreMembers.map((m, i) => <MemberCard m={m} i={i} key={m.name} />)}</div>
-        <div className="center-row"><Btn href="/members" kind="outline">Meet Every Member</Btn></div>
-      </Section>
-
+      <MetricCards />
+      <ResultsBlocks />
+      <VolunteerBlock />
+      <ProjectsSection />
+      <NumbersBlock />
+      <WaysGrid />
+      <WideBanner />
       <Testimonials />
       <CommunityCTA />
+      <FaqBox />
     </>
   );
 }
@@ -304,51 +417,67 @@ export function Home() {
 export function About() {
   return (
     <>
-      <PageHero eyebrow="About the club" title="Chartered in 2020. Still here, still working." desc={club.intro} image="/images/gallery/3.jpg">
-        <div className="btn-row"><Btn href="/join">Join the Club</Btn><Btn href="/members" kind="text">Meet the Board</Btn></div>
+      <PageHero layout="split" eyebrow="About Us" title="Know about our mission, vision and journey" desc={club.intro} wideImage="/images/gallery/1.jpg">
+        <Btn href="/events" icon={false}>See Our Work</Btn>
       </PageHero>
 
-      <Section tone="cream">
-        <div className="split">
-          <div className="split-photo"><Photo src="/images/gallery/1.jpg" alt="Volunteers sorting essentials for families" label="Our story" sizes="(max-width: 900px) 100vw, 45vw" /></div>
-          <div className="prose">
-            <Intro label="Our story" title="A club built during a difficult year" />
+      <Section>
+        <h2 className="center strip-title">Rotary family and the values we work by</h2>
+        <div className="logo-strip">{FAMILY_LOGOS.map((l) => <Image key={l.src} src={l.src} alt={l.alt} width={l.w} height={l.h} sizes="200px" />)}</div>
+        <div className="value-grid">
+          {values.map((v, i) => {
+            const Icon = ICONS[v.icon] ?? HeartHandshake;
+            return <div className="value" key={v.title}><span className={`way-icon c-${i % 3}`}><Icon size={20} aria-hidden="true" /></span><h3>{v.title}</h3><p>{v.body}</p></div>;
+          })}
+        </div>
+      </Section>
+
+      <Section>
+        <Intro center label="Our impact" title="Since our charter, the club has kept showing up" />
+        <dl className="impact-band">
+          <div><dd>2020</dd><dt>Year the club was chartered</dt></div>
+          <div><dd>{events.length}</dd><dt>Projects this Rotaract year</dt></div>
+          <div><dd>{avenues.length}</dd><dt>Avenues of service</dt></div>
+          <div><dd>{uniqueMemberCount}+</dd><dt>Office bearers and chairs</dt></div>
+        </dl>
+      </Section>
+
+      <Section>
+        <div className="story-block">
+          <div className="story-photo">
+            <Photo src="/images/volunteer.jpg" alt="A volunteer at a community project" label="Our story" sizes="(max-width: 900px) 100vw, 45vw" />
+            <ChartCard title="Projects per month" caption="This Rotaract year" bars={['06', '07', '08', '09', '10'].map((m) => ({ label: MONTHS[Number(m) - 1], value: events.filter((e) => e.date.slice(5, 7) === m).length }))} />
+          </div>
+          <div className="story-copy prose">
+            <Eyebrow>Our story</Eyebrow>
+            <h2>A club built during a difficult year</h2>
             <p>Rotaract Club of Khopoli received its charter in November 2020, when public gatherings were restricted and most service work had moved to phone calls and spreadsheets. The first projects were practical: getting essentials to families and helping students who had lost access to classes.</p>
             <p>That start left a habit behind. The club plans on paper before it posts anything, gives every project a single owner, and reports what actually happened rather than what was intended.</p>
-            <p>As a community based club, our members are not tied to one campus. Students, early-career professionals and local business owners sit at the same table, which is why the club can take on projects bigger than its size.</p>
+            <Btn href="/join" icon={false}>Join the Club</Btn>
           </div>
         </div>
       </Section>
 
       <Section>
-        <Intro center label="Structure" title="How the club is organised" />
-        <div className="info-grid">
-          {[
-            [Users, 'General body', 'Every inducted member. The general body approves the calendar, votes on inductions and carries out projects.'],
-            [Award, 'Board of directors', 'President, secretary and avenue directors elected for the Rotaract year. The board owns budgets, reporting and district coordination.'],
-            [Handshake, 'Project teams', 'Formed per project with one accountable lead, so nothing depends on a single office-bearer being free that week.'],
-          ].map(([Icon, t, d], i) => (
-            <div className={`info-card tint-${TINTS[i]}`} key={t}><span className="info-icon"><Icon size={24} aria-hidden="true" /></span><h3>{t}</h3><p>{d}</p></div>
-          ))}
-        </div>
+        <Intro center label="Charter facts" title="The club on paper" />
+        <dl className="facts-grid">{clubFacts.map((f) => <div key={f.label}><dt>{f.label}</dt><dd>{f.value}</dd></div>)}</dl>
       </Section>
 
-      <Section tone="cream">
-        <Intro center label="Charter facts" title="The club on paper" />
-        <dl className="facts-grid">
-          {clubFacts.map((f) => <div key={f.label}><dt>{f.label}</dt><dd>{f.value}</dd></div>)}
-        </dl>
+      <Section>
+        <Intro center label="Our team" title="Meet our incredible team" description={`The core team for the ${rotaractYear} Rotaract year.`} />
+        <div className="member-grid">{coreMembers.slice(0, 4).map((m, i) => <MemberCard m={m} i={i} key={m.name} />)}</div>
+        <div className="center-row"><Btn href="/teams" kind="outline">Meet Everyone</Btn></div>
       </Section>
 
       <Section>
         <Intro center label="The Rotary family" title="Rotary, Rotaract and Interact" />
-        <div className="info-grid">
+        <div className="value-grid">
           {[
             ['Rotary', 'A worldwide network of service clubs for working professionals. Rotary sponsors and mentors Rotaract clubs, including ours.', '/rotary-information', FAMILY_LOGOS[1]],
             ['Rotaract', "Rotary's programme for young adults. Clubs govern themselves, plan their own projects and report through their district: for us, District 3131.", '/district-3131', FAMILY_LOGOS[0]],
             ['Interact', 'The school-age wing of Rotary. Where we can, we support Interact clubs nearby so service starts before college.', null, FAMILY_LOGOS[2]],
           ].map(([t, d, href, logo]) => (
-            <div className="info-card family-card" key={t}>
+            <div className="value family-card" key={t}>
               <Image src={logo.src} alt={logo.alt} width={logo.w} height={logo.h} sizes="240px" className="family-card-logo" />
               <h3 className="sr-only">{t}</h3><p>{d}</p>
               {href && <Link href={href} className="text-link">Learn more <ArrowRight size={16} aria-hidden="true" /></Link>}
@@ -356,8 +485,34 @@ export function About() {
           ))}
         </div>
       </Section>
-      <GetInvolved />
+      <Testimonials />
       <CommunityCTA />
+    </>
+  );
+}
+
+/* ======================= Teams ======================= */
+
+export function Teams() {
+  return (
+    <>
+      <PageHero eyebrow={`Board ${rotaractYear}`} title="Meet our incredible team" desc={`${uniqueMemberCount} Rotaractors hold the club's portfolios for ${rotaractYear}. Where one person holds several, their roles are listed together.`} />
+      <Section className="team-section">
+        <div className="team-head"><h2>Our leadership team</h2><p>The office bearers who lead the club&apos;s service year.</p></div>
+        <div className="member-grid is-lead">{coreMembers.slice(0, 3).map((m, i) => <MemberCard m={m} i={i} key={m.name} size="lg" />)}</div>
+        <div className="member-grid">{coreMembers.slice(3).map((m, i) => <MemberCard m={m} i={i + 3} key={m.name} />)}</div>
+      </Section>
+      <Section className="team-section">
+        <div className="team-head"><h2>Board of directors</h2><p>Avenue directors and officers who own budgets, reporting and district coordination.</p></div>
+        <div className="member-grid">{boardOfDirectors.map((m, i) => <MemberCard m={m} i={i + 1} key={m.name} />)}</div>
+      </Section>
+      <Section className="team-section">
+        <div className="team-head"><h2>Chairpersons</h2><p>Chairs and additional portfolios.</p></div>
+        <div className="member-grid">{chairpersons.map((m, i) => <MemberCard m={m} i={i + 2} key={m.name + m.roles[0]} />)}</div>
+      </Section>
+      <WaysGrid />
+      <VolunteerBlock />
+      <FaqBox />
     </>
   );
 }
@@ -367,7 +522,9 @@ export function About() {
 export function Avenues() {
   return (
     <>
-      <PageHero eyebrow="Avenues of service" title="Seven causes the club works for" desc="Rotaract's avenues of service, adapted to what a community club in Khopoli can genuinely deliver. Choose one to see its projects and the people who lead it." />
+      <PageHero layout="split" eyebrow="Avenues of service" title="Seven causes the club works for" desc="Rotaract's avenues of service, adapted to what a community club in Khopoli can genuinely deliver. Choose one to see its projects and the people who lead it.">
+        <Btn href="/join" icon={false}>Pick Your Avenue</Btn>
+      </PageHero>
       <Section><AvenueGrid items={avenues} withCta headingLevel={2} /></Section>
       <CommunityCTA />
     </>
@@ -376,25 +533,21 @@ export function Avenues() {
 
 export function AvenueDetail({ slug }) {
   const a = avenues.find((x) => x.slug === slug);
-  const Icon = ICONS[a.icon] ?? HandHeart;
   const leads = membersWithRoles(a.leadRoles);
   const projects = eventsForAvenue(a);
   const others = avenues.filter((x) => x.slug !== slug);
   return (
     <>
-      <PageHero eyebrow={a.focus} title={a.name} desc={a.description}>
-        <span className="hero-icon"><Icon size={34} aria-hidden="true" /></span>
+      <PageHero layout="split" eyebrow={a.focus} title={a.name} desc={a.description}>
+        <Btn href={`/contact?about=${encodeURIComponent(`${a.name} project idea`)}`} icon={false}>Suggest a Project</Btn>
       </PageHero>
       <Section>
-        <div className="split-intro">
-          <Intro label="Projects" title={`${a.name} projects`} description={projects.length ? 'Recent work in this avenue.' : 'Projects for this avenue are being planned for the new Rotaract year.'} />
-          <Btn href={`/contact?about=${encodeURIComponent(`${a.name} project idea`)}`} kind="outline">Suggest a Project</Btn>
-        </div>
+        <Intro center label="Projects" title={`${a.name} projects`} description={projects.length ? 'Recent work in this avenue.' : 'Projects for this avenue are being planned for the new Rotaract year.'} />
         {projects.length ? <div className="card-grid">{projects.map((e, i) => <EventCard e={e} i={i} key={e.slug} />)}</div>
-          : <p className="empty-note">No projects logged yet. Have an idea? Tell us and we will help you run it.</p>}
+          : <p className="empty-note">No projects logged yet. Have an idea? <Link href="/contact">Tell us</Link> and we will help you run it.</p>}
       </Section>
       {leads.length > 0 && (
-        <Section tone="cream">
+        <Section>
           <Intro center label="Who leads it" title="Avenue leads" />
           <div className="member-grid">{leads.map((m, i) => <MemberCard m={m} i={i} key={m.name} />)}</div>
         </Section>
@@ -408,13 +561,36 @@ export function AvenueDetail({ slug }) {
   );
 }
 
-/* ======================= Events ======================= */
+/* ======================= Events (Kindora "Programs") ======================= */
 
 export function Events() {
+  const featured = eventsNewestFirst[0];
   return (
     <>
-      <PageHero eyebrow="Events & projects" title="What the club has done, and what is next" desc="Dates, times and venues are confirmed by the secretary. Most community projects are open to volunteers." />
-      <Section><EventsExplorer events={eventsNewestFirst} /></Section>
+      <PageHero layout="split" eyebrow="Our projects" title="Explore our life changing projects" desc="Dates, times and venues are confirmed by the secretary. Most community projects are open to volunteers.">
+        <Btn href="/contact?about=Upcoming%20events" icon={false}>Get Notified</Btn>
+      </PageHero>
+      <Section>
+        <div className="featured-card">
+          <div className="featured-photo"><Photo src={eventImage(featured)} alt={featured.title} label={featured.title} priority sizes="(max-width: 900px) 100vw, 40vw" /></div>
+          <div className="featured-copy">
+            <EventStatus event={featured} />
+            <h2>{featured.title}</h2>
+            <p>{featured.summary}</p>
+            <Btn href={`/events/${featured.slug}`} icon={false}>View Event</Btn>
+            <dl className="event-card-facts"><div><dt>Date</dt><dd>{formatDate(featured.date)}</dd></div><div><dt>Venue</dt><dd>{featured.venue}</dd></div></dl>
+          </div>
+        </div>
+      </Section>
+      <Section>
+        <Intro center label="All projects" title="Each project is a chance to serve" description="Filter by status or avenue." />
+        <EventsExplorer events={eventsNewestFirst} />
+      </Section>
+      <Section>
+        <Intro center label="Our network" title="Part of something bigger" />
+        <div className="green-counter"><strong>2,700+</strong><p>Rotaractors in District 3131 work on projects like these across Pune and Raigad.</p></div>
+      </Section>
+      <FaqBox items={faqGroups[2].items} />
       <CommunityCTA />
     </>
   );
@@ -435,51 +611,139 @@ export function EventDetail({ slug }) {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <PageHero eyebrow={e.avenue} title={e.title} desc={e.summary} />
-      <Section>
-        <div className="detail-grid">
-          <article className="detail-article prose">
-            <div className="detail-photo"><Photo src={eventImage(e)} alt={e.title} label={e.title} priority sizes="(max-width: 900px) 100vw, 60vw" /></div>
-            {e.outcomes?.length > 0 && (
-              <dl className="outcome-grid">{e.outcomes.map((o) => <div key={o.label}><dd>{o.value}</dd><dt>{o.label}</dt></div>)}</dl>
-            )}
-            <h2>About this project</h2>
+      <section className="detail-hero">
+        <div className="container">
+          <Eyebrow>{e.avenue}</Eyebrow>
+          <h1>{e.title}</h1>
+          <ul className="fact-chips">
+            <li><EventStatus event={e} /></li>
+            <li><CalendarDays size={16} aria-hidden="true" /> {formatDate(e.date)}</li>
+            <li><Clock size={16} aria-hidden="true" /> {e.time}</li>
+            <li><MapPin size={16} aria-hidden="true" /> {e.venue}</li>
+            {e.partner && <li><Handshake size={16} aria-hidden="true" /> {e.partner}</li>}
+          </ul>
+          <div className="detail-photo"><Photo src={eventImage(e)} alt={e.title} label={e.title} priority sizes="(max-width: 1240px) 100vw, 1240px" /></div>
+        </div>
+      </section>
+      <section className="section detail-body">
+        <div className="container">
+          <article className="prose narrow">
+            {e.outcomes?.length > 0 && <dl className="outcome-grid">{e.outcomes.map((o) => <div key={o.label}><dd>{o.value}</dd><dt>{o.label}</dt></div>)}</dl>}
             <p>{e.report ?? e.summary}</p>
-            {e.partner && <p className="callout">Organised in partnership with <strong>{e.partner}</strong>.</p>}
+            <h2>Project details</h2>
+            <p>This {avenue ? avenue.name.toLowerCase() : 'club'} project took place at {e.venue} on {formatDate(e.date)}, {e.time}.</p>
+            {e.partner && <blockquote className="quote-box">“Organised in partnership with {e.partner}.”</blockquote>}
             {e.gallery?.length > 0 && <GalleryGrid photos={e.gallery.map((src) => [src, e.title])} />}
-          </article>
-          <aside className="detail-sidebar">
-            <div className="side-card">
-              <EventStatus event={e} />
-              <ul className="event-facts">
-                <li><CalendarDays size={18} aria-hidden="true" /> {formatDate(e.date)}</li>
-                <li><Clock size={18} aria-hidden="true" /> {e.time}</li>
-                <li><MapPin size={18} aria-hidden="true" /> {e.venue}</li>
-                {e.partner && <li><Handshake size={18} aria-hidden="true" /> {e.partner}</li>}
-              </ul>
-              <Btn href={`/contact?about=${encodeURIComponent(e.title)}`} className="btn-block">Volunteer or Enquire</Btn>
+            <div className="detail-actions">
+              <Btn href={`/contact?about=${encodeURIComponent(e.title)}`} icon={false}>Volunteer or Enquire</Btn>
               <EventActions event={e} />
               {avenue && <Link href={`/avenues/${avenue.slug}`} className="text-link">More {avenue.name} projects <ArrowRight size={16} aria-hidden="true" /></Link>}
             </div>
-            <div className="side-card side-card-dark">
-              <h2>Fund a project like this</h2>
-              <p>Sponsors receive the project report, photographs and a mention with the district.</p>
-              <Btn href="/sponsorship" kind="light" className="btn-block">Become a Sponsor</Btn>
-            </div>
-            <div className="side-card">
-              <h2>More events</h2>
-              <ul className="mini-events">
-                {others.map((o, i) => (
-                  <li key={o.slug}><Link href={`/events/${o.slug}`}>
-                    <Photo src={eventImage(o)} alt="" label={initials(o.title)} tone={i + 1} sizes="90px" />
-                    <span>{o.title}<small>{formatDate(o.date)}</small></span>
-                  </Link></li>
-                ))}
-              </ul>
-            </div>
-          </aside>
+          </article>
+        </div>
+      </section>
+      <Section>
+        <div className="yellow-band">
+          <h2>Support projects like this</h2>
+          <p>Sponsors receive the project report, photographs and a mention with the district.</p>
+          <Btn href="/sponsorship" icon={false}>Become a Sponsor</Btn>
         </div>
       </Section>
+      <Section>
+        <Intro center title="More events" />
+        <div className="card-grid">{others.map((o, i) => <EventCard e={o} i={i} key={o.slug} />)}</div>
+      </Section>
+      <FaqBox items={faqGroups[2].items} />
+      <CommunityCTA />
+    </>
+  );
+}
+
+/* ======================= Blog ======================= */
+
+export function Blog({ page = 1 }) {
+  const pages = Math.ceil(postsNewestFirst.length / PAGE_SIZE);
+  const list = postsNewestFirst.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  return (
+    <>
+      <PageHero eyebrow="Blog & Updates" title="Blog & updates" desc="Stories from the club: our projects, our avenues and how to get involved." />
+      <Section>
+        <div className="post-grid">{list.map((p) => <PostCard p={p} key={p.slug} headingLevel={2} />)}</div>
+        {pages > 1 && (
+          <nav className="pagination" aria-label="Blog pages">
+            {Array.from({ length: pages }, (_, n) => (
+              <Link key={n} href={n === 0 ? '/blog' : `/blog/page/${n + 1}`} className={page === n + 1 ? 'is-active' : ''} aria-current={page === n + 1 ? 'page' : undefined}>{n + 1}</Link>
+            ))}
+          </nav>
+        )}
+      </Section>
+      <CommunityCTA />
+    </>
+  );
+}
+
+export function BlogPost({ slug }) {
+  const p = postsNewestFirst.find((x) => x.slug === slug);
+  const others = postsNewestFirst.filter((x) => x.slug !== slug).slice(0, 3);
+  const jsonLd = { '@context': 'https://schema.org', '@type': 'BlogPosting', headline: p.title, datePublished: p.date, image: `${SITE_URL}${p.image}`, author: { '@type': 'Organization', name: club.name }, publisher: { '@type': 'Organization', name: club.name } };
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <section className="detail-hero">
+        <div className="container">
+          <Eyebrow>{p.tags.join(', ')}</Eyebrow>
+          <h1>{p.title}</h1>
+          <p className="post-meta">By {club.name} · <time dateTime={p.date}>{formatPostDate(p.date)}</time></p>
+          <div className="detail-photo"><Photo src={p.image} alt="" label={p.title} priority sizes="(max-width: 1240px) 100vw, 1240px" /></div>
+        </div>
+      </section>
+      <section className="section detail-body">
+        <div className="container"><article className="prose narrow"><PostBody blocks={p.body} /></article></div>
+      </section>
+      <Section>
+        <Intro center title="Read other articles" />
+        <div className="post-grid is-three">{others.map((o) => <PostCard p={o} key={o.slug} />)}</div>
+      </Section>
+      <CommunityCTA />
+    </>
+  );
+}
+
+/* ======================= Reviews ======================= */
+
+export function Reviews() {
+  return (
+    <>
+      <PageHero eyebrow="Voices of support" title="Hear from those who believe in our mission" desc="Members, partners and beneficiaries on working with Rotaract Club of Khopoli." />
+      {testimonials.length ? <Testimonials intro={false} /> : (
+        <Section>
+          <div className="form-layout">
+            <div className="prose">
+              <Eyebrow>Share your story</Eyebrow>
+              <h2>We are collecting stories from members and partners</h2>
+              <p>Only real, consented quotes appear on this page. If you have worked with the club as a member, partner, sponsor or beneficiary, we would love to hear from you.</p>
+              <ul className="check-list">
+                <li><Check size={18} aria-hidden="true" /> We only publish with your permission</li>
+                <li><Check size={18} aria-hidden="true" /> We show your name and role exactly as you choose</li>
+                <li><Check size={18} aria-hidden="true" /> You can ask us to remove it at any time</li>
+              </ul>
+            </div>
+            <MailForm
+              title="Share your experience"
+              subject="Testimonial for the website"
+              submitLabel="Send My Story"
+              fields={[
+                { name: 'name', label: 'Your name (as it should appear)', required: true, autoComplete: 'name' },
+                { name: 'role', label: 'Role or organisation', required: true, placeholder: 'e.g. Member since 2024, or Partner school' },
+                { name: 'email', label: 'Email', type: 'email', required: true, autoComplete: 'email' },
+                { name: 'story', label: 'Your experience with the club', rows: 5, required: true, minLength: 20 },
+                { name: 'consent', label: 'May we publish this on the website?', options: ['Yes, you may publish it', 'No, this is just feedback'], required: true },
+              ]}
+            />
+          </div>
+        </Section>
+      )}
+      <CommunityCTA />
     </>
   );
 }
@@ -491,33 +755,9 @@ export function Gallery() {
     <>
       <PageHero eyebrow="Gallery" title="Moments from the field" desc="Photographs from the club's projects, fellowships and partnerships." />
       <Section>
-        <GalleryGrid photos={GALLERY} />
-        <p className="small-note">Some photographs are representative images while the club&apos;s own photo archive is being added.</p>
+        <GalleryGrid photos={GALLERY} featured />
+        <p className="small-note center">Some photographs are representative images while the club&apos;s own photo archive is being added.</p>
       </Section>
-      <CommunityCTA />
-    </>
-  );
-}
-
-/* ======================= Members ======================= */
-
-export function Members() {
-  return (
-    <>
-      <PageHero eyebrow={`Board ${rotaractYear}`} title="The people behind every project" desc={`${uniqueMemberCount} Rotaractors hold the club's portfolios for ${rotaractYear}. Where one person holds several, their roles are listed together.`} />
-      <Section>
-        <Intro center label="Core team" title="Club office bearers" />
-        <div className="member-grid">{coreMembers.map((m, i) => <MemberCard m={m} i={i} key={m.name} />)}</div>
-      </Section>
-      <Section tone="cream">
-        <Intro center label="Board of directors" title="Avenue directors and officers" />
-        <div className="member-grid">{boardOfDirectors.map((m, i) => <MemberCard m={m} i={i + 1} key={m.name} />)}</div>
-      </Section>
-      <Section>
-        <Intro center label="Chairpersons" title="Chairs and additional portfolios" />
-        <div className="member-grid">{chairpersons.map((m, i) => <MemberCard m={m} i={i + 2} key={m.name + m.roles[0]} />)}</div>
-      </Section>
-      <Testimonials tone="cream" />
       <CommunityCTA />
     </>
   );
@@ -529,14 +769,12 @@ export function District() {
   return (
     <>
       <PageHero eyebrow="Our district" title={district.name} desc={district.intro} logo={FAMILY_LOGOS[0]}>
-        <div className="btn-row"><Btn href={district.website} kind="dark">Visit the District Website</Btn></div>
+        <Btn href={district.website} icon={false}>Visit the District Website</Btn>
       </PageHero>
+      <Section><dl className="impact-band">{district.stats.map((s) => <div key={s.label}><dd>{s.value}</dd><dt>{s.label}</dt></div>)}</dl></Section>
       <Section>
-        <dl className="stat-grid">{district.stats.map((s) => <div key={s.label}><dd>{s.value}</dd><dt>{s.label}</dt></div>)}</dl>
-      </Section>
-      <Section tone="cream">
         <Intro center label="About the district" title="Where Khopoli fits in" description="Our club takes part in district projects, trainings and fellowships alongside clubs across Pune and Raigad." />
-        <div className="info-grid">{district.facts.map((f, i) => <div className={`info-card tint-${TINTS[i]}`} key={f.label}><h3>{f.label}</h3><p>{f.value}</p></div>)}</div>
+        <div className="value-grid">{district.facts.map((f, i) => <div className="value" key={f.label}><span className={`way-icon c-${i % 3}`}><Globe2 size={20} aria-hidden="true" /></span><h3>{f.label}</h3><p>{f.value}</p></div>)}</div>
       </Section>
       <CommunityCTA />
     </>
@@ -547,15 +785,13 @@ export function RotaryInfo() {
   return (
     <>
       <PageHero eyebrow="Rotary International" title="People of action, since 1905" desc={rotary.intro} logo={FAMILY_LOGOS[1]}>
-        <div className="btn-row"><Btn href={rotary.website} kind="dark">Visit Rotary.org</Btn></div>
+        <Btn href={rotary.website} icon={false}>Visit Rotary.org</Btn>
       </PageHero>
+      <Section><dl className="impact-band is-three">{rotary.stats.map((s) => <div key={s.label}><dd>{s.value}</dd><dt>{s.label}</dt></div>)}</dl></Section>
       <Section>
-        <dl className="stat-grid stat-grid-3">{rotary.stats.map((s) => <div key={s.label}><dd>{s.value}</dd><dt>{s.label}</dt></div>)}</dl>
-      </Section>
-      <Section tone="cream">
-        <div className="info-grid">
+        <div className="value-grid">
           {[['Vision', rotary.vision], ['Who Rotary is', rotary.founded], ['Mission', rotary.mission]].map(([t, d], i) => (
-            <div className={`info-card tint-${['sky', 'rose', 'gold'][i]}`} key={t}><h3>{t}</h3><p>{d}</p></div>
+            <div className="value" key={t}><span className={`way-icon c-${i % 3}`}><Sparkles size={20} aria-hidden="true" /></span><h3>{t}</h3><p>{d}</p></div>
           ))}
         </div>
       </Section>
@@ -574,7 +810,7 @@ export function RotaryInfo() {
 export function Faqs() {
   return (
     <>
-      <PageHero eyebrow="FAQs" title="Frequently asked questions" desc="About the club, membership, events and how Rotaract connects to Rotary." />
+      <PageHero eyebrow="Questions answered" title="Frequently asked questions" desc="About the club, membership, events and how Rotaract connects to Rotary." />
       <Section><div className="faq-page"><FaqSearch groups={faqGroups} /></div></Section>
       <CommunityCTA />
     </>
@@ -586,14 +822,14 @@ export function Faqs() {
 export function Join() {
   return (
     <>
-      <PageHero eyebrow="Join the club" title="Join a club that finishes what it starts" desc="Membership is open to young adults living, studying or working in and around Khopoli. There is no campus requirement." image="/images/gallery/4.jpg" />
+      <PageHero layout="split" eyebrow="Join the club" title="Join a club that finishes what it starts" desc="Membership is open to young adults living, studying or working in and around Khopoli. There is no campus requirement." wideImage="/images/gallery/4.jpg" />
       <Section>
         <Intro center label="What we expect" title="Three commitments, nothing hidden" />
-        <ol className="info-grid numbered">
-          {joinCommitments.map((c, i) => <li className={`info-card tint-${TINTS[i]}`} key={c.title}><span className="info-num" aria-hidden="true">0{i + 1}</span><h3>{c.title}</h3><p>{c.body}</p></li>)}
+        <ol className="value-grid numbered">
+          {joinCommitments.map((c, i) => <li className="value" key={c.title}><span className={`way-icon c-${i % 3}`} aria-hidden="true">{i + 1}</span><h3>{c.title}</h3><p>{c.body}</p></li>)}
         </ol>
       </Section>
-      <Section tone="cream">
+      <Section>
         <div className="form-layout">
           <div className="prose">
             <Eyebrow>How it works</Eyebrow>
@@ -605,15 +841,15 @@ export function Join() {
               <li><strong>Induction.</strong> Pick your avenue and join a project team.</li>
             </ol>
             <p>Plan for four to six hours a month. A nominal annual subscription covers district and Rotary International dues; the current amount is shared during your conversation with the secretary.</p>
-            <p><Link href="/faqs" className="text-link">Read the membership FAQs <ArrowRight size={16} aria-hidden="true" /></Link></p>
           </div>
           <MailForm
-            title="Tell us about yourself"
+            title="Membership application"
+            intro="Tell us a little about yourself."
             subject="Membership application"
             submitLabel="Submit Application"
             fields={[
-              { name: 'name', label: 'Full name', required: true, placeholder: 'Your full name', autoComplete: 'name' },
-              { name: 'email', label: 'Email', type: 'email', required: true, placeholder: 'you@example.com', autoComplete: 'email' },
+              { name: 'name', label: 'Your full name', required: true, placeholder: 'Full name', autoComplete: 'name' },
+              { name: 'email', label: 'Your email', type: 'email', required: true, placeholder: 'you@example.com', autoComplete: 'email' },
               { name: 'phone', label: 'Phone', type: 'tel', required: true, placeholder: '10-digit mobile number', pattern: '[0-9]{10}', title: 'Enter a 10-digit phone number', autoComplete: 'tel-national' },
               { name: 'occupation', label: 'Occupation or college', placeholder: 'Student, engineer, business…' },
               { name: 'avenue', label: 'Preferred avenue', options: avenues.map((a) => a.name), required: true },
@@ -622,6 +858,7 @@ export function Join() {
           />
         </div>
       </Section>
+      <FaqBox items={faqGroups[1].items} />
     </>
   );
 }
@@ -632,7 +869,7 @@ export function BodApplication() {
   return (
     <>
       <PageHero eyebrow="Board application" title="Stand for the board" desc="Members who have completed one full Rotaract year with good attendance can apply for a board position ahead of the election cycle." />
-      <Section tone="cream">
+      <Section>
         <div className="form-layout">
           <div className="prose">
             <Eyebrow>Before you apply</Eyebrow>
@@ -665,56 +902,59 @@ export function BodApplication() {
   );
 }
 
-/* ======================= Sponsorship ======================= */
+/* ======================= Sponsorship (Kindora "Donation") ======================= */
 
 export function Sponsorship() {
   return (
     <>
-      <PageHero eyebrow="Sponsorship" title="Fund service you can actually audit" desc="Sponsorship pays for materials, transport and venues. Every rupee is accounted for in the project report, and we send it to you whether or not you ask." image="/images/support.jpg" />
+      <section className="donate-hero">
+        <div className="container donate-grid">
+          <div>
+            <Eyebrow>Sponsorship</Eyebrow>
+            <h1>Support us and make a difference in Khopoli</h1>
+            <p className="lead">Sponsorship pays for materials, transport and venues. Every rupee is accounted for in the project report, and we send it to you whether or not you ask.</p>
+            <ul className="check-list">
+              <li><Check size={18} aria-hidden="true" /> A written report for every project you fund</li>
+              <li><Check size={18} aria-hidden="true" /> Your logo on project creatives and banners</li>
+              <li><Check size={18} aria-hidden="true" /> In-kind support acknowledged exactly like funding</li>
+            </ul>
+          </div>
+          <div id="enquiry">
+            <MailForm
+              title="Sponsorship form"
+              intro="Fill in the form and a board member will get back to you. Contributions big or small help the club serve Khopoli."
+              subject="Sponsorship enquiry"
+              submitLabel="Send Enquiry"
+              fields={[
+                { name: 'name', label: 'Your full name', required: true, placeholder: 'Full name', autoComplete: 'name' },
+                { name: 'organisation', label: 'Organisation', required: true, placeholder: 'Business or organisation', autoComplete: 'organization' },
+                { name: 'email', label: 'Your email', type: 'email', required: true, placeholder: 'you@company.com', autoComplete: 'email' },
+                { name: 'phone', label: 'Phone', type: 'tel', required: true, pattern: '[0-9]{10}', title: 'Enter a 10-digit phone number', autoComplete: 'tel-national' },
+                { name: 'tier', label: 'Choose how you would like to help', options: [...sponsorTiers.map((t) => t.name), 'In-kind support', 'Not sure yet'] },
+                { name: 'message', label: 'Anything we should know?', rows: 4, placeholder: 'A project, budget or idea you have in mind.' },
+              ]}
+            />
+          </div>
+        </div>
+      </section>
       <Section>
-        <Intro center label="Tiers" title="Three ways to partner" description="Amounts are set per project rather than fixed, because a plantation drive and a skills workshop cost very different things." />
-        <div className="tier-grid">
+        <Intro center label="Partnership packages" title="You can contribute through our partnership packages" description="Amounts are set per project rather than fixed, because a plantation drive and a skills workshop cost very different things." />
+        <div className="package-grid">
           {sponsorTiers.map((t, i) => (
-            <div className={`tier-card ${i === 1 ? 'is-featured' : ''}`} key={t.name}>
-              {i === 1 && <span className="chip chip-float">Most popular</span>}
-              <small>{t.scope}</small>
+            <div className={`package c-${i}`} key={t.name}>
               <h3>{t.name}</h3>
-              <ul>{t.perks.map((p) => <li key={p}><Check size={17} aria-hidden="true" /> {p}</li>)}</ul>
-              <Btn href="#enquiry" kind={i === 1 ? 'primary' : 'outline'} className="btn-block">Enquire</Btn>
+              <p>{t.scope}</p>
+              <strong>Per project</strong>
+              <ul>{t.perks.map((pk) => <li key={pk}><Check size={16} aria-hidden="true" /> {pk}</li>)}</ul>
+              <a href="#enquiry" className="card-btn is-solid">Enquire Now</a>
             </div>
           ))}
         </div>
       </Section>
-      <Section tone="cream">
-        <Intro center label="In kind" title="Not everything has to be money" />
-        <div className="info-grid">
-          <div className="info-card tint-rose"><h3>Materials & venues</h3><p>Venues, printing, transport, refreshments, saplings, stationery and equipment are all welcome, and acknowledged exactly like funding.</p></div>
-          <div className="info-card tint-sky"><h3>Your expertise</h3><p>Professionals who can run a session in finance, design, trades, medicine or law are some of our most valuable partners.</p></div>
-          <div className="info-card tint-gold"><h3>Start small</h3><p>Local businesses often start with one project and stay for the year. That is fine with us.</p></div>
-        </div>
-      </Section>
-      <Section id="enquiry">
-        <div className="form-layout">
-          <div>
-            <Intro label="Enquiry" title="Tell us how you would like to help" description="Prefer to talk first? Write to us and a board member will call you back." />
-            <ContactMethods />
-          </div>
-          <MailForm
-            title="Partnership enquiry"
-            subject="Sponsorship enquiry"
-            submitLabel="Send Enquiry"
-            fields={[
-              { name: 'name', label: 'Full name', required: true, autoComplete: 'name' },
-              { name: 'organisation', label: 'Organisation', required: true, placeholder: 'Business or organisation', autoComplete: 'organization' },
-              { name: 'email', label: 'Email', type: 'email', required: true, autoComplete: 'email' },
-              { name: 'phone', label: 'Phone', type: 'tel', required: true, pattern: '[0-9]{10}', title: 'Enter a 10-digit phone number', autoComplete: 'tel-national' },
-              { name: 'tier', label: 'Interested in', options: [...sponsorTiers.map((t) => t.name), 'In-kind support', 'Not sure yet'] },
-              { name: 'budget', label: 'Indicative budget', placeholder: 'e.g. ₹10,000' },
-              { name: 'message', label: 'How would you like to collaborate?', rows: 5, required: true, minLength: 15, placeholder: 'Tell us about the project, support or idea you have in mind.' },
-            ]}
-          />
-        </div>
-      </Section>
+      <WaysGrid />
+      <ResultsBlocks />
+      <VolunteerBlock />
+      <NumbersBlock />
     </>
   );
 }
@@ -724,55 +964,93 @@ export function Sponsorship() {
 export function Contact() {
   return (
     <>
-      <PageHero eyebrow="Contact" title="Talk to the club directly" desc="No ticketing system and no form queue you never hear back from. Messages go straight to the board." />
+      <PageHero eyebrow="Contact us" title="Get in touch with Rotaract Khopoli" desc="No ticketing system and no form queue you never hear back from. Messages go straight to the board." />
+      <Section className="contact-cards-section">
+        <div className="contact-cards">
+          <div className="contact-card c-0">
+            <h2>General inquiries</h2>
+            <p>Questions about the club, membership, meetings or upcoming projects.</p>
+            <a href={`mailto:${clubEmail}`} className="card-btn is-solid">Contact Us</a>
+          </div>
+          <div className="contact-card c-2">
+            <h2>Partnership opportunities</h2>
+            <p>If you represent a school, business or organisation interested in partnering with the club.</p>
+            <Link href="/sponsorship" className="card-btn is-solid">Contact Us</Link>
+          </div>
+        </div>
+      </Section>
       <Section>
         <div className="form-layout">
           <div>
-            <Intro label="Get in touch" title="Reach the people who run it" />
+            <Intro label="Get in touch" title="Why reach out to Rotaract Khopoli?" description="Whether you want to volunteer, join, partner or simply ask a question, a board member will reply personally." />
+            <div className="why-grid">
+              <div><span className="way-icon c-1"><MessageCircle size={20} aria-hidden="true" /></span><h3>Personal replies</h3><p>Messages go to the board, not a queue.</p></div>
+              <div><span className="way-icon c-2"><MapPin size={20} aria-hidden="true" /></span><h3>Meet us in person</h3><p>We meet at {contact.meetingPlace.split(',')[0]}.</p></div>
+            </div>
             <ContactMethods showPhone />
-            <dl className="officer-list">
-              {officers.map((o) => <div key={o.role}><dt>{o.role}</dt><dd>{o.name}</dd></div>)}
-            </dl>
             <SocialLinks className="social-dark" />
           </div>
           <MailForm
-            title="Send a message"
+            title="Let's chat"
+            intro="Want to learn more about the club? We are ready to help."
             subject="Website enquiry"
             prefill="message"
             fields={[
-              { name: 'name', label: 'Your name', required: true, placeholder: 'Full name', autoComplete: 'name' },
-              { name: 'email', label: 'Email', type: 'email', required: true, placeholder: 'you@example.com', autoComplete: 'email' },
-              { name: 'message', label: 'Message', rows: 6, required: true, minLength: 10, placeholder: 'What would you like to discuss?' },
+              { name: 'name', label: 'Your full name', required: true, placeholder: 'Full name', autoComplete: 'name' },
+              { name: 'email', label: 'Your email', type: 'email', required: true, placeholder: 'you@example.com', autoComplete: 'email' },
+              { name: 'message', label: 'Your message', rows: 6, required: true, minLength: 10, placeholder: 'Write your message' },
             ]}
           />
+        </div>
+      </Section>
+      <FaqBox />
+    </>
+  );
+}
+
+/* ======================= Legal ======================= */
+
+function LegalPage({ eyebrow, title, desc, sections }) {
+  return (
+    <>
+      <PageHero eyebrow={eyebrow} title={title} desc={desc} />
+      <Section>
+        <div className="prose narrow">
+          {sections.map(([h, body]) => <div key={h}><h2>{h}</h2>{body}</div>)}
+          <p className="small-note">Last updated November 2026.</p>
         </div>
       </Section>
     </>
   );
 }
 
-/* ======================= Privacy ======================= */
-
 export function Privacy() {
   return (
-    <>
-      <PageHero eyebrow="Privacy policy" title="How we handle your details" desc="Plain-language notes on what this website collects and what the club does with it." />
-      <Section>
-        <div className="prose narrow">
-          <h2>What we collect</h2>
-          <p>We only collect what you type into a form on this site: for example your name, email, phone number and message when you apply for membership, enquire about sponsorship, apply for the board or contact us.</p>
-          <h2>How we use it</h2>
-          <p>Your details are used only to reply to you and to process your application or enquiry. We do not sell or share them with anyone outside the club, except where a project partner needs them to arrange something you asked for, and only with your agreement.</p>
-          <h2>How it is sent and stored</h2>
-          <p>Depending on how the site is set up, a form either opens your own email app with the message ready to send, or delivers it through a form service to the club inbox. Messages are kept in the club inbox for as long as they are needed, and applications are kept for the current Rotaract year.</p>
-          <h2>Visitor statistics</h2>
-          <p>The site may count page views with privacy-friendly analytics that do not use cookies or build personal profiles.</p>
-          <h2>Your choices</h2>
-          <p>You can ask us to show, correct or delete the details you sent at any time by writing to <a href={`mailto:${clubEmail}`}>{clubEmail}</a>.</p>
-          <p className="small-note">Last updated November 2026.</p>
-        </div>
-      </Section>
-    </>
+    <LegalPage
+      eyebrow="Privacy policy" title="How we handle your details" desc="Plain-language notes on what this website collects and what the club does with it."
+      sections={[
+        ['What we collect', <p key="a">We only collect what you type into a form on this site: for example your name, email, phone number and message when you apply for membership, enquire about sponsorship, apply for the board, share a testimonial or contact us.</p>],
+        ['How we use it', <p key="b">Your details are used only to reply to you and to process your application or enquiry. We do not sell or share them with anyone outside the club, except where a project partner needs them to arrange something you asked for, and only with your agreement.</p>],
+        ['How it is sent and stored', <p key="c">Depending on how the site is set up, a form either opens your own email app with the message ready to send, or delivers it through a form service to the club inbox. Messages are kept for as long as they are needed, and applications for the current Rotaract year.</p>],
+        ['Visitor statistics', <p key="d">The site may count page views with privacy-friendly analytics that do not use cookies or build personal profiles.</p>],
+        ['Your choices', <p key="e">You can ask us to show, correct or delete the details you sent at any time by writing to <a href={`mailto:${clubEmail}`}>{clubEmail}</a>.</p>],
+      ]}
+    />
+  );
+}
+
+export function Terms() {
+  return (
+    <LegalPage
+      eyebrow="Terms & conditions" title="Using this website" desc="The simple terms for using the Rotaract Club of Khopoli website."
+      sections={[
+        ['About this site', <p key="a">This website is run by {club.name} (Club ID {club.clubId}), a Rotaract club under Rotary International in {club.district}. Views expressed here are the club&apos;s own.</p>],
+        ['Information on the site', <p key="b">We keep event dates, venues and member details as accurate as we can, but they may change. The secretary confirms final details for every project.</p>],
+        ['Logos and photos', <p key="c">The Rotaract, Rotary and Interact logos are trademarks of Rotary International and are used under its brand guidelines. Some photographs are representative stock images; please do not reuse photos from this site without asking.</p>],
+        ['Forms and sponsorship', <p key="d">Sending a form does not create a contract. Sponsorship and partnership terms are agreed in writing with the board for each project.</p>],
+        ['Contact', <p key="e">Questions about these terms? Write to <a href={`mailto:${clubEmail}`}>{clubEmail}</a>.</p>],
+      ]}
+    />
   );
 }
 
@@ -783,8 +1061,9 @@ export function NotFound() {
         <p className="error-code" aria-hidden="true">404</p>
         <h1>This page took a different avenue</h1>
         <p>The page you are looking for does not exist or has moved.</p>
-        <div className="btn-row center-row"><Btn href="/">Back to Home</Btn><Btn href="/events" kind="outline">See Events</Btn></div>
+        <div className="btn-row center-row"><Btn href="/" icon={false}>Back to Home</Btn><Btn href="/events" kind="outline" icon={false}>See Events</Btn></div>
       </div>
     </section>
   );
 }
+

@@ -64,28 +64,30 @@ export const FAMILY_LOGOS = [
 ];
 
 export const NAV = [
-  { href: '/', label: 'Home' },
-  { href: '/about', label: 'About' },
   { href: '/events', label: 'Events' },
-  { href: '/members', label: 'Members' },
-  { href: '/contact', label: 'Contact' },
+  { href: '/blog', label: 'Blog' },
 ];
 
 export const ALL_PAGES = [
   ['Home', '/'],
-  ['About the club', '/about'],
+  ['About Us', '/about'],
+  ['Our Team', '/teams'],
   ['Avenues', '/avenues'],
   ['Events', '/events'],
+  ['Event Details', '/events/tree-plantation'],
+  ['Blog', '/blog'],
+  ['Blog Details', '/blog/our-story-since-2020'],
   ['Gallery', '/gallery'],
-  ['Members', '/members'],
-  ['District 3131', '/district-3131'],
-  ['Rotary information', '/rotary-information'],
-  ['FAQs', '/faqs'],
-  ['Join the club', '/join'],
+  ['Reviews', '/reviews'],
   ['Sponsorship', '/sponsorship'],
-  ['Board application', '/bod-application'],
-  ['Contact', '/contact'],
-  ['Privacy policy', '/privacy-policy'],
+  ['Join the Club', '/join'],
+  ['Board Application', '/bod-application'],
+  ['District 3131', '/district-3131'],
+  ['Rotary Information', '/rotary-information'],
+  ['FAQs', '/faqs'],
+  ['Contact Us', '/contact'],
+  ['Privacy Policy', '/privacy-policy'],
+  ['Terms & Conditions', '/terms-and-conditions'],
 ];
 
 export const avenues = [
@@ -306,3 +308,102 @@ export function membersWithRoles(keywords) {
 export function eventsForAvenue(avenue) {
   return eventsNewestFirst.filter((e) => avenue.eventAvenues.includes(e.avenue));
 }
+
+
+/* ---------------- Kindora-style section content (club facts only) ---------------- */
+
+export const values = [
+  { icon: 'HeartHandshake', title: 'Service above self', body: 'Projects are planned with the people they are meant for, not around a photo opportunity.' },
+  { icon: 'ShieldCheck', title: 'Accountability', body: 'Every project has one owner and a report on what actually happened, including what went wrong.' },
+  { icon: 'Users', title: 'Fellowship', body: 'Students, young professionals and business owners from Khopoli working at the same table.' },
+];
+
+export const volunteerReasons = [
+  { icon: 'HandHeart', title: 'Make a tangible impact', body: 'Turn up for a plantation drive, a gaushala morning or a school visit and see the result the same day.' },
+  { icon: 'GraduationCap', title: 'Gain new skills', body: 'Plan budgets, lead teams and speak in public through real projects and PD sessions.' },
+  { icon: 'Users', title: 'Find your people', body: 'Fellowship with young people across Khopoli, District 3131 and partner clubs in India.' },
+];
+
+export const waysToHelp = [
+  { icon: 'UserPlus', title: 'Join the club', body: 'Become a Rotaractor. Open to anyone 18+ in and around Khopoli.', cta: 'Apply Now', href: '/join' },
+  { icon: 'HandHeart', title: 'Volunteer at a project', body: 'Most community projects are open to volunteers. Come for one drive.', cta: 'Volunteer', href: '/contact?about=Volunteering' },
+  { icon: 'Handshake', title: 'Sponsor a project', body: 'Fund a project or a whole avenue, with a report on every rupee.', cta: 'Sponsor', href: '/sponsorship' },
+  { icon: 'Lightbulb', title: 'Share your expertise', body: 'Professionals can run a skills session for members and beneficiaries.', cta: 'Offer a Session', href: '/contact?about=Running%20a%20session' },
+  { icon: 'Package', title: 'Give in kind', body: 'Venues, printing, transport, saplings or stationery help as much as funds.', cta: 'Support', href: '/sponsorship#enquiry' },
+  { icon: 'Megaphone', title: 'Spread the word', body: 'Share our projects and help more young people in Khopoli find the club.', cta: 'See Events', href: '/events' },
+];
+
+/**
+ * Club blog. Posts are written only from the club's own facts on this site.
+ * Body blocks: { p }, { h2 }, { quote }, { list: [...] }.
+ */
+export const posts = [
+  {
+    slug: 'our-story-since-2020', title: 'Our story: a Rotaract club built during a difficult year', date: '2026-11-18',
+    tags: ['Club', 'History'], image: '/images/gallery/1.jpg',
+    excerpt: 'How Rotaract Club of Khopoli started in November 2020, and the habits that start left behind.',
+    body: [
+      { p: 'Rotaract Club of Khopoli received its charter in November 2020, when public gatherings were restricted and most service work had moved to phone calls and spreadsheets. The first projects were practical: getting essentials to families and helping students who had lost access to classes.' },
+      { h2: 'Habits that stayed' },
+      { p: 'That start left a habit behind. The club plans on paper before it posts anything, gives every project a single owner, and reports what actually happened rather than what was intended.' },
+      { quote: 'Service above self, written in the voice of a small town with big plans.' },
+      { p: 'As a community based club, our members are not tied to one campus. Students, early-career professionals and local business owners sit at the same table, which is why the club can take on projects bigger than its size.' },
+    ],
+  },
+  {
+    slug: 'seven-avenues-of-service', title: 'The seven avenues of service, explained', date: '2026-11-12',
+    tags: ['Avenues'], image: '/images/gallery/3.jpg',
+    excerpt: 'Community, professional, club and international service, plus PR, DEI and public image: what each avenue means for Khopoli.',
+    body: [
+      { p: 'Every Rotaractor in Khopoli picks an avenue, and every project belongs to one. Here is what the seven avenues cover in our club.' },
+      { list: ['Community Service: local drives, school support, health camps and clean-ups.', 'Professional Development: workshops, mock interviews and sessions with working professionals.', 'Club Service: fellowships, inductions and the administration that keeps the club running.', 'International Service: joint projects and exchanges with clubs beyond the district.', 'Public Relations: documenting every project honestly.', 'Diversity, Equity & Inclusion: making sure the club is open to every background.', 'Public Image: consistent branding and storytelling about the club\'s work.'] },
+      { h2: 'Pick one, own one' },
+      { p: 'Members lead or co-lead at least one project in their avenue each year. That is how the club grows leaders, not just volunteers.' },
+    ],
+  },
+  {
+    slug: 'a-year-of-projects', title: 'A year of projects: from Maha Aarti to Canva hacks', date: '2026-10-20',
+    tags: ['Projects'], image: '/images/events/tree-plantation.jpg',
+    excerpt: 'Eight projects across community service, international service, DEI and professional development.',
+    body: [
+      { p: 'This Rotaract year the club ran eight projects. Each one had an owner, a venue and, where relevant, a partner organisation.' },
+      { list: ['Maha Aarti at Shree Ram Mandir with the Rotary Club of Khopoli.', 'Paintscape, a creative evening for members.', 'A joint meeting with Rotaract Club Saanjh, Delhi.', 'Gau Seva at the gaushala on Vavoshi Road.', 'Zoo Day with Rotaract Club of Bicholim.', 'A DEI session at Rotary Bhavan.', 'Tree Plantation with Khopoli Municipal Council.', 'A PD session on presentation design and Canva.'] },
+      { h2: 'What comes next' },
+      { p: 'The calendar for the new Rotaract year is being finalised with the board. Every completed project will be documented on the Events page.' },
+    ],
+  },
+  {
+    slug: 'how-to-join-rotaract-khopoli', title: 'How to join Rotaract Club of Khopoli', date: '2026-10-05',
+    tags: ['Membership'], image: '/images/gallery/4.jpg',
+    excerpt: 'Who can join, what membership involves, and the four steps from application to induction.',
+    body: [
+      { p: 'Membership is open to anyone 18 and above living, studying or working in and around Khopoli. There is no campus requirement and no upper age limit.' },
+      { h2: 'Four steps' },
+      { list: ['Send the application from the Join page.', 'Have a short conversation with the secretary.', 'Attend two meetings to see how the club works.', 'Get inducted, pick your avenue and join a project team.'] },
+      { p: 'Plan for four to six hours a month: two meetings and one project. A nominal annual subscription covers district and Rotary International dues.' },
+    ],
+  },
+  {
+    slug: 'what-is-district-3131', title: 'What is Rotaract District 3131?', date: '2026-09-22',
+    tags: ['District'], image: '/images/events/dei-session.jpg',
+    excerpt: 'The district our club belongs to: 100+ clubs and 2,700+ Rotaractors across Pune and Raigad.',
+    body: [
+      { p: 'Rotaract District 3131 brings together the Rotaract clubs of the Pune and Raigad revenue districts of Maharashtra. It was formed in 2008-09 when the old District 3130 was split in two.' },
+      { p: 'Today it has more than 100 clubs and over 2,700 Rotaractors, from college students to young professionals. Our club takes part in district projects, trainings and fellowships alongside them.' },
+      { quote: 'Bigger projects than any one club could manage alone.' },
+    ],
+  },
+  {
+    slug: 'rotary-rotaract-interact', title: 'Rotary, Rotaract and Interact: one family', date: '2026-09-08',
+    tags: ['Rotary'], image: '/images/events/joint-meeting.jpg',
+    excerpt: 'How the three programmes fit together, and where Rotaract Club of Khopoli sits.',
+    body: [
+      { p: 'Rotary is a worldwide network of service clubs for working professionals, founded in 1905. Rotaract is its programme for young adults, and Interact is its school-age wing.' },
+      { p: 'Every Rotaract club is sponsored by a Rotary club. Clubs govern themselves, plan their own projects and report through their district: for us, District 3131.' },
+      { h2: 'Why it matters' },
+      { p: 'Being part of the Rotary family connects a small club in Khopoli to more than 1.2 million members across 200+ countries and geographical areas.' },
+    ],
+  },
+];
+export const postsNewestFirst = [...posts].sort((a, b) => b.date.localeCompare(a.date));
+export const PAGE_SIZE = 6;

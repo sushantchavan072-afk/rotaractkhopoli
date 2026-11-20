@@ -2,7 +2,11 @@
 
 The website of **Rotaract Club of Khopoli** (Club ID 21869318, Rotaract District 3131), built with Next.js.
 
-- **Design:** the Kindora style: a coral, green and yellow palette, pill labels with a green tick, black pill buttons with a round arrow, and soft rounded cards. The font is **Plus Jakarta Sans**, self-hosted so pages don't wait on Google Fonts.
+- **Design:** modelled on the Kindora charity layout:
+  - pill navigation over the home-page hero photo, and a header that sticks to the top on scroll;
+  - coral, black, yellow and green cards, a green volunteering block, a bordered "ways to help" grid, a coral closing call-to-action and a grey FAQ panel;
+  - a white footer;
+  - the **Plus Jakarta Sans** font, self-hosted.
 - **Content:** everything lives in **`data/club.js`**.
 
 ## Run it
@@ -32,24 +36,29 @@ Visitor statistics (Vercel Analytics, which uses no cookies) switch on automatic
 
 ## Pages
 
-| URL | Page |
+| URL | Page (Kindora equivalent) |
 |---|---|
-| `/` | Home: hero, impact numbers, mission, what we do, ways to get involved, avenues, recent projects, gallery, board |
-| `/about` | Story, structure, charter facts, the Rotary family |
-| `/avenues` and `/avenues/<slug>` | All avenues, plus one page per avenue with its projects and leads |
-| `/events` and `/events/<slug>` | Events with Upcoming/Completed and avenue filters; event pages with add-to-calendar and share |
-| `/gallery` | Photo gallery |
-| `/members` | Core team, board and chairs for the current Rotaract year |
+| `/` | Home: hero, impact cards, results with charts, volunteering, projects, numbers, ways to help, banner, call-to-action, FAQ |
+| `/about` | About Us |
+| `/teams` | Our Team (Teams). `/members` redirects here |
+| `/events` and `/events/<slug>` | Projects with a featured project, filters and pagination, plus detail pages (Programs) |
+| `/avenues` and `/avenues/<slug>` | The seven avenues, each with its projects and leads |
+| `/blog`, `/blog/<slug>` and `/blog/page/<n>` | Blog list, pagination and posts (Blog) |
+| `/reviews` | Reviews. Shows real testimonials, or a form to collect them |
+| `/sponsorship` | Sponsorship form and partnership packages (Donation) |
+| `/contact` | Contact cards, "Why reach out" and the chat form |
+| `/gallery`, `/join`, `/bod-application`, `/faqs` | Gallery, membership, board application and FAQs |
 | `/district-3131`, `/rotary-information` | The district and Rotary International |
-| `/faqs` | Searchable FAQs |
-| `/join`, `/bod-application`, `/sponsorship`, `/contact` | Forms |
-| `/privacy-policy` | How form data is handled |
+| `/privacy-policy`, `/terms-and-conditions` | Legal pages |
+
+Kindora's `/elements` page is a template style guide, so it is not included.
 
 ## Updating content (`data/club.js`)
 
 - **Club email:** set `contact.email` to a shared club inbox. Until then, forms go to the president's address.
 - **Social links:** fill in `contact.social`. Icons appear automatically.
 - **New Rotaract year:** update `rotaractYear`, `officers`, `coreMembers`, `boardOfDirectors` and `chairpersons`.
+- **Blog:** add to `posts` in `data/club.js`. The blog lists 6 per page, and `/blog/page/2` appears automatically once there are more.
 - **Events:** add to `events` with a unique `slug` and its own page appears. Add a photo at `public/images/events/<slug>.jpg`. For completed projects, add `outcomes`, `report` and `gallery` to show results on the event page.
 - **Upcoming/Completed labels** are worked out in the visitor's browser, so they stay correct without a rebuild.
 - **Testimonials:** add only real, consented quotes to `testimonials`. The section stays hidden while the list is empty.
