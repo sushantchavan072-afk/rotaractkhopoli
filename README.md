@@ -5,7 +5,7 @@ The website of **Rotaract Club of Khopoli** (Club ID 21869318, Rotaract District
 - **Design:** modelled on the Kindora charity layout:
   - pill navigation over the home-page hero photo, and a header that sticks to the top on scroll;
   - coral, black, yellow and green cards, a green volunteering block, a bordered "ways to help" grid, a coral closing call-to-action and a grey FAQ panel;
-  - a footer over a dithered mountain range (the Sahyadri ghats Khopoli sits under);
+  - a white footer (with "Made with ♥ by Gargi Gaikwad");
   - the **Segoe UI** font (from the visitor's device; Windows has it built in, other devices use their closest system font) and the **react-icons** (Font Awesome 6) icon set Kindora uses.
 - **Content:** everything lives in **`data/club.js`**.
 
@@ -53,7 +53,7 @@ Visitor statistics (Vercel Analytics, which uses no cookies) switch on automatic
 
 Kindora's `/elements` page is a template style guide, so it is not included.
 
-## Background and footer
+## Background
 
 The site is **light mode only**.
 
@@ -62,20 +62,14 @@ The site is **light mode only**.
 - it draws once and then does nothing until the mouse moves, so an idle page uses no CPU;
 - the animation runs only while a trail is fading, and stops while the tab is hidden;
 - touch drags (scrolling on phones) don't draw trails, and visitors who prefer reduced motion get the still scatter only;
-- the character colour is the `color` of `.site-bg` in `app/globals.css`.
+- the characters use the club colours (`COLORS` at the top of the file): the mouse trail cycles through them and the resting scatter is a random mix.
 
-**Footer:** `components/ui/ridgeline-dither-footer.tsx` (Ridgeline Dither Footer), set up in `Footer()` in `components/ui.jsx`. That function holds the club's logo, tagline, link columns, copyright and "Made with ♥" credit.
-
-- The mountains build in when the footer scrolls into view.
-- The mist drifts while the footer is on screen, at about 15 fps. The pointer clears the mist and shows an altitude readout, and a click sends a gust of wind.
-- Nothing runs while the footer is off screen or the tab is hidden.
-- Social icons appear automatically once `contact.social` is filled in `data/club.js` (Instagram, LinkedIn, YouTube).
 
 ### Why there is TypeScript but no Tailwind or shadcn
 
-These components are TypeScript, so the project now includes TypeScript (`tsconfig.json`, with the `@/*` import alias). It also uses shadcn's convention of keeping shared UI components in `components/ui/`, so tools and copy-paste components find them at the expected path.
+The background component is TypeScript, so the project now includes TypeScript (`tsconfig.json`, with the `@/*` import alias). It also uses shadcn's convention of keeping shared UI components in `components/ui/`, so tools and copy-paste components find them at the expected path.
 
-Tailwind is **not** installed on purpose. The background only used a few utility classes (`block h-full w-full text-foreground`, plus `fixed inset-0` for placement), which are now the `.site-bg` rule in `globals.css`; the footer carries its own scoped styles. Tailwind's base styles ("preflight") would reset this site's hand-written stylesheet. If you later want Tailwind or shadcn components anyway:
+Tailwind is **not** installed on purpose. The background only used a few utility classes (`block h-full w-full text-foreground`, plus `fixed inset-0` for placement), which are now the `.site-bg` rule in `globals.css`. Tailwind's base styles ("preflight") would reset this site's hand-written stylesheet. If you later want Tailwind or shadcn components anyway:
 
 ```bash
 npx shadcn@latest init
@@ -94,9 +88,19 @@ This sets up Tailwind and `components.json`. Then check every page, because the 
 - **Testimonials:** add only real, consented quotes to `testimonials`. The section stays hidden while the list is empty.
 - **Member photos:** save them as `public/images/members/<photo>.png` and set `photo:` on the member. Members without a photo show their initials.
 
+## Leave a note (Reviews page)
+
+The "Share your experience" section on `/reviews` is a note wall (`NoteWall` in `components/ui.jsx`):
+
+- visitors write a short note (up to 140 characters), add their name if they like, pick a colour and pin it to the wall;
+- notes are saved only in that visitor's browser, so the wall is a keepsake, not a public guestbook;
+- each note has a **Send to the club** button, which sends it like the other forms (see below).
+
+A public wall that everyone can see would need a database. Ask if you want one.
+
 ## Forms
 
-The Join, Board application, Sponsorship and Contact forms work in two ways:
+The Join, Board application, Sponsorship, Contact and footer forms work in two ways:
 
 1. **With `NEXT_PUBLIC_FORM_ENDPOINT` set** (recommended): submissions are posted to a form service such as [Formspree](https://formspree.io), which emails them to the club inbox. The visitor sees a confirmation on the page.
 2. **Without it:** the form opens the visitor's email app with the message ready to send to the club email.

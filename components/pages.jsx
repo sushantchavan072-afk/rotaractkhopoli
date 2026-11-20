@@ -19,7 +19,7 @@ import {
   postsNewestFirst, PAGE_SIZE, riPresident, drr, districtGovernor,
 } from '../data/club';
 import {
-  Btn, Eyebrow, Intro, Section, PageHero, Photo, FaqList, FaqSearch, MailForm, SocialLinks,
+  Btn, Eyebrow, Intro, Section, PageHero, Photo, FaqList, FaqSearch, MailForm, NoteWall, SocialLinks,
   EventCard, EventsExplorer, EventStatus, EventActions, FamilyLogos, LogoMarquee,
 } from './ui';
 
@@ -724,34 +724,14 @@ export function Reviews() {
       <PageHero eyebrow="Voices of support" title="Hear from those who believe in our mission" desc="Members, partners and beneficiaries on working with Rotaract Club of Khopoli." />
       {testimonials.length > 0 && <Testimonials intro={false} />}
       <CommunityCTA />
-      {testimonials.length === 0 && (
-        <Section>
-          <div className="form-layout">
-            <div className="prose">
-              <Eyebrow>Share your story</Eyebrow>
-              <h2>We are collecting stories from members and partners</h2>
-              <p>Only real, consented quotes appear on this page. If you have worked with the club as a member, partner, sponsor or beneficiary, we would love to hear from you.</p>
-              <ul className="check-list">
-                <li><Check size={18} aria-hidden="true" /> We only publish with your permission</li>
-                <li><Check size={18} aria-hidden="true" /> We show your name and role exactly as you choose</li>
-                <li><Check size={18} aria-hidden="true" /> You can ask us to remove it at any time</li>
-              </ul>
-            </div>
-            <MailForm
-              title="Share your experience"
-              subject="Testimonial for the website"
-              submitLabel="Send My Story"
-              fields={[
-                { name: 'name', label: 'Your name (as it should appear)', required: true, autoComplete: 'name' },
-                { name: 'role', label: 'Role or organisation', required: true, placeholder: 'e.g. Member since 2024, or Partner school' },
-                { name: 'email', label: 'Email', type: 'email', required: true, autoComplete: 'email' },
-                { name: 'story', label: 'Your experience with the club', rows: 5, required: true, minLength: 20 },
-                { name: 'consent', label: 'May we publish this on the website?', options: ['Yes, you may publish it', 'No, this is just feedback'], required: true },
-              ]}
-            />
-          </div>
-        </Section>
-      )}
+      <Section id="share" className="note-section">
+        <div className="note-head">
+          <Eyebrow>Share your experience</Eyebrow>
+          <h2>Leave a note</h2>
+          <p>Been to one of our events, volunteered with us or partnered on a project? Pin a short note to the wall and send it to the club. We only ever publish a story with your permission.</p>
+        </div>
+        <NoteWall />
+      </Section>
     </>
   );
 }

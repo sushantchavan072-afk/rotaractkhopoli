@@ -2,14 +2,13 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import RidgelineDitherFooter from '@/components/ui/ridgeline-dither-footer';
+import { usePathname } from 'next/navigation';
 // Icons: react-icons (Font Awesome 6), the same icon library Kindora uses.
 import {
   FaArrowRight as ArrowRight, FaArrowRight as ArrowUpRight, FaChevronDown as ChevronDown, FaBars as Menu,
   FaXmark as X, FaPlus as Plus, FaRegEnvelope as Mail, FaMagnifyingGlass as Search,
   FaRegCalendarPlus as CalendarPlus, FaShareNodes as Share2, FaCheck as Check, FaInstagram as Instagram,
-  FaFacebookF as Facebook, FaLinkedinIn as Linkedin, FaYoutube as Youtube,
+  FaFacebookF as Facebook, FaLinkedinIn as Linkedin, FaYoutube as Youtube, FaHeart as Heart,
 } from 'react-icons/fa6';
 import {
   ALL_PAGES, NAV, club, clubEmail, contact, officers, initials, FORM_ENDPOINT, FAMILY_LOGOS,
@@ -230,44 +229,36 @@ export function SocialLinks({ className = '' }) {
   );
 }
 
-const FOOTER_COLUMNS = [
-  { title: 'Quick Links', links: [{ label: 'About Us', href: '/about' }, { label: 'Events', href: '/events' }, { label: 'Avenues', href: '/avenues' }, { label: 'Sponsorship', href: '/sponsorship' }] },
-  { title: 'More', links: [{ label: 'Our Team', href: '/teams' }, { label: 'Blog', href: '/blog' }, { label: 'Gallery', href: '/gallery' }, { label: 'Reviews', href: '/reviews' }] },
-  { title: 'Get in Touch', links: [{ label: 'Join the Club', href: '/join' }, { label: 'Contact Us', href: '/contact' }, { label: 'Email Us', href: `mailto:${clubEmail}` }, { label: 'Privacy Policy', href: '/privacy-policy' }, { label: 'Terms & Conditions', href: '/terms-and-conditions' }] },
-];
-
-/** Site footer: the Ridgeline dither footer (components/ui/ridgeline-dither-footer.tsx) with the club's links. */
 export function Footer() {
-  const router = useRouter();
-  // The footer renders plain <a> links; send same-site ones through the Next router so pages change without a full reload.
-  const onClickCapture = (e) => {
-    const a = e.target.closest?.('a[href^="/"]');
-    if (!a || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || a.target) return;
-    e.preventDefault();
-    router.push(a.getAttribute('href'));
-  };
-  const socials = ['instagram', 'linkedin', 'youtube']
-    .filter((k) => contact.social[k])
-    .map((k) => ({ icon: k, href: contact.social[k], label: `${club.shortName} on ${k === 'linkedin' ? 'LinkedIn' : k === 'youtube' ? 'YouTube' : 'Instagram'}` }));
   return (
-    <div className="site-footer" onClickCapture={onClickCapture}>
-      <RidgelineDitherFooter
-        preset="evergreen"
-        palette={{ muted: '#56655d' }}
-        seed={31}
-        ridges={6}
-        name=""
-        brandHref="/"
-        logo={<Image src="/images/logos/rotaract-khopoli.png" alt={`${club.name}, home`} width={866} height={297} sizes="190px" className="site-footer-logo" />}
-        tagline={`${club.tagline} Club ID ${club.clubId} · ${club.district}.`}
-        columns={FOOTER_COLUMNS}
-        socials={socials}
-        copyright={`© ${new Date().getFullYear()} ${club.name}. All rights reserved.`}
-        credit={{ label: 'the Rotaractors of Khopoli', href: '/teams' }}
-        fontFamily="var(--font)"
-        maxWidth="1240px"
-        height="640px"
-      />
+    <footer className="footer">
+      <div className="container">
+        <div className="footer-top">
+          <div className="footer-brand">
+            <Logo />
+            <p>{club.tagline}</p>
+            <SubscribeForm />
+          </div>
+          <FooterCol title="Quick Links" items={[['Sponsorship', '/sponsorship'], ['About Us', '/about'], ['Events', '/events'], ['Avenues', '/avenues']]} />
+          <FooterCol title="More" items={[['Blog', '/blog'], ['Our Team', '/teams'], ['Reviews', '/reviews'], ['Gallery', '/gallery']]} />
+          <FooterCol title="Legal & Policy Links" items={[['Privacy Policy', '/privacy-policy'], ['Terms & Conditions', '/terms-and-conditions'], ['Contact Us', '/contact']]} />
+        </div>
+        <div className="footer-bottom">
+          <span>© {new Date().getFullYear()} {club.name} · Club ID {club.clubId} · {club.district}</span>
+          <SocialLinks />
+          <a href={`mailto:${clubEmail}`} className="footer-mail"><Mail size={15} aria-hidden="true" /> {clubEmail}</a>
+          <span className="footer-credit">Made with <Heart className="footer-heart" aria-label="love" /> by Gargi Gaikwad</span>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+function FooterCol({ title, items }) {
+  return (
+    <div className="footer-col">
+      <h2 className="footer-heading">{title}</h2>
+      {items.map(([n, h]) => <Link href={h} key={h}>{n}</Link>)}
     </div>
   );
 }
@@ -287,6 +278,31 @@ async function deliver(subject, fields) {
   const body = Object.entries(fields).map(([k, v]) => `${k}: ${v}`).join('\n\n');
   window.location.href = `mailto:${clubEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   return 'mailto';
+}
+
+function SubscribeForm() {
+  const [state, setState] = useState('idle');
+  async function onSubmit(e) {
+    e.preventDefault();
+    const email = String(new FormData(e.currentTarget).get('email') ?? '');
+    try { setState(await deliver('Please add me to club updates', { Email: email, Request: 'Keep me posted about upcoming projects and events.' })); }
+    catch { setState('error'); }
+  }
+  return (
+    <>
+      <form className="subscribe" onSubmit={onSubmit}>
+        <Mail size={18} aria-hidden="true" />
+        <label className="sr-only" htmlFor="footer-email">Email address for project updates</label>
+        <input id="footer-email" name="email" type="email" placeholder="Enter your email" required autoComplete="email" />
+        <button type="submit">Subscribe</button>
+      </form>
+      <p className="form-status" role="status" aria-live="polite">
+        {state === 'sent' && 'Thank you, you are on the list.'}
+        {state === 'mailto' && 'Your email app should open with the request ready to send.'}
+        {state === 'error' && `That did not go through. Please write to ${clubEmail}.`}
+      </p>
+    </>
+  );
 }
 
 /**
@@ -345,6 +361,120 @@ export function MailForm({ title, intro, subject, fields, submitLabel = 'Send Me
           {state === 'error' && `Sorry, that did not go through. Please write to ${clubEmail}.`}
         </p>
       </form>
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------------- Note wall (Share your experience) */
+
+const NOTE_MAX = 140;
+const NOTES_KEY = 'rck-notes';
+const NOTE_COLORS = [
+  { id: 'sun', label: 'Yellow' },
+  { id: 'rose', label: 'Pink' },
+  { id: 'mint', label: 'Green' },
+  { id: 'sky', label: 'Blue' },
+];
+// Tiny store over localStorage, so the wall survives reloads and stays in sync across tabs.
+let notesMemory = '[]'; // used when the browser blocks storage
+const readNotes = () => { try { return localStorage.getItem(NOTES_KEY) ?? '[]'; } catch { return notesMemory; } };
+const subscribeNotes = (cb) => {
+  window.addEventListener('storage', cb);
+  window.addEventListener('rck-notes', cb);
+  return () => { window.removeEventListener('storage', cb); window.removeEventListener('rck-notes', cb); };
+};
+const writeNotes = (list) => {
+  const raw = JSON.stringify(list);
+  notesMemory = raw;
+  try { localStorage.setItem(NOTES_KEY, raw); } catch { /* storage blocked: keep it in memory */ }
+  window.dispatchEvent(new Event('rck-notes'));
+};
+const parseNotes = (raw) => { try { const v = JSON.parse(raw); return Array.isArray(v) ? v : []; } catch { return []; } };
+
+/** "Leave a note" wall: visitors pin short notes in their own browser and can send any note to the club. */
+export function NoteWall() {
+  const raw = useSyncExternalStore(subscribeNotes, readNotes, () => '[]');
+  const notes = useMemo(() => parseNotes(raw), [raw]);
+  const [text, setText] = useState('');
+  const [name, setName] = useState('');
+  const [color, setColor] = useState('sun');
+  const [status, setStatus] = useState({}); // note id -> 'sending' | 'sent' | 'mailto' | 'error'
+  const left = NOTE_MAX - text.length;
+
+  function pin(e) {
+    e.preventDefault();
+    const body = text.trim();
+    if (!body) return;
+    const note = { id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, text: body.slice(0, NOTE_MAX), name: name.trim().slice(0, 40), color, at: new Date().toISOString() };
+    writeNotes([note, ...notes].slice(0, 30));
+    setText('');
+  }
+  async function send(note) {
+    setStatus((s) => ({ ...s, [note.id]: 'sending' }));
+    try {
+      const result = await deliver(`A note for the club${note.name ? ` from ${note.name}` : ''}`, { Name: note.name || 'Not given', Note: note.text });
+      setStatus((s) => ({ ...s, [note.id]: result }));
+      if (result === 'sent') writeNotes(parseNotes(readNotes()).map((n) => (n.id === note.id ? { ...n, sent: true } : n)));
+    } catch { setStatus((s) => ({ ...s, [note.id]: 'error' })); }
+  }
+  const remove = (id) => writeNotes(notes.filter((n) => n.id !== id));
+
+  return (
+    <div className="note-layout">
+      <form className="note-form" onSubmit={pin}>
+        <div className="field">
+          <label htmlFor="note-text">Your note</label>
+          <textarea id="note-text" rows={4} maxLength={NOTE_MAX} required value={text} onChange={(e) => setText(e.target.value)} placeholder="Say hi, share a memory from an event, or tell us what the club meant to you…" />
+        </div>
+        <div className="field">
+          <label htmlFor="note-name">Name <span className="optional">(optional)</span></label>
+          <input id="note-name" maxLength={40} value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Aditi" autoComplete="name" />
+        </div>
+        <div className="note-form-row">
+          <fieldset className="note-swatches">
+            <legend className="sr-only">Note colour</legend>
+            {NOTE_COLORS.map((c) => (
+              <label key={c.id} className={`note-swatch is-${c.id}`} title={c.label}>
+                <input type="radio" name="note-color" value={c.id} checked={color === c.id} onChange={() => setColor(c.id)} />
+                <span className="sr-only">{c.label}</span>
+              </label>
+            ))}
+          </fieldset>
+          <span className={`note-count ${left <= 20 ? 'is-low' : ''}`} aria-live="polite">{left} left</span>
+        </div>
+        <button type="submit" className="note-pin-btn">Pin it to the wall</button>
+        <p className="note-help">The wall lives in your own browser. It is a keepsake, not public. To actually send a note to the club, press “Send to the club” on it.</p>
+      </form>
+
+      <div className={`note-wall ${notes.length ? '' : 'is-empty'}`} aria-live="polite">
+        {notes.length === 0 ? (
+          <div className="note-empty">
+            <span className="note-empty-pin" aria-hidden="true" />
+            <p>No notes yet. Be the first to pin one.</p>
+          </div>
+        ) : (
+          <ul className="note-list">
+            {notes.map((n, i) => {
+              const st = n.sent ? 'sent' : status[n.id];
+              return (
+                <li key={n.id} className={`note is-${n.color}`} style={{ '--tilt': `${[-2, 1.5, -1, 2, -1.5, 1][i % 6]}deg` }}>
+                  <span className="note-pin" aria-hidden="true" />
+                  <button type="button" className="note-remove" onClick={() => remove(n.id)} aria-label="Remove this note"><X size={13} aria-hidden="true" /></button>
+                  <p className="note-text">{n.text}</p>
+                  <p className="note-meta">{n.name ? `— ${n.name}` : '— Anonymous'} · {new Date(n.at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                  {st === 'sent' ? (
+                    <span className="note-sent"><Check size={12} aria-hidden="true" /> Sent to the club</span>
+                  ) : (
+                    <button type="button" className="note-send" onClick={() => send(n)} disabled={st === 'sending'}>
+                      {st === 'sending' ? 'Sending…' : st === 'mailto' ? 'Opened your email app' : st === 'error' ? 'Try again' : 'Send to the club'}
+                    </button>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
     </div>
   );
 }
@@ -545,6 +675,8 @@ const REVEAL_RULES = [
   ['.wide-banner-card', 'zoom-in', 150],
   ['.section-intro, .split-intro, .team-head, .strip-title, .page-hero-inner, .faq-head, .cta-band, .detail-hero .container > *', 'fade-up', 150],
   ['.metric-grid, .story-block > *', 'fade-up', 100],
+  ['.footer-top', 'fade-up', 150],
+  ['.note-head, .note-layout > *', 'fade-up', 150],
   ['.leader-card, .about-text, .timeline, .four-way, .focus-grid, .ways-grid, .value-grid, .logo-strip, .impact-band, .facts-grid, .green-counter, .yellow-band, .featured-card, .page-hero-wide, .form-layout > *, .donate-grid > *, .prose.narrow, .filters, .notice-banner, .pill-links', 'fade-up', 200],
 ];
 

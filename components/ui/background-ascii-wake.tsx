@@ -18,10 +18,18 @@ import { useEffect, useRef } from "react";
 // - the animation loop only runs while a wake is fading; at rest (no pointer
 //   movement) nothing is redrawn, so an idle page costs no CPU;
 // - pauses while the tab is hidden; the site is light-only, so there is no
-//   theme watcher. The ink colour comes from the .site-bg rule in globals.css.
+//   theme watcher;
+// - the glyphs use the club's colours: the trail cycles through them as the
+//   pointer moves, and the resting scatter is a random mix.
 // ---------------------------------------------------------------------------
 
 const RAMP = " .:-=+*#%@";
+
+// Club colours for the glyphs: coral, Rotaract cranberry, green, Interact blue, golden yellow, violet.
+// (Slightly deeper than the brand tints so the characters still read on white.)
+const COLORS = ["#f2774f", "#d22163", "#2fbf68", "#0099d9", "#e7a800", "#7a5cf0"];
+// The trail cycles through the colours as the pointer moves, one colour every ~90 ms.
+const COLOR_STEP_MS = 90;
 
 export interface WakeGlyphProps {
   /** grid cell size in px */
@@ -52,7 +60,6 @@ export function WakeGlyph({ cellSize = 12, className = "" }: WakeGlyphProps) {
     if (!ctx) return;
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const fg = getComputedStyle(canvas).color;
     const monoFont =
       getComputedStyle(document.documentElement).getPropertyValue("--font-mono").trim() ||
       "ui-monospace, monospace";
@@ -65,9 +72,11 @@ export function WakeGlyph({ cellSize = 12, className = "" }: WakeGlyphProps) {
     let heat: Float32Array = new Float32Array(0);
     let rate: Float32Array = new Float32Array(0);
     let ambient: Float32Array = new Float32Array(0);
+    let hue: Uint8Array = new Uint8Array(0); // colour index of each cell
     let raf = 0;
     let last = 0;
     const pointer = { x: -1, y: -1, t: 0, has: false };
+    let trailColor = 0;
 
     const resize = () => {
       dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -87,20 +96,27 @@ export function WakeGlyph({ cellSize = 12, className = "" }: WakeGlyphProps) {
       heat = new Float32Array(n);
       rate = new Float32Array(n).fill(1.4);
       ambient = new Float32Array(n);
+      hue = new Uint8Array(n);
 
       // sparse, near-silent ground state: a static seeded scatter of faint cells
       const rand = mulberry32(0xa53f9c1 ^ (cols * 71 + rows));
       for (let i = 0; i < n; i++) {
-        if (rand() < 0.035) ambient[i] = 0.08 + rand() * 0.14;
+        if (rand() < 0.035) {
+          ambient[i] = 0.08 + rand() * 0.14;
+          hue[i] = Math.floor(rand() * COLORS.length);
+        }
       }
     };
 
     const draw = () => {
       ctx.clearRect(0, 0, width, height);
-      ctx.fillStyle = fg;
+      // One pass per colour, so fillStyle changes only six times per frame.
+      for (let c = 0; c < COLORS.length; c++) {
+      ctx.fillStyle = COLORS[c]!;
       for (let gy = 0; gy < rows; gy++) {
         for (let gx = 0; gx < cols; gx++) {
           const idx = gy * cols + gx;
+          if (hue[idx] !== c) continue;
           const lum = Math.max(ambient[idx]!, heat[idx]!);
           if (lum <= 0.03) continue;
           const ch = RAMP[Math.min(RAMP.length - 1, Math.floor(lum * (RAMP.length - 1)))];
@@ -108,6 +124,7 @@ export function WakeGlyph({ cellSize = 12, className = "" }: WakeGlyphProps) {
           ctx.globalAlpha = Math.min(1, 0.15 + lum * 0.85);
           ctx.fillText(ch!, gx * cellSize + cellSize / 2, gy * cellSize + cellSize / 2);
         }
+      }
       }
       ctx.globalAlpha = 1;
     };
@@ -131,6 +148,7 @@ export function WakeGlyph({ cellSize = 12, className = "" }: WakeGlyphProps) {
           if (falloff > heat[idx]!) {
             heat[idx] = falloff;
             rate[idx] = decayRate;
+            hue[idx] = trailColor;
           }
         }
       }
@@ -162,6 +180,7 @@ export function WakeGlyph({ cellSize = 12, className = "" }: WakeGlyphProps) {
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
       const now = performance.now();
+      trailColor = Math.floor(now / COLOR_STEP_MS) % COLORS.length;
       if (pointer.has) {
         const dx = x - pointer.x;
         const dy = y - pointer.y;
@@ -227,7 +246,7 @@ export function WakeGlyph({ cellSize = 12, className = "" }: WakeGlyphProps) {
     };
   }, [cellSize]);
 
-  // "block h-full w-full text-foreground" from the original Tailwind classes lives in .site-bg (app/globals.css)
+  // "block h-full w-full" from the original Tailwind classes lives in .site-bg (app/globals.css)
   return <canvas ref={canvasRef} aria-hidden="true" className={`site-bg ${className}`.trim()} />;
 }
 
