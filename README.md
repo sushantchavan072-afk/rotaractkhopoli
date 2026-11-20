@@ -109,7 +109,7 @@ This sets up Tailwind and `components.json`. Then check every page, because the 
 - **Events:** add to `events` with a unique `slug` and its own page appears. Add a photo at `public/images/events/<slug>.jpg`. For completed projects, add `outcomes`, `report` and `gallery` to show results on the event page.
 - **Upcoming/Completed labels** are worked out in the visitor's browser, so they stay correct without a rebuild.
 - **Testimonials:** add only real, consented quotes to `testimonials`. The section stays hidden while the list is empty.
-- **Member photos:** save them as `public/images/members/<photo>.png` and set `photo:` on the member. Members without a photo show their initials.
+- **Member photos:** save them as `public/images/members/<photo>.webp` (or `.png` / `.jpg`) and set `photo:` on the member. Members without a photo show their initials.
 
 ## Leave a note (Reviews page)
 
