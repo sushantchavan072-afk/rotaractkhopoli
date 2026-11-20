@@ -243,26 +243,81 @@ export const allFaqs = faqGroups.flatMap((g) => g.items);
 
 /* ---------------- District & Rotary ---------------- */
 /**
- * Leaders for the current Rotary year (RIY 2026-27).
- * photo: file in public/images/leaders/ (leave empty to show initials).
- * message: paste the leader's message here; the message block appears only when this is filled in.
+ * Leaders for the current Rotary year (RIY 2026-27). Messages are reproduced as provided by the club.
+ * photo: file in public/images/leaders/ · themeLogo: file in public/images/themes/
  */
 export const riPresident = {
   name: 'Olayinka Hakeem Babalola',
   role: 'President, Rotary International',
+  short: 'RI President',
   year: 'RIY 2026-27',
   theme: 'Create Lasting Impact',
-  photo: '/images/leaders/ri-president.jpg',
-  message: [], // TODO(club): paragraphs of the RI President's message
+  themeLabel: 'Presidential theme',
+  themeLogo: { src: '/images/themes/create-lasting-impact.png', w: 409, h: 409, alt: 'Create Lasting Impact, Rotary theme 2026-27' },
+  photo: '/images/leaders/ri-president.webp',
+  highlight: 'When we work alongside communities, invest in people\u2019s skills and leadership abilities, and measure our progress, we ensure that positive changes can continue in our communities and in ourselves long after a single project ends.',
+  greeting: 'My dear friends,',
+  message: [
+    'As members of Rotary, we are all united across cultures, languages, and communities. Together, we share a responsibility not only to bring about change but also to ensure that the effects endure.',
+    'When we focus our efforts and work together, we can maximize our impact in the year ahead.',
+    'That is why this year, we are called to Create Lasting Impact.',
+    'Our ability to Create Lasting Impact depends on the strength and diversity of our members. The goal in front of us is clear: Reach 1.25 million Rotarians and retain at least 125,000 Rotaractors by 2030.',
+    'But this is not only about numbers. It is about people.',
+    'Every new member brings new ideas, energy, and opportunities. When we truly welcome others and share our stories, we expand Rotary\u2019s reach and deepen valuable connections.',
+    'Don\u2019t be afraid to share how Rotary has changed your life when you connect with prospective members. Everyone loves a good story.',
+    'I also encourage you to consider how your club invites, includes, and engages with others.',
+    'Examine your last seven years of membership and retention data, find your best year, and aim to do better than your best. Explore the membership resources linked below and think about how you can use them to attract more people to Rotary.',
+    'Our promise to the world remains unchanged: We will eradicate polio.',
+    'Through your dedication and advocacy, Rotary continues to support one of the most ambitious public health efforts in history. Since 2021, we\u2019ve had a 17% increase in individual contributions to PolioPlus, a clear sign that our members and friends of Rotary remain deeply invested in the fight against polio.',
+    'Now is the time to remain focused and committed to this endeavor.',
+    'Lasting peace is not created in a single moment. It comes over time, through understanding, collaboration, and trust. Each act of service has the potential to contribute to a more peaceful world, but we need to be deliberate and strategic to achieve it. I encourage you to seek opportunities to collaborate, listen, and lead with empathy. When we work together with purpose and direction, we create stronger communities and enduring peace.',
+    'My friends, Rotary has the power to transform lives, including our own. As you plan your projects, welcome new members, and serve your community, I ask you to thoughtfully consider the impact you are making and how it will last.',
+    'Together, we can Create Lasting Impact that endures across the globe, in our communities, and in ourselves.',
+    'Thank you for all that you do, and for all that we will accomplish together.',
+  ],
+  signoff: ['Yours in Rotary,', 'Yinka H. Babalola', '2026-27 President', 'Rotary International'],
+};
+
+export const districtGovernor = {
+  name: 'Rtn. Nitin Dhamale',
+  role: 'District Governor, Rotary International District 3131',
+  short: 'District Governor',
+  year: 'RIY 2026-27',
+  theme: 'Maximum Projects, Maximum Beneficiaries, Maximum Impact',
+  themeLabel: 'District Governor\u2019s vision',
+  themeLogo: { src: '/images/themes/create-lasting-impact.png', w: 409, h: 409, alt: 'Create Lasting Impact, Rotary theme 2026-27' },
+  photo: '/images/leaders/district-governor.webp',
+  greeting: 'Dear Rotaractors, Greetings!',
+  message: [
+    'It is a privilege to address the energetic and inspiring members of Rotaract District 3131. You are the young leaders, innovators, and changemakers who are shaping a better future through selfless service.',
+    'As we begin Rotary Year 2026\u201327 under the Rotary International theme \u201cCreate Lasting Impact,\u201d I encourage each one of you to serve with passion, lead with integrity, and inspire others through your actions.',
+    'This year, let us focus on growing our Rotaract family by adding new members while retaining our existing members, because a strong organization is built on both growth and continuity. I also urge every Rotaract Club to work closely with its sponsoring Rotary Club and actively participate in Global Grant projects. Together, we can implement larger, sustainable service initiatives that create a lasting difference in our communities.',
+    'Let us strengthen Rotary\u2013Rotaract collaboration, undertake meaningful service projects, and remember that true success is measured not by the number of activities we conduct, but by the lives we touch and the impact we create. My vision for District 3131 is \u201cMaximum Projects, Maximum Beneficiaries, Maximum Impact,\u201d and I am confident that our Rotaractors will play a vital role in achieving this vision.',
+    'Together, let us lead with purpose, serve with compassion, and continue to Create Lasting Impact.',
+    'I wish every Rotaractor and every Rotaract Club a successful, rewarding, and impactful Rotary Year 2026\u201327.',
+  ],
+  signoff: ['With warm regards,', 'Yours in Rotary,', 'Rtn. Nitin Dhamale', 'District Governor 2026-27', 'Rotary International District 3131'],
 };
 
 export const drr = {
   name: 'Dr. Karishma Awari',
-  role: 'District Rotaract Representative (DRR)',
-  district: 'Rotaract District 3131',
+  role: 'District Rotaract Representative (DRR), Rotaract District 3131',
+  short: 'DRR',
   year: 'RIY 2026-27',
-  photo: '', // TODO(club): e.g. '/images/leaders/drr.jpg'
-  message: [], // TODO(club): paragraphs of the DRR's message
+  theme: 'REIGN',
+  themeSub: 'Rotaract Empowering Individuals for Growth and Networking',
+  themeLabel: 'District theme',
+  themeLogo: { src: '/images/themes/reign.png', w: 651, h: 267, alt: 'REIGN, Rotaract Empowering Individuals for Growth and Networking, DRR Dr. Karishma Awari, RIY 2026-27, RID 3131' },
+  photo: '/images/leaders/drr.webp',
+  greeting: 'Dear Rotaractors of District 3131,',
+  message: [
+    'It gives me immense pleasure to welcome you to Rotary International Year 2026\u201327 under our district theme REIGN.',
+    'This year is about unlocking the potential within every Rotaractor: nurturing leadership, strengthening professional skills, deepening our commitment to community service, and building networks that endure beyond the Rotary year.',
+    'REIGN calls us to empower one another in our clubs, across our zones, and throughout Pune and Raigad. When individuals grow, clubs grow. When clubs grow, our district creates impact that is measurable, inclusive, and lasting.',
+    'I invite every club president, secretary, and member to carry REIGN into your meetings, projects, fellowships, and reporting. Let us lead with purpose, serve with compassion, and network with integrity.',
+    'Together, let us make RIY 2026\u201327 a year of empowered leaders, stronger communities, and proud Rotaract across RID 3131.',
+  ],
+  signoff: ['Dr. Karishma Awari', 'DRR, RID 3131 \u00b7 RIY 2026\u201327'],
 };
 
 export const district = {

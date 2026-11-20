@@ -16,7 +16,7 @@ import {
   coreMembers, boardOfDirectors, chairpersons, uniqueMemberCount, initials, testimonials,
   allFaqs, faqGroups, district, rotary, sponsorTiers, joinCommitments, rotaractYear,
   membersWithRoles, eventsForAvenue, SITE_URL, FAMILY_LOGOS, values, volunteerReasons, waysToHelp,
-  postsNewestFirst, PAGE_SIZE, riPresident, drr,
+  postsNewestFirst, PAGE_SIZE, riPresident, drr, districtGovernor,
 } from '../data/club';
 import {
   Btn, Eyebrow, Intro, Section, PageHero, Photo, FaqList, FaqSearch, MailForm, SocialLinks,
@@ -781,27 +781,47 @@ function StatCards({ stats }) {
   );
 }
 
-/** A leader's photo, title, theme and (once provided) message. */
-function LeaderCard({ leader, eyebrow, tone = 'coral' }) {
+/** A leader's photo, role, theme (with its logo) and message. Long messages fold behind "Read the full message". */
+function LeaderCard({ leader, eyebrow, tone = 'coral', preview = 3 }) {
+  const shown = leader.message.slice(0, preview);
+  const rest = leader.message.slice(preview);
   return (
-    <div className={`leader-card is-${tone}`}>
-      <div className="leader-photo"><Photo src={leader.photo || undefined} alt={leader.name} label={initials(leader.name)} sizes="(max-width: 900px) 80vw, 420px" /></div>
-      <div className="leader-copy">
-        <Eyebrow>{eyebrow}</Eyebrow>
-        <h2>{leader.name}</h2>
-        <p className="leader-role">{leader.role}{leader.district ? `, ${leader.district}` : ''} · {leader.year}</p>
-        {leader.theme && (
-          <div className="leader-theme"><small>Presidential theme {leader.year}</small><strong>“{leader.theme}”</strong></div>
-        )}
-        {leader.message?.length > 0 && (
-          <div className="leader-message">
-            <h3>Message from the {leader.role.includes('President') ? 'RI President' : 'DRR'}</h3>
-            {leader.message.map((para) => <p key={para.slice(0, 40)}>{para}</p>)}
+    <article className={`leader-card is-${tone}`}>
+      <div className="leader-top">
+        <div className="leader-photo"><Photo src={leader.photo || undefined} alt={leader.name} label={initials(leader.name)} sizes="(max-width: 900px) 80vw, 400px" /></div>
+        <div className="leader-copy">
+          <Eyebrow>{eyebrow}</Eyebrow>
+          <h2>{leader.name}</h2>
+          <p className="leader-role">{leader.role} · {leader.year}</p>
+          <div className="leader-theme">
+            {leader.themeLogo && <Image src={leader.themeLogo.src} alt={leader.themeLogo.alt} width={leader.themeLogo.w} height={leader.themeLogo.h} sizes="200px" className={leader.themeLogo.w > leader.themeLogo.h ? 'is-wide' : ''} />}
+            <div><small>{leader.themeLabel} {leader.year}</small><strong>{leader.theme}</strong>{leader.themeSub && <span>{leader.themeSub}</span>}</div>
           </div>
-        )}
+          {leader.highlight && <blockquote className="leader-highlight">“{leader.highlight}”</blockquote>}
+        </div>
       </div>
-    </div>
+      {leader.message?.length > 0 && (
+        <div className="leader-letter">
+          <h3>Message from the {leader.short}</h3>
+          {leader.greeting && <p className="leader-greeting">{leader.greeting}</p>}
+          {shown.map((para) => <p key={para.slice(0, 48)}>{para}</p>)}
+          {rest.length > 0 ? (
+            <details>
+              <summary><span className="more">Read the full message</span><span className="less">Show less</span></summary>
+              {rest.map((para) => <p key={para.slice(0, 48)}>{para}</p>)}
+              <Signoff lines={leader.signoff} />
+            </details>
+          ) : <Signoff lines={leader.signoff} />}
+        </div>
+      )}
+    </article>
   );
+}
+
+function Signoff({ lines = [] }) {
+  if (!lines.length) return null;
+  const nameAt = lines.findIndex((l) => !/yours|regards/i.test(l));
+  return <p className="leader-signoff">{lines.map((l, i) => <span key={l} className={i === nameAt ? 'is-name' : undefined}>{l}</span>)}</p>;
 }
 
 export function District() {
@@ -812,7 +832,11 @@ export function District() {
       </PageHero>
       <Section><StatCards stats={district.stats} /></Section>
       <Section>
-        <LeaderCard leader={drr} eyebrow="District Rotaract Representative" tone="green" />
+        <Intro center label="District leadership" title={`Leading District 3131 in ${drr.year}`} description="The District Rotaract Representative leads the district's Rotaract clubs, alongside the Rotary District Governor." />
+        <div className="leader-stack">
+          <LeaderCard leader={drr} eyebrow="District Rotaract Representative" tone="green" />
+          <LeaderCard leader={districtGovernor} eyebrow="Rotary District Governor" tone="sun" />
+        </div>
       </Section>
       <Section>
         <div className="about-text">
@@ -843,7 +867,7 @@ export function RotaryInfo() {
       </PageHero>
       <Section><StatCards stats={rotary.stats} /></Section>
       <Section>
-        <LeaderCard leader={riPresident} eyebrow={`RI President ${riPresident.year}`} />
+        <LeaderCard leader={riPresident} eyebrow={`RI President ${riPresident.year}`} preview={4} />
       </Section>
       <Section>
         <div className="about-text">
