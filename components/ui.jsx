@@ -51,7 +51,7 @@ export function Photo({ src, alt = '', label, className = '', tone = 0, priority
 /* ---------------------------------------------------------------- Basics */
 
 export function Btn({ href = '/join', children, kind = 'primary', className = '', icon = true }) {
-  const inner = (<>{children}{icon && <span className="btn-arrow" aria-hidden="true"><ArrowUpRight size={18} /></span>}</>);
+  const inner = (<>{children}{icon && <span className="btn-arrow" aria-hidden="true"><ArrowRight size={18} /></span>}</>);
   const cls = `btn btn-${kind} ${className}`;
   if (/^(https?:|mailto:|tel:)/.test(href)) {
     const ext = href.startsWith('http');
@@ -125,17 +125,25 @@ export function Logo({ light = false }) {
 }
 
 
-/** Strip of District 3131 family logos (Rotaract, Rotary, Interact). */
+/** Continuously scrolling strip of District 3131 family logos (Kindora's partner logo slider). */
+export function LogoMarquee({ grey = true, copies = 4 }) {
+  const set = (k) => FAMILY_LOGOS.map((l) => {
+    const img = <Image src={l.src} alt={k === 0 ? l.alt : ''} width={l.w} height={l.h} sizes="200px" />;
+    return <li key={`${k}-${l.src}`} aria-hidden={k > 0 || undefined}>{l.href && k === 0 ? <Link href={l.href}>{img}</Link> : img}</li>;
+  });
+  return (
+    <div className={`marquee ${grey ? 'is-grey' : ''}`}>
+      <ul className="marquee-track">{Array.from({ length: copies }, (_, k) => set(k))}</ul>
+    </div>
+  );
+}
+
+/** Hero strip: title plus the scrolling family logos. */
 export function FamilyLogos({ title = 'Proudly part of the Rotary family in District 3131' }) {
   return (
     <div className="family-logos">
       <span>{title}</span>
-      <ul>
-        {FAMILY_LOGOS.map((l) => {
-          const img = <Image src={l.src} alt={l.alt} width={l.w} height={l.h} sizes="200px" />;
-          return <li key={l.src}>{l.href ? <Link href={l.href}>{img}</Link> : img}</li>;
-        })}
-      </ul>
+      <LogoMarquee />
     </div>
   );
 }
@@ -362,7 +370,7 @@ export function FaqList({ items, firstOpen = true }) {
                 <span>{f.q}</span>{open ? <Minus size={19} aria-hidden="true" /> : <Plus size={19} aria-hidden="true" />}
               </button>
             </h3>
-            <div id={id} className="faq-answer" hidden={!open}><p>{f.a}</p></div>
+            <div id={id} className="faq-answer" inert={!open}><div><p>{f.a}</p></div></div>
           </div>
         );
       })}
@@ -523,18 +531,57 @@ export function EventActions({ event }) {
 
 /* ---------------------------------------------------------------- Motion */
 
-/** Fades content in as it scrolls into view. Content stays visible without JS or with reduced motion. */
+/**
+ * Kindora-style scroll reveal (the same effects as its AOS setup: 0.6s ease, small distances, staggered grids).
+ * Rules map selectors to an effect, a base delay and a per-item stagger. Content stays visible without JS
+ * and for visitors who prefer reduced motion.
+ */
+const REVEAL_RULES = [
+  ['.home-hero-copy', 'fade-up', 150],
+  ['.home-hero-art .hero-quote, .home-hero-art .story-reel, .home-hero-art .hero-info-card, .home-hero-art .hero-small-tag', 'fade-up', 150],
+  ['.donorline .avatar, .cta-stat .avatar', 'fade-right', 100, 200],
+  ['.volunteer-copy li', 'zoom-in', 50, 150],
+  ['.quote-card', 'zoom-out', 50, 100],
+  ['.member-card', 'zoom-right', 50, 150, 4],
+  ['.gallery-item', 'zoom-in', 0, 80, 4],
+  ['.faq-item', 'fade-up', 50, 100],
+  ['.card-grid > *, .post-grid > *, .package-grid > *, .contact-cards > *, .avenue-grid > *', 'fade-up', 0, 100, 3],
+  ['.counters > *', 'fade-up', 50, 100],
+  ['.wide-banner-card', 'zoom-in', 150],
+  ['.section-intro, .split-intro, .team-head, .strip-title, .page-hero-inner, .faq-head, .cta-band, .detail-hero .container > *', 'fade-up', 150],
+  ['.metric-grid, .story-block > *', 'fade-up', 100],
+  ['.ways-grid, .value-grid, .logo-strip, .impact-band, .facts-grid, .green-counter, .yellow-band, .featured-card, .page-hero-wide, .form-layout > *, .donate-grid > *, .prose.narrow, .filters, .notice-banner, .pill-links', 'fade-up', 200],
+  ['.footer-top', 'fade-up', 150],
+];
+
 export function ScrollReveal() {
   const pathname = usePathname();
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) return undefined;
-    const els = [...document.querySelectorAll('.section .container > *')].filter((el) => el.getBoundingClientRect().top > window.innerHeight);
-    els.forEach((el) => el.classList.add('reveal'));
     const io = new IntersectionObserver((entries) => entries.forEach((en) => {
-      if (en.isIntersecting) { en.target.classList.add('is-visible'); io.unobserve(en.target); }
-    }), { rootMargin: '0px 0px -40px 0px' });
-    els.forEach((el) => io.observe(el));
-    return () => io.disconnect();
+      if (en.isIntersecting) { en.target.classList.add('aos-animate'); io.unobserve(en.target); }
+    }), { rootMargin: '0px 0px -60px 0px' });
+    const apply = () => {
+      for (const [selector, effect, base, step = 0, cycle = 0] of REVEAL_RULES) {
+        document.querySelectorAll(selector).forEach((el) => {
+          if (el.dataset.aos || el.closest('.marquee')) return;
+          let delay = base;
+          if (step) {
+            const siblings = [...el.parentElement.children].filter((c) => c.matches(selector));
+            const i = siblings.indexOf(el);
+            delay += (cycle ? i % cycle : i) * step;
+          }
+          el.dataset.aos = effect;
+          el.style.setProperty('--aos-delay', `${delay}ms`);
+          io.observe(el);
+        });
+      }
+    };
+    apply();
+    // Re-scan when client components add content (filters, pagination, search results).
+    const mo = new MutationObserver(apply);
+    mo.observe(document.querySelector('main') ?? document.body, { childList: true, subtree: true });
+    return () => { io.disconnect(); mo.disconnect(); };
   }, [pathname]);
   return null;
 }

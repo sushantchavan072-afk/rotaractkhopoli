@@ -16,7 +16,7 @@ import {
 } from '../data/club';
 import {
   Btn, Eyebrow, Intro, Section, PageHero, Photo, FaqList, FaqSearch, MailForm, SocialLinks,
-  EventCard, EventsExplorer, EventStatus, EventActions, FamilyLogos,
+  EventCard, EventsExplorer, EventStatus, EventActions, FamilyLogos, LogoMarquee,
 } from './ui';
 
 const ICONS = { HandHeart, GraduationCap, Users, Globe2, Megaphone, HeartHandshake, Sparkles, ShieldCheck, UserPlus, Lightbulb, Package, Handshake };
@@ -423,7 +423,7 @@ export function About() {
 
       <Section>
         <h2 className="center strip-title">Rotary family and the values we work by</h2>
-        <div className="logo-strip">{FAMILY_LOGOS.map((l) => <Image key={l.src} src={l.src} alt={l.alt} width={l.w} height={l.h} sizes="200px" />)}</div>
+        <div className="logo-strip"><LogoMarquee grey={false} copies={5} /></div>
         <div className="value-grid">
           {values.map((v, i) => {
             const Icon = ICONS[v.icon] ?? HeartHandshake;
