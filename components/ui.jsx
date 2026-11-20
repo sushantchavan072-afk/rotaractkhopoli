@@ -51,7 +51,7 @@ export function Photo({ src, alt = '', label, className = '', tone = 0, priority
 /* ---------------------------------------------------------------- Basics */
 
 export function Btn({ href = '/join', children, kind = 'primary', className = '', icon = true }) {
-  const inner = (<>{children}{icon && <ArrowRight size={18} aria-hidden="true" />}</>);
+  const inner = (<>{children}{icon && <span className="btn-arrow" aria-hidden="true"><ArrowUpRight size={18} /></span>}</>);
   const cls = `btn btn-${kind} ${className}`;
   if (/^(https?:|mailto:|tel:)/.test(href)) {
     const ext = href.startsWith('http');
@@ -61,7 +61,7 @@ export function Btn({ href = '/join', children, kind = 'primary', className = ''
 }
 
 export function Eyebrow({ children }) {
-  return <span className="eyebrow">{children}</span>;
+  return <span className="eyebrow"><span className="eyebrow-dot" aria-hidden="true" />{children}</span>;
 }
 
 export function Intro({ label, title, description, center = false, as: H = 'h2' }) {
@@ -179,8 +179,8 @@ export function Header() {
             )}
           </div>
           <div className="nav-actions">
-            <Link href="/sponsorship" className="btn btn-outline btn-sm"><Heart size={15} aria-hidden="true" /> Support Us</Link>
-            <Link href="/join" className="btn btn-primary btn-sm">Join the Club</Link>
+            <Link href="/sponsorship" className="nav-support"><Heart size={15} aria-hidden="true" /> Support Us</Link>
+            <Link href="/join" className="nav-donate">Join the Club <ArrowUpRight size={16} aria-hidden="true" /></Link>
           </div>
         </nav>
       </div>
@@ -329,7 +329,7 @@ export function MailForm({ title, intro, subject, fields, submitLabel = 'Send Me
           );
         })}
         <p className="consent">By sending this form you agree to the club using these details to reply to you, as described in our <Link href="/privacy-policy">privacy policy</Link>.</p>
-        <button type="submit" className="btn btn-primary btn-block" disabled={state === 'sending'}>{state === 'sending' ? 'Sending…' : submitLabel} <ArrowRight size={18} aria-hidden="true" /></button>
+        <button type="submit" className="submit-btn" disabled={state === 'sending'}>{state === 'sending' ? 'Sending…' : submitLabel} <ArrowUpRight size={18} aria-hidden="true" /></button>
         <p className={`form-status ${state === 'error' ? 'is-error' : ''}`} role="status" aria-live="polite">
           {state === 'sent' && <><Check size={16} aria-hidden="true" /> Thank you, your message has reached the club. We will reply soon.</>}
           {state === 'mailto' && `Your email app should open with the message ready to send to ${clubEmail}. If nothing opened, write to that address directly.`}
@@ -420,6 +420,7 @@ export function EventCard({ e, i = 0, headingLevel = 3 }) {
           <div><dt>Date</dt><dd>{formatDate(e.date)}</dd></div>
           <div><dt>Venue</dt><dd>{e.venue}</dd></div>
         </dl>
+        <span className="inline-arrow" aria-hidden="true">View Event <ArrowUpRight size={18} /></span>
       </div>
     </article>
   );
@@ -497,8 +498,8 @@ export function EventActions({ event }) {
   }
   return (
     <div className="event-actions">
-      {!isPast(event) && <button type="button" className="btn btn-outline btn-sm" onClick={addToCalendar}><CalendarPlus size={16} aria-hidden="true" /> Add to Calendar</button>}
-      <button type="button" className="btn btn-outline btn-sm" onClick={share}><Share2 size={16} aria-hidden="true" /> {copied ? 'Link Copied' : 'Share'}</button>
+      {!isPast(event) && <button type="button" className="chip-btn" onClick={addToCalendar}><CalendarPlus size={16} aria-hidden="true" /> Add to Calendar</button>}
+      <button type="button" className="chip-btn" onClick={share}><Share2 size={16} aria-hidden="true" /> {copied ? 'Link Copied' : 'Share'}</button>
     </div>
   );
 }

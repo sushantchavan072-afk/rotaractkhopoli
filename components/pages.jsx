@@ -111,7 +111,7 @@ function CommunityCTA() {
           <Eyebrow>Membership open</Eyebrow>
           <h2>Bring one idea. We will help you finish it.</h2>
           <p>Membership is open to young adults living, studying or working in and around Khopoli. There is no campus requirement.</p>
-          <div className="btn-row"><Btn href="/join" kind="light">Apply for Membership</Btn><Btn href="/sponsorship" kind="outline-light">Partner With Us</Btn></div>
+          <div className="btn-row"><Btn href="/join">Apply for Membership</Btn><Btn href="/sponsorship" kind="outline">Partner With Us</Btn></div>
         </div>
         <div className="cta-photo"><Photo src="/images/cta.jpg" alt="Volunteers joining hands" label="Service above self" sizes="(max-width: 900px) 100vw, 45vw" /></div>
       </div>
@@ -190,23 +190,26 @@ export function Home() {
       <section className="home-hero">
         <div className="container home-hero-grid">
           <div className="home-hero-copy">
-            <Eyebrow>{club.district} · Since 2020</Eyebrow>
-            <h1>A small town club that <em>keeps its word.</em></h1>
+            <div className="donorline">
+              <div className="avatar-stack" aria-hidden="true">
+                {coreMembers.slice(0, 3).map((m, i) => <span key={m.name} className={`avatar tint-${TINTS[i]}`}>{initials(m.name)}</span>)}
+              </div>
+              <span>{uniqueMemberCount}+ Rotaractors serving Khopoli</span>
+            </div>
+            <h1>A small town club that <span>keeps its word.</span></h1>
             <p className="lead">{club.intro}</p>
-            <div className="btn-row"><Btn href="/join">Join the Club</Btn><Btn href="/sponsorship" kind="outline">Support Our Work</Btn></div>
-            <ul className="trust-row">
-              <li><strong>{club.charteredOn}</strong>Chartered</li>
-              <li><strong>{club.clubId}</strong>Club ID</li>
-              <li><strong>{avenues.length} avenues</strong>Of service</li>
-            </ul>
+            <div className="btn-row"><Btn href="/join">Join the Club</Btn><Btn href="/about" kind="text">What We Do</Btn></div>
           </div>
           <div className="home-hero-art">
             <Photo src="/images/hero.jpg" alt="Young volunteers of Rotaract Club of Khopoli" label=" " priority sizes="(max-width: 900px) 100vw, 50vw" className="hero-photo" />
-            <Link href={`/events/${latest.slug}`} className="hero-card">
+            <div className="hero-quote"><span className="hero-small-avatar" aria-hidden="true">♥</span><p>Service above self, written in the voice of a small town with big plans.</p></div>
+            <Link href="/events" className="story-reel"><span><small>See what we</small><strong>did this year</strong></span><span className="play-button" aria-hidden="true"><ArrowRight size={17} /></span></Link>
+            <Link href={`/events/${latest.slug}`} className="hero-info-card">
               <small>Latest project</small>
               <strong>{latest.title}</strong>
-              <span>{formatDate(latest.date)} · {latest.venue}</span>
+              <span>{formatDate(latest.date)}</span>
             </Link>
+            <div className="hero-small-tag">Chartered<br />{club.charteredOn}</div>
           </div>
         </div>
         <div className="container"><FamilyLogos /></div>

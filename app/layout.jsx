@@ -1,5 +1,4 @@
-import '@fontsource-variable/fraunces';
-import '@fontsource-variable/open-sans';
+import '@fontsource-variable/plus-jakarta-sans';
 import './globals.css';
 import {Analytics} from '@vercel/analytics/next';
 import {Header, Footer, ScrollReveal} from '../components/ui';
@@ -12,7 +11,7 @@ export const metadata = {
   description: 'Community based Rotaract club in Khopoli, chartered November 2020. Community service, professional development and fellowship in District 3131.',
 };
 
-export const viewport = { themeColor: '#d22163' };
+export const viewport = { themeColor: '#fb8e6d' };
 
 export default function RootLayout({ children }){
   return (

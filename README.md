@@ -2,7 +2,7 @@
 
 The website of **Rotaract Club of Khopoli** (Club ID 21869318, Rotaract District 3131), built with Next.js.
 
-- **Design:** Rotaract cranberry, Rotary azure and gold on warm cream. Headings use **Fraunces**, a warm serif. Body text uses **Open Sans**, Rotary's recommended web font. Both fonts are self-hosted, so pages don't wait on Google Fonts.
+- **Design:** the Kindora style: a coral, green and yellow palette, pill labels with a green tick, black pill buttons with a round arrow, and soft rounded cards. The font is **Plus Jakarta Sans**, self-hosted so pages don't wait on Google Fonts.
 - **Content:** everything lives in **`data/club.js`**.
 
 ## Run it
