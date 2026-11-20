@@ -41,6 +41,9 @@ const formatPostDate = (iso) => { const [y, m, d] = iso.split('-').map(Number); 
 
 /** Every photo on the site with a caption, used by the gallery page. Replace with the club's own photos. */
 export const GALLERY = [
+  ['/images/events/road-safety-drive.jpg', 'Road safety awareness drive with Interactors and the traffic police'],
+  ['/images/cta-team.jpg', 'Members of Rotaract Club of Khopoli'],
+  ['/images/events/cyber-crime-awareness.jpg', 'Cyber crime awareness session with Rotary Club of Khopoli'],
   ['/images/gallery/1.jpg', 'Sorting supplies for families'],
   ['/images/events/tree-plantation.jpg', 'Saplings ready for planting'],
   ['/images/gallery/2.jpg', 'Children at a school session'],
@@ -657,7 +660,7 @@ export function EventDetail({ slug }) {
           <ul className="fact-chips">
             <li><EventStatus event={e} /></li>
             <li><CalendarDays size={16} aria-hidden="true" /> {formatDate(e.date)}</li>
-            <li><Clock size={16} aria-hidden="true" /> {e.time}</li>
+            {e.time && <li><Clock size={16} aria-hidden="true" /> {e.time}</li>}
             <li><MapPin size={16} aria-hidden="true" /> {e.venue}</li>
             {e.partner && <li><Handshake size={16} aria-hidden="true" /> {e.partner}</li>}
           </ul>
@@ -668,9 +671,9 @@ export function EventDetail({ slug }) {
         <div className="container">
           <article className="prose narrow">
             {e.outcomes?.length > 0 && <dl className="outcome-grid">{e.outcomes.map((o) => <div key={o.label}><dd>{o.value}</dd><dt>{o.label}</dt></div>)}</dl>}
-            <p>{e.report ?? e.summary}</p>
+            {[].concat(e.report ?? e.summary).map((para) => <p key={para.slice(0, 40)}>{para}</p>)}
             <h2>Project details</h2>
-            <p>This {avenue ? avenue.name.toLowerCase() : 'club'} project took place at {e.venue} on {formatDate(e.date)}, {e.time}.</p>
+            <p>This {avenue ? avenue.name.toLowerCase() : 'club'} project took place at {e.venue} on {formatDate(e.date)}{e.time ? `, ${e.time}` : ''}.</p>
             {e.partner && <p className="partner-note"><span className="partner-icon" aria-hidden="true"><Handshake size={18} /></span><span>Organised in partnership with <strong>{e.partner}</strong></span></p>}
             {e.gallery?.length > 0 && <GalleryGrid photos={e.gallery.map((src) => [src, e.title])} />}
             <div className="detail-actions">

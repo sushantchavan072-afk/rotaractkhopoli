@@ -17,9 +17,20 @@ export const viewport = {
   themeColor: '#ffffff',
 };
 
+/**
+ * Decides before first paint whether the home page intro plays (components/ui/intro-overlay.jsx):
+ * only on the home page, once per browser session, never with reduced motion or for automated
+ * browsers. ?intro=1 replays it. After 8 seconds the class is removed whatever happens, so the
+ * page can never stay hidden.
+ */
+const INTRO_SCRIPT = `(function(){try{if(location.pathname!=='/')return;var d=document.documentElement,f=/[?&]intro=1/.test(location.search);if(!f&&(navigator.webdriver||sessionStorage.getItem('rck-intro')||matchMedia('(prefers-reduced-motion: reduce)').matches))return;d.classList.add('intro-on');setTimeout(function(){d.classList.remove('intro-on')},8000)}catch(e){}})();`;
+
 export default function RootLayout({ children }){
   return (
-    <html lang="en-IN">
+    <html lang="en-IN" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: INTRO_SCRIPT }} />
+      </head>
       <body>
         <DotGlowBackground />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }} />

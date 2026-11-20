@@ -111,7 +111,8 @@ export const avenues = [
  * Club project and event log.
  * Optional per-event fields (shown on the event page when present):
  *   outcomes: [{ value: '120', label: 'Saplings planted' }, ...]
- *   report:   'A paragraph on what happened, what went well and what did not.'
+ *   report:   'A paragraph on what happened, what went well and what did not.' (or an array of paragraphs)
+ *   time:     optional, e.g. '6:00 PM - 8:00 PM'; leave it out when the time is not known
  *   gallery:  ['/images/events/tree-plantation-2.jpg', ...]
  * TODO(club): add outcomes for completed projects (the FAQ promises beneficiary numbers and spend). Dates, times and venues are indicative and confirmed by the secretary.
  * Photos live in public/images/events/<slug>.jpg — a coloured placeholder shows until the file is added.
@@ -138,9 +139,21 @@ export const events = [
   { slug: 'tree-plantation', date: '2026-09-20', time: '7:30 AM - 11:00 AM', title: 'Tree Plantation',
     venue: 'Khopoli Municipal Ground & Hill Slope', avenue: 'Community Service', partner: 'Khopoli Municipal Council',
     summary: 'Plantation of native saplings with a six-month watering roster assigned to member pairs for survival tracking.' },
+  { slug: 'cyber-crime-awareness', date: '2026-10-07', title: 'Cyber Crime Awareness',
+    venue: 'Khopoli', avenue: 'Community Service', partner: 'Rotary Club of Khopoli',
+    summary: 'A joint session with Rotary Club of Khopoli where the head of the Cyber Crime Department, Khopoli Police Station, explained common cyber frauds and how to stay safe.',
+    report: 'A joint event of Cyber Crime Awareness was conducted by Rotary and Rotaract Club of Khopoli, wherein the head of the Cyber Crime Department of Khopoli Police Station gave an overview of the types of cyber crime incidents and how to be safe from such frauds.' },
   { slug: 'pd-session', date: '2026-10-11', time: '6:00 PM - 8:00 PM', title: 'PD Session: Creative PPT Making & Canva Hacks',
     venue: 'Online · Google Meet', avenue: 'Professional Development',
     summary: 'A hands-on workshop on presentation design, storytelling slides and practical Canva shortcuts for club reporting.' },
+  { slug: 'road-safety-drive', date: '2026-10-15', title: 'Road Safety Awareness Drive',
+    venue: 'Khopoli', avenue: 'Community Service', partner: 'Rotary Club of Khopoli, Interact Club of Khopoli and the Traffic Police Department',
+    summary: 'A road safety drive by the Rotary, Rotaract and Interact clubs of Khopoli with the traffic police, raising awareness of traffic rules, especially among young people.',
+    report: [
+      'A road safety awareness drive was conducted by Rotary Club of Khopoli, Rotaract Club of Khopoli and Interact Club of Khopoli in partnership with the traffic police department.',
+      'The main objective of the drive was to create awareness among the people, especially the youth, regarding traffic rules.',
+      'Interactors from two schools participated in the event along with Rotary and Rotaract representatives.',
+    ] },
 ];
 
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];

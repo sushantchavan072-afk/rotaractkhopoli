@@ -39,6 +39,12 @@
   --rotaract-50: #fce9f1;
   --interact-50: #e3f5fc;
   --radius: 28px;
+  /* A very light wash of the club colours behind the whole site */
+  --page-gradient:
+    radial-gradient(1100px 620px at 0% 0%, rgba(253, 139, 107, .10), transparent 62%),
+    radial-gradient(1000px 640px at 100% 8%, rgba(23, 69, 143, .07), transparent 60%),
+    radial-gradient(900px 700px at 85% 100%, rgba(212, 19, 103, .06), transparent 62%),
+    radial-gradient(900px 600px at 5% 95%, rgba(82, 217, 127, .07), transparent 60%);
   /* Segoe UI from the visitor's device (built into every Windows PC; Microsoft's licence does not allow
      hosting the font files on a website). Other devices fall back to their closest system font. */
   --font: 'Segoe UI', 'Segoe UI Variable Text', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Roboto, Arial, sans-serif;
@@ -50,7 +56,7 @@
 /* ---------- Base ---------- */
 *, *::before, *::after { box-sizing: border-box; }
 html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; color-scheme: light; }
-body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 17px; font-weight: 400; -webkit-font-smoothing: antialiased; }
+body { margin: 0; background-color: var(--bg); background-image: var(--page-gradient); background-attachment: fixed; color: var(--text); font-family: var(--font); font-size: 17px; font-weight: 400; -webkit-font-smoothing: antialiased; }
 img { max-width: 100%; display: block; }
 a { color: inherit; text-decoration: none; }
 button, input, select, textarea { font: inherit; color: inherit; }
@@ -230,8 +236,8 @@ section:nth-of-type(6n) .eyebrow-dot { background: var(--interact); }
 .metric-card { --mx: 36px; --my: 40px; position: relative; border-radius: var(--radius); padding: var(--my) var(--mx); min-height: 410px; overflow: hidden; display: flex; flex-direction: column; align-items: flex-start; }
 .metric-card > strong { font-size: clamp(3rem, 4.6vw, 4.4rem); font-weight: 500; letter-spacing: -0.03em; line-height: 1; position: relative; z-index: 2; }
 .metric-label { font-size: 19px; margin: 22px 0 22px; position: relative; z-index: 2; }
-.pill-text { margin: 0; max-width: 220px; position: relative; z-index: 2; line-height: 1.75; font-size: 15px; color: var(--ink); }
-.pill-text span { background: var(--surface); padding: 3px 14px; border-radius: 14px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+.pill-text { margin: 0; max-width: 220px; position: relative; z-index: 2; line-height: 2.35; font-size: 15px; color: var(--ink); }
+.pill-text span { background: var(--surface); padding: 5px 14px; border-radius: 30px; box-decoration-break: clone; -webkit-box-decoration-break: clone; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
 .metric-card.is-coral { background: var(--coral); color: #fff; }
 .metric-card.is-dark { background: #1c1c1c; color: #fff; }
 .metric-card.is-dark .pill-text { max-width: 320px; margin-bottom: 24px; }
@@ -1088,6 +1094,18 @@ html:has(dialog[open]) { overflow: hidden; }
 @media (hover: hover) {
   :is(.btn, .card-btn, .nav-cta, .submit-btn, .chip-btn, .pill-links a, .note-pin-btn, .letter-toggle, .back-link)[data-hue]:not(:disabled):hover { background: var(--hue-bg) !important; border-color: var(--hue-bg) !important; color: var(--hue-fg) !important; }
 }
+
+/* ---------- Home page intro (components/ui/intro-overlay.jsx; switched on by INTRO_SCRIPT in app/layout.jsx) ---------- */
+.intro { display: none; }
+html.intro-on .intro, .intro.is-playing { display: block; position: fixed; inset: 0; z-index: 500; background: #fff; }
+html.intro-on { overflow: hidden; scrollbar-gutter: stable; }
+.intro-logo { position: absolute; inset: 0; display: grid; place-items: center; opacity: 0; }
+.intro-logo img { width: min(240px, 58vw); height: auto; }
+.intro-frame { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; overflow: hidden; visibility: hidden; }
+.intro-frame img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+html.intro-on :is(.site-header, .home-hero-copy > *, .home-hero-art > :not(.photo):not(.photo-fallback)) { opacity: 0; }
+@media (prefers-reduced-motion: reduce) { .intro { display: none !important; } }
+@media print { .intro { display: none !important; } }
 
 /* ---------- Leave a note (Reviews page, "Share your experience") ---------- */
 .note-head { text-align: center; max-width: 640px; margin: 0 auto 48px; display: flex; flex-direction: column; align-items: center; }

@@ -754,7 +754,7 @@ function to24(t) {
 export function EventActions({ event }) {
   const [copied, setCopied] = useState(false);
   function addToCalendar() {
-    const [startT, endT] = event.time.split(/\s*-\s*/).map(to24);
+    const [startT, endT] = (event.time ?? '').split(/\s*-\s*/).map(to24);
     const start = startT ? `DTSTART;TZID=Asia/Kolkata:${icsDate(event.date, startT)}` : `DTSTART;VALUE=DATE:${event.date.replace(/-/g, '')}`;
     const end = endT ? `DTEND;TZID=Asia/Kolkata:${icsDate(event.endDate ?? event.date, endT)}` : '';
     const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Rotaract Khopoli//EN', 'BEGIN:VEVENT',

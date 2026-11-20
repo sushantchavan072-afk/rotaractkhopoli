@@ -57,6 +57,18 @@ Kindora's `/elements` page is a template style guide, so it is not included.
 
 The site is **light mode only**.
 
+**Home page intro** (`components/ui/intro-overlay.jsx`), modelled on radiatinghope.org:
+1. The club logo appears on white and fades away.
+2. The hero photo opens as a small window and grows to fill the screen.
+3. The photo glides into its place in the hero. On phones, where the hero photo is below the fold, it fades away instead.
+4. The menu fades in and the headline and text rise into place.
+
+It plays once per browser session, only on the home page. It never plays for visitors who prefer reduced motion. Any click, key press, scroll or tap skips it.
+- A small script in `app/layout.jsx` decides before the first paint, so nothing flashes, and it always uncovers the page after 8 seconds.
+- Add `?intro=1` to the home page URL to replay it.
+
+**Page gradient:** a very light wash of coral, Rotary blue, cranberry and green sits behind the whole site (`--page-gradient` in `app/globals.css`).
+
 **Background** (`components/ui/background-dot-glow.tsx`):
 - A faint dot grid sits 32px apart behind the page. It is a static CSS background on `.site-bg`, so it costs nothing to show.
 - Dots within about 150px of the mouse glow in Rotaract cranberry.
