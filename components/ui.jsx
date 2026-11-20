@@ -1,5 +1,5 @@
 'use client';
-import React, { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import React, { useCallback, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
@@ -550,47 +550,82 @@ function MemberBadgeDialog({ member, portrait, onClose }) {
 
 /* ---------------------------------------------------------------- Hover to expand */
 
-/**
- * Wrapper that opens the <details> inside it when a mouse rests on it (after a short pause, so
- * passing over it while scrolling does nothing). It stays open; "Show less" closes it.
- * Touch screens keep the tap-to-open button.
- */
-export function HoverOpen({ as: Tag = 'div', className = '', children, delay = 250 }) {
+// Where the mouse last was, shared by every hover-to-open element. When content opens or closes,
+// the page moves under a still mouse and the browser fires pointer events at the new element;
+// comparing with this position ignores those, so one opening never sets off a chain of others.
+const lastPointer = { x: -1, y: -1 };
+
+/** Calls `onIntent` when a mouse rests on (or moves across) an element for `delay` ms. Touch is ignored. */
+function useHoverIntent(onIntent, delay = 220) {
   const timer = useRef(0);
-  const onEnter = (e) => {
-    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
-    const box = e.currentTarget;
-    window.clearTimeout(timer.current);
-    timer.current = window.setTimeout(() => {
-      const d = box.querySelector('details');
-      if (d && !d.open) d.open = true;
-    }, delay);
-  };
-  const onLeave = () => window.clearTimeout(timer.current);
   useEffect(() => () => window.clearTimeout(timer.current), []);
-  return <Tag className={className} onMouseEnter={onEnter} onMouseLeave={onLeave}>{children}</Tag>;
+  const onPointerMove = (e) => {
+    if (e.pointerType !== 'mouse') return;
+    const moved = Math.abs(e.clientX - lastPointer.x) + Math.abs(e.clientY - lastPointer.y) > 1;
+    lastPointer.x = e.clientX;
+    lastPointer.y = e.clientY;
+    if (!moved || timer.current) return;
+    timer.current = window.setTimeout(() => { timer.current = 0; onIntent(); }, delay);
+  };
+  const onPointerLeave = () => { window.clearTimeout(timer.current); timer.current = 0; };
+  return { onPointerMove, onPointerLeave };
+}
+
+/**
+ * A leader's message: the first paragraphs, then the rest unfolding smoothly when the mouse rests on
+ * the message (or the button is pressed). It stays open after the mouse leaves; "Show less" folds it.
+ */
+export function LeaderLetter({ title, greeting, preview = [], rest = [], signoff = null }) {
+  const [open, setOpen] = useState(false);
+  const hover = useHoverIntent(() => setOpen(true), 260);
+  const id = useId();
+  return (
+    <div className={`leader-letter ${open ? 'is-open' : ''}`} {...(rest.length ? hover : {})}>
+      <h3>{title}</h3>
+      {greeting && <p className="leader-greeting">{greeting}</p>}
+      {preview.map((para) => <p key={para.slice(0, 48)}>{para}</p>)}
+      {rest.length > 0 ? (
+        <>
+          <div className="letter-more" id={id} inert={!open}>
+            <div>
+              {rest.map((para) => <p key={para.slice(0, 48)}>{para}</p>)}
+              {signoff}
+            </div>
+          </div>
+          <button type="button" className="letter-toggle" aria-expanded={open} aria-controls={id} onClick={() => setOpen(!open)}>
+            {open ? 'Show less' : 'Read the full message'} <span aria-hidden="true">{open ? '\u2212' : '+'}</span>
+          </button>
+        </>
+      ) : signoff}
+    </div>
+  );
 }
 
 /* ---------------------------------------------------------------- FAQs */
 
+/** FAQ accordion. Click a question, or rest the mouse on it, to open it (one open at a time). */
 export function FaqList({ items, firstOpen = true }) {
   const [expanded, setExpanded] = useState(firstOpen ? 0 : -1);
   return (
     <div className="faq-items">
-      {items.map((f, i) => {
-        const open = expanded === i;
-        const id = `faq-${f.q.replace(/\W+/g, '-').toLowerCase()}`;
-        return (
-          <div className={`faq-item ${open ? 'is-open' : ''}`} key={f.q}>
-            <h3>
-              <button type="button" aria-expanded={open} aria-controls={id} onClick={() => setExpanded(open ? -1 : i)}>
-                <span>{f.q}</span><span className="faq-icon" aria-hidden="true"><Plus size={19} /></span>
-              </button>
-            </h3>
-            <div id={id} className="faq-answer" inert={!open}><div><p>{f.a}</p></div></div>
-          </div>
-        );
-      })}
+      {items.map((f, i) => (
+        <FaqItem key={f.q} f={f} open={expanded === i} onToggle={() => setExpanded(expanded === i ? -1 : i)} onHover={() => setExpanded(i)} />
+      ))}
+    </div>
+  );
+}
+
+function FaqItem({ f, open, onToggle, onHover }) {
+  const hover = useHoverIntent(() => { if (!open) onHover(); }, 200);
+  const id = `faq-${f.q.replace(/\W+/g, '-').toLowerCase()}`;
+  return (
+    <div className={`faq-item ${open ? 'is-open' : ''}`} {...hover}>
+      <h3>
+        <button type="button" aria-expanded={open} aria-controls={id} onClick={onToggle}>
+          <span>{f.q}</span><span className="faq-icon" aria-hidden="true"><Plus size={19} /></span>
+        </button>
+      </h3>
+      <div id={id} className="faq-answer" inert={!open}><div><p>{f.a}</p></div></div>
     </div>
   );
 }
@@ -753,6 +788,22 @@ export function EventActions({ event }) {
  * Rules map selectors to an effect, a base delay and a per-item stagger. Content stays visible without JS
  * and for visitors who prefer reduced motion.
  */
+/**
+ * Buttons light up in a different colour each on hover (Rotary blue, cranberry, green, gold,
+ * Interact blue, coral; see [data-hue] in globals.css). Neighbouring buttons get different colours,
+ * and a button inside a "ways" card takes the colour of that card's icon.
+ */
+const HUE_SELECTOR = '.btn, .card-btn, .nav-cta, .submit-btn, .chip-btn, .pill-links a, .note-pin-btn, .letter-toggle, .back-link';
+const ICON_HUE = { 'c-0': '2', 'c-1': '3', 'c-2': '5' }; // green, gold, coral icons
+function tintButtons() {
+  document.querySelectorAll(HUE_SELECTOR).forEach((el, i) => {
+    if (el.dataset.hue) return;
+    const icon = el.closest('.way, .value')?.querySelector('.way-icon');
+    const fromIcon = icon && Object.keys(ICON_HUE).find((c) => icon.classList.contains(c));
+    el.dataset.hue = fromIcon ? ICON_HUE[fromIcon] : String(i % 6);
+  });
+}
+
 const REVEAL_RULES = [
   ['.home-hero-copy', 'fade-up', 150],
   ['.home-hero-art .hero-quote, .home-hero-art .story-reel, .home-hero-art .hero-info-card, .home-hero-art .hero-small-tag', 'fade-up', 150],
@@ -769,7 +820,7 @@ const REVEAL_RULES = [
   ['.metric-grid, .story-block > *', 'fade-up', 100],
   ['.footer-top', 'fade-up', 150],
   ['.note-head, .note-layout > *', 'fade-up', 150],
-  ['.leader-card, .about-text, .timeline, .four-way, .focus-grid, .ways-grid, .value-grid, .logo-strip, .impact-band, .facts-grid, .green-counter, .yellow-band, .featured-card, .page-hero-wide, .form-layout > *, .donate-grid > *, .prose.narrow, .filters, .notice-banner, .pill-links', 'fade-up', 200],
+  ['.post-featured, .post-hero-head, .post-cover, .post-prose, .leader-card, .about-text, .timeline, .four-way, .focus-grid, .ways-grid, .value-grid, .logo-strip, .impact-band, .facts-grid, .green-counter, .yellow-band, .featured-card, .page-hero-wide, .form-layout > *, .donate-grid > *, .prose.narrow, .filters, .notice-banner, .pill-links', 'fade-up', 200],
 ];
 
 /** Numbers that count up when they scroll into view (like Kindora's stats). Years and ranges are left alone. */
@@ -828,6 +879,7 @@ export function ScrollReveal() {
       }
     };
     apply();
+    tintButtons();
     const counter = new IntersectionObserver((entries) => entries.forEach((en) => {
       if (en.isIntersecting) { counter.unobserve(en.target); en.target.dataset.counted = 'done'; countUp(en.target); }
     }), { threshold: 0.6 });
@@ -838,7 +890,7 @@ export function ScrollReveal() {
     });
     watchCounts();
     // Re-scan when client components add content (filters, pagination, search results).
-    const mo = new MutationObserver(() => { apply(); watchCounts(); });
+    const mo = new MutationObserver(() => { apply(); watchCounts(); tintButtons(); });
     mo.observe(document.querySelector('main') ?? document.body, { childList: true, subtree: true });
     return () => { io.disconnect(); mo.disconnect(); counter.disconnect(); };
   }, [pathname]);

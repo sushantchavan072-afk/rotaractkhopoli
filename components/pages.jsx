@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 // Icons: react-icons (Font Awesome 6), the same icon library Kindora uses.
 import {
-  FaArrowRight as ArrowRight, FaRegCalendar as CalendarDays, FaRegClock as Clock, FaLocationDot as MapPin,
+  FaArrowRight as ArrowRight, FaArrowLeft as ArrowLeft, FaRegCalendar as CalendarDays, FaRegClock as Clock, FaLocationDot as MapPin,
   FaHandshake as Handshake, FaRegEnvelope as Mail, FaPhone as Phone, FaCheck as Check, FaStar as Star,
   FaHandHoldingHeart as HandHeart, FaGraduationCap as GraduationCap, FaUsers as Users, FaEarthAsia as Globe2,
   FaBullhorn as Megaphone, FaHandshakeAngle as HeartHandshake, FaWandMagicSparkles as Sparkles,
@@ -19,7 +19,7 @@ import {
   postsNewestFirst, PAGE_SIZE, riPresident, drr, districtGovernor,
 } from '../data/club';
 import {
-  Btn, Eyebrow, Intro, Section, PageHero, Photo, FaqList, FaqSearch, MailForm, NoteWall, HoverOpen, MemberBadgeCard, SocialLinks,
+  Btn, Eyebrow, Intro, Section, PageHero, Photo, FaqList, FaqSearch, MailForm, NoteWall, LeaderLetter, MemberBadgeCard, SocialLinks,
   EventCard, EventsExplorer, EventStatus, EventActions, FamilyLogos, LogoMarquee,
 } from './ui';
 
@@ -355,15 +355,40 @@ function ContactMethods({ showPhone = false }) {
   );
 }
 
+/** Rough reading time for a post, at about 200 words a minute. */
+const readMinutes = (p) => {
+  const words = p.body.map((b) => b.p ?? b.h2 ?? b.quote ?? (b.list ?? []).join(' ')).join(' ').split(/\s+/).length;
+  return Math.max(1, Math.round(words / 200));
+};
+
+/** Blog card: the whole card is one link (via the title), with a photo, tag, date, title, summary and "Read article". */
 function PostCard({ p, headingLevel = 3 }) {
   const H = `h${headingLevel}`;
   return (
     <article className="post-card">
-      <Link href={`/blog/${p.slug}`} className="post-card-photo" tabIndex={-1} aria-hidden="true"><Photo src={p.image} alt="" label={p.title} sizes="(max-width: 900px) 100vw, 50vw" /></Link>
-      <div className="post-card-meta"><span className="tags">{p.tags.map((t) => <span className="chip chip-line" key={t}>{t}</span>)}</span><time dateTime={p.date}>{formatPostDate(p.date)}</time></div>
-      <H>{p.title}</H>
-      <p>{p.excerpt}</p>
-      <Link href={`/blog/${p.slug}`} className="card-btn">Read More<span className="sr-only">: {p.title}</span></Link>
+      <div className="post-card-photo"><Photo src={p.image} alt="" label={p.title} sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 400px" /></div>
+      <div className="post-card-body">
+        <div className="post-card-meta"><span className="chip chip-line">{p.tags[0]}</span><time dateTime={p.date}>{formatPostDate(p.date)}</time></div>
+        <H><Link href={`/blog/${p.slug}`} className="post-card-link">{p.title}</Link></H>
+        <p>{p.excerpt}</p>
+        <span className="post-read" aria-hidden="true">Read article <ArrowRight size={13} /></span>
+      </div>
+    </article>
+  );
+}
+
+/** The newest post, shown large at the top of the blog. */
+function PostFeatured({ p }) {
+  return (
+    <article className="post-featured">
+      <div className="post-featured-photo"><Photo src={p.image} alt="" label={p.title} priority sizes="(max-width: 900px) 100vw, 640px" /></div>
+      <div className="post-featured-body">
+        <div className="post-card-meta"><span className="chip chip-line">Latest</span>{p.tags.map((t) => <span className="chip chip-line" key={t}>{t}</span>)}</div>
+        <h2><Link href={`/blog/${p.slug}`} className="post-card-link">{p.title}</Link></h2>
+        <p>{p.excerpt}</p>
+        <p className="post-featured-meta"><time dateTime={p.date}>{formatPostDate(p.date)}</time> · {readMinutes(p)} min read</p>
+        <span className="btn" aria-hidden="true">Read article <span className="btn-arrow"><ArrowRight size={14} /></span></span>
+      </div>
     </article>
   );
 }
@@ -682,7 +707,8 @@ export function Blog({ page = 1 }) {
     <>
       <PageHero eyebrow="Blog & Updates" title="Blog & updates" desc="Stories from the club: our projects, our avenues and how to get involved." />
       <Section>
-        <div className="post-grid">{list.map((p) => <PostCard p={p} key={p.slug} headingLevel={2} />)}</div>
+        {page === 1 && list.length > 0 && <PostFeatured p={list[0]} />}
+        <div className="post-grid is-three">{(page === 1 ? list.slice(1) : list).map((p) => <PostCard p={p} key={p.slug} headingLevel={2} />)}</div>
         {pages > 1 && (
           <nav className="pagination" aria-label="Blog pages">
             {Array.from({ length: pages }, (_, n) => (
@@ -703,16 +729,29 @@ export function BlogPost({ slug }) {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <section className="detail-hero">
+      <section className="post-hero">
         <div className="container">
-          <Eyebrow>{p.tags.join(', ')}</Eyebrow>
-          <h1>{p.title}</h1>
-          <p className="post-meta">By {club.name} · <time dateTime={p.date}>{formatPostDate(p.date)}</time></p>
-          <div className="detail-photo"><Photo src={p.image} alt="" label={p.title} priority sizes="(max-width: 1240px) 100vw, 1240px" /></div>
+          <Link href="/blog" className="back-link"><ArrowLeft size={13} aria-hidden="true" /> All articles</Link>
+          <header className="post-hero-head">
+            <div className="post-tags">{p.tags.map((t) => <span className="chip chip-line" key={t}>{t}</span>)}</div>
+            <h1>{p.title}</h1>
+            <p className="post-lede">{p.excerpt}</p>
+            <div className="post-byline">
+              <span className="post-avatar" aria-hidden="true">RK</span>
+              <span><strong>{club.name}</strong><span><time dateTime={p.date}>{formatPostDate(p.date)}</time> · {readMinutes(p)} min read</span></span>
+            </div>
+          </header>
+          <div className="post-cover"><Photo src={p.image} alt="" label={p.title} priority sizes="(max-width: 1240px) 100vw, 1240px" /></div>
         </div>
       </section>
-      <section className="section detail-body">
-        <div className="container"><article className="prose narrow"><PostBody blocks={p.body} /></article></div>
+      <section className="section post-body">
+        <div className="container">
+          <article className="prose post-prose"><PostBody blocks={p.body} /></article>
+          <div className="post-end">
+            <Link href="/blog" className="back-link"><ArrowLeft size={13} aria-hidden="true" /> Back to all articles</Link>
+            <Link href="/join" className="text-link">Join the club <ArrowRight size={13} aria-hidden="true" /></Link>
+          </div>
+        </div>
       </section>
       <Section>
         <Intro center title="Read other articles" />
@@ -788,18 +827,13 @@ function LeaderCard({ leader, eyebrow, tone = 'coral', preview = 3 }) {
         </div>
       </div>
       {leader.message?.length > 0 && (
-        <HoverOpen className="leader-letter">
-          <h3>Message from the {leader.short}</h3>
-          {leader.greeting && <p className="leader-greeting">{leader.greeting}</p>}
-          {shown.map((para) => <p key={para.slice(0, 48)}>{para}</p>)}
-          {rest.length > 0 ? (
-            <details>
-              <summary><span className="more">Read the full message</span><span className="less">Show less</span></summary>
-              {rest.map((para) => <p key={para.slice(0, 48)}>{para}</p>)}
-              <Signoff lines={leader.signoff} />
-            </details>
-          ) : <Signoff lines={leader.signoff} />}
-        </HoverOpen>
+        <LeaderLetter
+          title={`Message from the ${leader.short}`}
+          greeting={leader.greeting}
+          preview={shown}
+          rest={rest}
+          signoff={<Signoff lines={leader.signoff} />}
+        />
       )}
     </article>
   );

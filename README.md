@@ -77,10 +77,18 @@ The site is **light mode only**.
 - Esc, the × button or a click outside closes it.
 - It loads only when someone opens a badge.
 
-**Hover to expand:**
-- Leader messages (RI President, District Governor, DRR) unfold to the full message when the mouse rests on them (`HoverOpen` in `components/ui.jsx`). "Show less" folds them again, and on phones the button still opens them.
-- Testimonial cards show long quotes in full while the mouse is over them.
-- Notes on the Reviews page wall lift and grow when hovered.
+**Hover to expand** (`useHoverIntent` in `components/ui.jsx`):
+- **FAQs:** rest the mouse on a question for a moment and it opens, while the one that was open closes.
+- **Leader messages** (RI President, District Governor, DRR): the full message unfolds smoothly and stays open; "Show less" folds it.
+- **Testimonial cards** show long quotes in full on hover, and notes on the Reviews wall lift and grow.
+- Clicking and keyboard work as before, and touch screens use taps.
+- When something opens or closes, the page shifts under a still mouse. Only real mouse movement counts, so one item opening never sets off a chain of others.
+
+**Button hover colours:**
+- Each button lights up in its own colour when the mouse is over it: Rotary blue, cranberry, green, Rotary gold, Interact blue or coral.
+- Neighbouring buttons get different colours, and buttons in the "ways to help" cards match their card's icon.
+- The colours are assigned in `tintButtons` in `components/ui.jsx` and styled by `[data-hue]` in `app/globals.css`.
+- Hover shadows are kept light.
 
 **Rotary family colours** (`--rotary-blue`, `--rotary-gold`, `--rotaract`, `--interact` and their light tints, at the top of `app/globals.css`) are used alongside the Kindora palette:
 - section label dots, and the blue card tint;
