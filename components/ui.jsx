@@ -581,7 +581,7 @@ function countUp(el) {
   const start = performance.now();
   const duration = 2000;
   const tick = (now) => {
-    const t = Math.min(1, (now - start) / duration);
+    const t = Math.min(1, Math.max(0, (now - start) / duration)); // rAF time can be slightly earlier than start
     const eased = 1 - (1 - t) ** 3;
     el.textContent = `${prefix}${fmt(target * eased)}${suffix}`;
     if (t < 1) requestAnimationFrame(tick); else { el.textContent = final; el.removeAttribute('aria-label'); }
@@ -597,10 +597,14 @@ export function ScrollReveal() {
     const io = new IntersectionObserver((entries) => entries.forEach((en) => {
       if (en.isIntersecting) { en.target.setAttribute('data-aos-in', ''); io.unobserve(en.target); } // an attribute, not a class: React rewrites className on re-render
     }), { rootMargin: '0px 0px -60px 0px' });
+    // Elements this effect run is watching. Tracked here rather than via data-aos, because during a page
+    // change the previous run can tag new-page elements just before it is torn down; those must still be watched.
+    const watched = new WeakSet();
     const apply = () => {
       for (const [selector, effect, base, step = 0, cycle = 0] of REVEAL_RULES) {
         document.querySelectorAll(selector).forEach((el) => {
-          if (el.dataset.aos || el.closest('.marquee')) return;
+          if (watched.has(el) || el.hasAttribute('data-aos-in') || el.closest('.marquee')) return;
+          watched.add(el);
           let delay = base;
           if (step) {
             const siblings = [...el.parentElement.children].filter((c) => c.matches(selector));
@@ -615,11 +619,16 @@ export function ScrollReveal() {
     };
     apply();
     const counter = new IntersectionObserver((entries) => entries.forEach((en) => {
-      if (en.isIntersecting) { counter.unobserve(en.target); countUp(en.target); }
+      if (en.isIntersecting) { counter.unobserve(en.target); en.target.dataset.counted = 'done'; countUp(en.target); }
     }), { threshold: 0.6 });
-    document.querySelectorAll(COUNT_SELECTOR).forEach((el) => { if (!el.dataset.counted) { el.dataset.counted = '1'; counter.observe(el); } });
+    const countWatched = new WeakSet();
+    const watchCounts = () => document.querySelectorAll(COUNT_SELECTOR).forEach((el) => {
+      if (el.dataset.counted === 'done' || countWatched.has(el)) return;
+      countWatched.add(el); counter.observe(el);
+    });
+    watchCounts();
     // Re-scan when client components add content (filters, pagination, search results).
-    const mo = new MutationObserver(apply);
+    const mo = new MutationObserver(() => { apply(); watchCounts(); });
     mo.observe(document.querySelector('main') ?? document.body, { childList: true, subtree: true });
     return () => { io.disconnect(); mo.disconnect(); counter.disconnect(); };
   }, [pathname]);
