@@ -364,7 +364,7 @@ function PostCard({ p, headingLevel = 3 }) {
 function PostBody({ blocks }) {
   return blocks.map((b, i) => {
     if (b.h2) return <h2 key={i}>{b.h2}</h2>;
-    if (b.quote) return <blockquote key={i} className="quote-box">“{b.quote}”</blockquote>;
+    if (b.quote) return <blockquote key={i} className="quote-box"><span className="quote-mark" aria-hidden="true">“</span><p>{b.quote}</p></blockquote>;
     if (b.list) return <ul key={i} className="check-list">{b.list.map((li) => <li key={li}><Check size={18} aria-hidden="true" /> {li}</li>)}</ul>;
     return <p key={i}>{b.p}</p>;
   });
@@ -639,7 +639,7 @@ export function EventDetail({ slug }) {
             <p>{e.report ?? e.summary}</p>
             <h2>Project details</h2>
             <p>This {avenue ? avenue.name.toLowerCase() : 'club'} project took place at {e.venue} on {formatDate(e.date)}, {e.time}.</p>
-            {e.partner && <blockquote className="quote-box">“Organised in partnership with {e.partner}.”</blockquote>}
+            {e.partner && <p className="partner-note"><span className="partner-icon" aria-hidden="true"><Handshake size={18} /></span><span>Organised in partnership with <strong>{e.partner}</strong></span></p>}
             {e.gallery?.length > 0 && <GalleryGrid photos={e.gallery.map((src) => [src, e.title])} />}
             <div className="detail-actions">
               <Btn href={`/contact?about=${encodeURIComponent(e.title)}`} icon={false}>Volunteer or Enquire</Btn>
@@ -754,9 +754,10 @@ export function Gallery() {
 /* ======================= District & Rotary ======================= */
 
 /** Yellow statistic cards: each figure in its own card, in the same yellow design. */
-function StatCards({ stats }) {
+/** Big-number cards. tone: 'kindora' (yellow), 'rotary' (Rotary blue and gold) or 'rotaract' (cranberry). */
+function StatCards({ stats, tone = 'kindora' }) {
   return (
-    <dl className={`stat-cards is-${stats.length}`}>
+    <dl className={`stat-cards is-${stats.length} tone-${tone}`}>
       {stats.map((st) => <div key={st.label}><dd>{st.value}</dd><dt>{st.label}</dt></div>)}
     </dl>
   );
@@ -776,7 +777,7 @@ function LeaderCard({ leader, eyebrow, tone = 'coral', preview = 3 }) {
           <p className="leader-role">{leader.role} · {leader.year}</p>
           <div className="leader-theme">
             {leader.themeLogo && <Image src={leader.themeLogo.src} alt={leader.themeLogo.alt} width={leader.themeLogo.w} height={leader.themeLogo.h} sizes="200px" className={leader.themeLogo.w > leader.themeLogo.h ? 'is-wide' : ''} />}
-            <div><small>{leader.themeLabel} {leader.year}</small><strong>{leader.theme}</strong>{leader.themeSub && <span>{leader.themeSub}</span>}</div>
+            <div><small className="leader-theme-label">{leader.themeLabel} {leader.year}</small><strong>{leader.theme}</strong>{leader.themeSub && <span>{leader.themeSub}</span>}</div>
           </div>
           {leader.highlight && <blockquote className="leader-highlight">“{leader.highlight}”</blockquote>}
         </div>
@@ -811,7 +812,7 @@ export function District() {
       <PageHero eyebrow="Our district" title={district.name} desc={district.intro} logo={FAMILY_LOGOS[0]}>
         <Btn href={district.website} icon={false}>Visit the District Website</Btn>
       </PageHero>
-      <Section><StatCards stats={district.stats} /></Section>
+      <Section><StatCards stats={district.stats} tone="rotaract" /></Section>
       <Section>
         <div className="about-text">
           <div><Eyebrow>About the district</Eyebrow><h2>What a Rotaract district does</h2></div>
@@ -830,7 +831,7 @@ export function District() {
       </Section>
       <Section>
         <Intro center label="District leadership" title={`Leading Rotaract District 3131 in ${drr.year}`} description="The District Rotaract Representative leads the district's Rotaract clubs through the Rotary year." />
-        <LeaderCard leader={drr} eyebrow="District Rotaract Representative" tone="green" />
+        <LeaderCard leader={drr} eyebrow="District Rotaract Representative" tone="rotaract" />
       </Section>
       <CommunityCTA />
     </>
@@ -843,7 +844,7 @@ export function RotaryInfo() {
       <PageHero eyebrow="Rotary International" title="People of action, since 1905" desc={rotary.intro} logo={FAMILY_LOGOS[1]}>
         <Btn href={rotary.website} icon={false}>Visit Rotary.org</Btn>
       </PageHero>
-      <Section><StatCards stats={rotary.stats} /></Section>
+      <Section><StatCards stats={rotary.stats} tone="rotary" /></Section>
       <Section>
         <div className="about-text">
           <div><Eyebrow>Our history</Eyebrow><h2>Founded on {rotary.founded} in Chicago</h2></div>
@@ -877,8 +878,8 @@ export function RotaryInfo() {
       <Section>
         <Intro center label="Rotary leadership" title={`Leading Rotary in ${riPresident.year}`} description="The President of Rotary International and the Governor of Rotary District 3131, our sponsoring Rotary district." />
         <div className="leader-stack">
-          <LeaderCard leader={riPresident} eyebrow={`RI President ${riPresident.year}`} preview={4} />
-          <LeaderCard leader={districtGovernor} eyebrow="Rotary District 3131 Governor" tone="sun" />
+          <LeaderCard leader={riPresident} eyebrow={`RI President ${riPresident.year}`} tone="rotary" preview={4} />
+          <LeaderCard leader={districtGovernor} eyebrow="Rotary District 3131 Governor" tone="gold" />
         </div>
       </Section>
       <CommunityCTA />

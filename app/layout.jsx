@@ -2,7 +2,8 @@ import '@fontsource-variable/urbanist';
 import './globals.css';
 import {Analytics} from '@vercel/analytics/next';
 import {Header, Footer, ScrollReveal} from '../components/ui';
-import WakeGlyph from '@/components/ui/background-ascii-wake';
+import DotGlowBackground from '@/components/ui/background-dot-glow';
+import CustomCursor from '@/components/ui/custom-cursor';
 import {club, SITE_URL} from '../data/club';
 import {organizationJsonLd} from '../lib/seo';
 
@@ -20,12 +21,13 @@ export default function RootLayout({ children }){
   return (
     <html lang="en-IN">
       <body>
-        <WakeGlyph />
+        <DotGlowBackground />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }} />
         <Header/>
         <main id="main" tabIndex={-1}>{children}</main>
         <Footer/>
         <ScrollReveal/>
+        <CustomCursor/>
         {process.env.VERCEL && <Analytics/>}
       </body>
     </html>

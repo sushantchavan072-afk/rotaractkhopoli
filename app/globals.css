@@ -29,6 +29,15 @@
   --coral-50: #fdeee8;
   --mint-50: #e6f8ec;
   --sun-50: #fff6d6;
+  /* Rotary family colours (official brand values), used alongside the Kindora palette */
+  --rotary-blue: #17458f;   /* Rotary royal blue */
+  --rotary-gold: #f7a81b;   /* Rotary gold */
+  --rotaract: #d41367;      /* Rotaract cranberry */
+  --interact: #00a2e0;      /* Interact sky blue */
+  --rotary-50: #e9eff9;
+  --gold-50: #fef4df;
+  --rotaract-50: #fce9f1;
+  --interact-50: #e3f5fc;
   --radius: 28px;
   /* Segoe UI from the visitor's device (built into every Windows PC; Microsoft's licence does not allow
      hosting the font files on a website). Other devices fall back to their closest system font. */
@@ -71,7 +80,7 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: non
 .tint-rose { background: var(--coral-50); --accent: var(--coral-dark); }
 .tint-sky { background: var(--mint-50); --accent: var(--green-dark); }
 .tint-gold { background: var(--sun-50); --accent: #7a5c00; }
-.tint-leaf { background: #efeefa; --accent: #4b3f99; }
+.tint-leaf { background: var(--rotary-50); --accent: var(--rotary-blue); }
 
 /* ---------- Section intros & eyebrow pills ---------- */
 .section-intro { max-width: 720px; margin-bottom: 44px; }
@@ -82,8 +91,11 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: non
 .eyebrow { display: inline-flex; align-items: center; gap: 10px; border: 1px solid var(--line); background: var(--surface); padding: 4px 16px 4px 4px; border-radius: 40px; font-size: 14px; font-weight: 500; color: var(--text); }
 .eyebrow-dot { width: 28px; height: 28px; border-radius: 50%; background: var(--yellow-strong); position: relative; flex: none; }
 .eyebrow-dot::after { content: '✦'; position: absolute; inset: 0; display: grid; place-items: center; font-size: 12px; color: #fff; }
-section:nth-of-type(3n+1) .eyebrow-dot { background: var(--green); }
-section:nth-of-type(3n+2) .eyebrow-dot { background: var(--coral); }
+section:nth-of-type(6n+1) .eyebrow-dot { background: var(--green); }
+section:nth-of-type(6n+2) .eyebrow-dot { background: var(--coral); }
+section:nth-of-type(6n+4) .eyebrow-dot { background: var(--rotary-blue); }
+section:nth-of-type(6n+5) .eyebrow-dot { background: var(--rotaract); }
+section:nth-of-type(6n) .eyebrow-dot { background: var(--interact); }
 
 /* ---------- Buttons, chips, links ---------- */
 .btn-row { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
@@ -154,7 +166,7 @@ section:nth-of-type(3n+2) .eyebrow-dot { background: var(--coral); }
 .subscribe input { border: 0; min-width: 0; flex: 1; outline: none; background: transparent; font-size: 15px; color: var(--ink); }
 .subscribe button { border: 0; background: var(--ink); color: var(--on-ink); border-radius: 30px; padding: 13px 20px; font-size: 15px; font-weight: 500; white-space: nowrap; }
 .footer .form-status { font-size: 13px; color: var(--green-dark); margin: 10px 0 0; background: none; border: 0; padding: 0; }
-.footer-bottom { border-top: 1px solid var(--line); padding-top: 26px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; color: var(--muted); font-size: 14px; }
+.footer-bottom { position: relative; padding-top: 26px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; color: var(--muted); font-size: 14px; }
 .footer-mail { display: inline-flex; gap: 8px; align-items: center; }
 .footer-mail:hover { color: var(--ink); }
 .social { display: flex; align-items: center; gap: 12px; }
@@ -372,7 +384,12 @@ section:nth-of-type(3n+2) .eyebrow-dot { background: var(--coral); }
 .prose h2 { font-size: clamp(1.6rem, 2.6vw, 2.2rem); font-weight: 500; margin: 1.4em 0 .6em; }
 .prose h2:first-child, .prose .eyebrow + h2 { margin-top: 18px; }
 .narrow { max-width: 900px; margin-inline: auto; }
-.quote-box { margin: 32px 0; border: 1px solid #f7c3b2; border-left: 6px solid var(--coral); border-radius: 18px; padding: 24px 28px; font-size: 17px; line-height: 1.6; color: var(--text); }
+.quote-box { margin: 32px 0; display: flex; gap: 18px; align-items: flex-start; background: var(--coral-50); border-radius: var(--radius); padding: 26px 30px; }
+.quote-box p { margin: 0; font-size: 18px; line-height: 1.6; color: var(--ink); font-style: italic; }
+.quote-mark { flex: none; width: 44px; height: 44px; border-radius: 50%; background: var(--coral); color: var(--ink); display: grid; place-items: center; font: 600 34px/1 var(--font-head); padding-top: 12px; }
+.partner-note { display: flex; align-items: center; gap: 14px; width: fit-content; max-width: 100%; margin: 28px 0; padding: 10px 24px 10px 10px; background: var(--surface); border: 1px solid var(--line-strong); border-radius: 60px; font-size: 16px; color: var(--text-2); }
+.partner-note strong { color: var(--ink); font-weight: 600; }
+.partner-icon { flex: none; width: 42px; height: 42px; border-radius: 50%; background: var(--rotary-50); color: var(--rotary-blue); display: grid; place-items: center; }
 .outcome-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin: 0 0 30px; }
 .outcome-grid > div { background: var(--coral-50); border-radius: 18px; padding: 18px; display: flex; flex-direction: column-reverse; }
 .outcome-grid dd { margin: 0; font-size: 30px; font-weight: 600; }
@@ -803,6 +820,14 @@ section:nth-of-type(3n+2) .eyebrow-dot { background: var(--coral); }
 .stat-cards dd, .stat-cards dt { position: relative; z-index: 1; }
 .stat-cards dd { margin: 0; font-size: clamp(2.2rem, 3.4vw, 3rem); font-weight: 600; letter-spacing: -0.02em; line-height: 1.05; color: var(--ink); }
 .stat-cards dt { font-size: 15px; color: var(--text-2); line-height: 1.45; max-width: 220px; }
+/* Rotary page: Rotary gold and royal blue; District page: Rotaract cranberry */
+.stat-cards.tone-rotary > div:nth-child(odd) { background: var(--rotary-gold); }
+.stat-cards.tone-rotary > div:nth-child(even) { background: var(--rotary-blue); }
+.stat-cards.tone-rotaract > div:nth-child(odd) { background: var(--rotaract); }
+.stat-cards.tone-rotaract > div:nth-child(even) { background: var(--rotaract-50); }
+.stat-cards.tone-rotaract > div:nth-child(even) dd { color: #a80f52; }
+:is(.stat-cards.tone-rotary > div:nth-child(even), .stat-cards.tone-rotaract > div:nth-child(odd)) :is(dd, dt) { color: #fff; }
+:is(.stat-cards.tone-rotary > div:nth-child(even), .stat-cards.tone-rotaract > div:nth-child(odd))::after { background: rgba(255,255,255,.1); }
 
 
 .about-text { display: grid; grid-template-columns: .8fr 1.2fr; gap: 56px; align-items: start; }
@@ -881,17 +906,21 @@ section:nth-of-type(3n+2) .eyebrow-dot { background: var(--coral); }
 .leader-card.is-coral { background: var(--coral-50); --lc: var(--coral); --lc-dark: var(--coral-dark); }
 .leader-card.is-green { background: var(--mint-50); --lc: var(--green); --lc-dark: var(--green-dark); }
 .leader-card.is-sun { background: var(--sun-50); --lc: var(--yellow-strong); --lc-dark: #7a5c00; }
+.leader-card.is-rotary { background: var(--rotary-50); --lc: var(--rotary-blue); --lc-dark: var(--rotary-blue); }
+.leader-card.is-gold { background: var(--gold-50); --lc: var(--rotary-gold); --lc-dark: #7d5100; }
+.leader-card.is-rotaract { background: var(--rotaract-50); --lc: var(--rotaract); --lc-dark: #a80f52; }
 .leader-top { display: grid; grid-template-columns: minmax(240px, 360px) 1fr; gap: 52px; align-items: end; }
 .leader-photo { position: relative; aspect-ratio: 4 / 5; border-radius: 24px; overflow: hidden; background: radial-gradient(circle at 50% 70%, #fff 0%, rgba(255,255,255,.55) 60%, rgba(255,255,255,.2) 100%); }
 .leader-photo .photo { object-fit: contain; object-position: center bottom; }
 .leader-copy { padding-bottom: 6px; }
 .leader-copy h2 { font-size: clamp(2rem, 3.2vw, 2.8rem); margin: 18px 0 6px; }
 .leader-role { font-size: 17px; color: var(--text-2); margin: 0 0 24px; }
-.leader-theme { display: flex; align-items: center; gap: 20px; background: var(--surface); border-radius: 22px; padding: 18px 24px 18px 18px; border-left: 6px solid var(--lc); max-width: 640px; }
+.leader-theme { display: flex; align-items: center; gap: 20px; background: var(--surface); border-radius: 24px; padding: 16px 24px 16px 16px; border: 1px solid rgba(0,0,0,.05); box-shadow: 0 12px 30px rgba(0,0,0,.05); max-width: 640px; }
 .leader-theme img { width: 96px; height: 96px; object-fit: contain; border-radius: 14px; flex: none; }
 .leader-theme img.is-wide { width: 190px; height: auto; border-radius: 0; }
 .leader-theme > div { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-.leader-theme small { font-size: 12.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--lc-dark); }
+.leader-theme small { align-self: flex-start; display: inline-flex; align-items: center; gap: 7px; margin-bottom: 4px; padding: 5px 12px; border-radius: 30px; background: color-mix(in srgb, var(--lc) 13%, #fff); font-size: 11.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--lc-dark); }
+.leader-theme small::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--lc); flex: none; }
 .leader-theme strong { font-size: clamp(1.3rem, 2.2vw, 1.8rem); font-weight: 600; color: var(--ink); line-height: 1.2; }
 .leader-theme span { font-size: 14.5px; color: var(--text-2); }
 .leader-highlight { margin: 22px 0 0; font-size: 18px; line-height: 1.6; color: var(--ink); font-style: italic; max-width: 640px; }
@@ -924,9 +953,11 @@ section:nth-of-type(3n+2) .eyebrow-dot { background: var(--coral); }
 }
 
 
-/* ---------- Background: ASCII wake (components/ui/background-ascii-wake.tsx) ---------- */
-/* The canvas sits behind everything; the glyph colours are set in the component. */
-.site-bg { position: fixed; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; pointer-events: none; color: #2b3a31; }
+/* ---------- Background ---------- */
+/* Dot grid + glow + ASCII trail (components/ui/background-dot-glow.tsx); it sits behind everything. */
+.site-bg { position: fixed; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; pointer-events: none;
+  /* the resting dot grid: 32px apart, very faint */
+  background-image: radial-gradient(circle at 16px 16px, rgba(35, 45, 60, .1) 1.05px, transparent 1.6px); background-size: 32px 32px; }
 main, .footer { position: relative; z-index: 1; }
 .footer { background: transparent; }
 .header-mobile-actions { display: none; align-items: center; gap: 10px; }
@@ -939,7 +970,21 @@ main, .footer { position: relative; z-index: 1; }
 .footer-credit { display: inline-flex; align-items: center; gap: 6px; }
 .footer-heart { color: #e5484d; width: 13px; height: 13px; }
 
-@media print { .site-bg { display: none !important; } }
+@media print { .site-bg, .cursor-arrow, .cursor-sparks { display: none !important; } }
+::selection { background: rgba(212, 19, 103, .16); }
+/* A thin Rotary family rule above the footer's bottom line: Rotary blue, gold, Rotaract cranberry, Interact blue */
+.footer-bottom::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; border-radius: 2px; background: linear-gradient(90deg, var(--rotary-blue), var(--rotary-gold), var(--rotaract), var(--interact)); opacity: .85; }
+
+/* ---------- Custom cursor (components/ui/custom-cursor.tsx) ---------- */
+@media (pointer: fine) {
+  html.custom-cursor, html.custom-cursor * { cursor: none !important; }
+  html.custom-cursor :is(input:not([type='checkbox']):not([type='radio']):not([type='submit']):not([type='button']), textarea, [contenteditable='true']) { cursor: text !important; }
+}
+.cursor-arrow { position: fixed; left: 0; top: 0; z-index: 300; pointer-events: none; opacity: 0; color: var(--rotary-blue); transition: opacity .1s ease-out, color .2s; will-change: transform, opacity; }
+.cursor-arrow svg { display: block; transform-origin: 1px 1px; transition: transform .2s ease; filter: drop-shadow(0 1px 1.5px rgba(0,0,0,.25)); }
+.cursor-arrow[data-state='link'] { color: var(--rotaract); }
+.cursor-arrow[data-state='link'] svg { transform: scale(1.25); }
+.cursor-sparks { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 299; pointer-events: none; }
 
 /* ---------- Leave a note (Reviews page, "Share your experience") ---------- */
 .note-head { text-align: center; max-width: 640px; margin: 0 auto 48px; display: flex; flex-direction: column; align-items: center; }

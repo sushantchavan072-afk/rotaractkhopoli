@@ -53,21 +53,32 @@ Visitor statistics (Vercel Analytics, which uses no cookies) switch on automatic
 
 Kindora's `/elements` page is a template style guide, so it is not included.
 
-## Background
+## Background, cursor and colours
 
 The site is **light mode only**.
 
-**Background:** `components/ui/background-ascii-wake.tsx` (WakeGlyph). A faint scatter of monospace characters sits behind the page. When the mouse moves, it leaves a short trail of characters that fades away. It is tuned to stay light:
+**Background** (`components/ui/background-dot-glow.tsx`):
+- A faint dot grid sits 32px apart behind the page. It is a static CSS background on `.site-bg`, so it costs nothing to show.
+- Dots within about 150px of the mouse glow in Rotaract cranberry.
+- Moving the mouse leaves a short trail of characters in the Rotary family colours.
+- Nothing is redrawn while the mouse is still, and the animation stops while the tab is hidden.
+- Touch screens and visitors who prefer reduced motion see only the plain dots.
 
-- it draws once and then does nothing until the mouse moves, so an idle page uses no CPU;
-- the animation runs only while a trail is fading, and stops while the tab is hidden;
-- touch drags (scrolling on phones) don't draw trails, and visitors who prefer reduced motion get the still scatter only;
-- the characters use the club colours (`COLORS` at the top of the file): the mouse trail cycles through them and the resting scatter is a random mix.
+**Cursor** (`components/ui/custom-cursor.tsx`):
+- On mouse and trackpad devices, the system pointer is replaced by a small Rotary-blue arrow.
+- Over links and buttons it turns cranberry and grows slightly. Clicking gives a small spark burst.
+- Text fields keep the normal text cursor.
+- Touch screens and reduced-motion visitors keep the system cursor.
 
+**Rotary family colours** (`--rotary-blue`, `--rotary-gold`, `--rotaract`, `--interact` and their light tints, at the top of `app/globals.css`) are used alongside the Kindora palette:
+- section label dots, and the blue card tint;
+- the leader cards: Rotary blue for the RI President, Rotary gold for the District Governor, Rotaract cranberry for the DRR;
+- the number cards: Rotary gold and blue on the Rotary page, cranberry on the District page;
+- the event partner badge, the line above the footer's bottom row, text selection, the cursor, the glow and the trail.
 
 ### Why there is TypeScript but no Tailwind or shadcn
 
-The background component is TypeScript, so the project now includes TypeScript (`tsconfig.json`, with the `@/*` import alias). It also uses shadcn's convention of keeping shared UI components in `components/ui/`, so tools and copy-paste components find them at the expected path.
+The background and cursor components are TypeScript, so the project now includes TypeScript (`tsconfig.json`, with the `@/*` import alias). It also uses shadcn's convention of keeping shared UI components in `components/ui/`, so tools and copy-paste components find them at the expected path.
 
 Tailwind is **not** installed on purpose. The background only used a few utility classes (`block h-full w-full text-foreground`, plus `fixed inset-0` for placement), which are now the `.site-bg` rule in `globals.css`. Tailwind's base styles ("preflight") would reset this site's hand-written stylesheet. If you later want Tailwind or shadcn components anyway:
 
