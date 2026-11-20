@@ -1,4 +1,5 @@
 import {Sponsorship} from '../../components/pages';
+import {pageMeta} from '../../lib/seo';
 
-export const metadata = { title: "Sponsorship", description: "Sponsor a Rotaract Club of Khopoli project. Partnership tiers, what sponsors receive, and how funds are reported." };
+export const metadata = pageMeta('/sponsorship', "Sponsorship", "Sponsor a Rotaract Club of Khopoli project. Partnership tiers, in-kind support, what sponsors receive and how every rupee is reported.");
 export default function Page(){ return <Sponsorship/>; }

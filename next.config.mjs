@@ -1,3 +1,6 @@
-/** An independent Next.js rebuild, not the original Kindora source. */
-const config = { reactStrictMode: true };
+/** @type {import('next').NextConfig} */
+const config = {
+  reactStrictMode: true,
+  images: { formats: ['image/avif', 'image/webp'] },
+};
 export default config;

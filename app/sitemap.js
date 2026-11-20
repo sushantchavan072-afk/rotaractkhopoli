@@ -1,7 +1,6 @@
-import {ALL_PAGES, events} from '../data/club';
+import {ALL_PAGES, avenues, events, SITE_URL} from '../data/club';
 
-const base = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 export default function sitemap(){
-  return [...ALL_PAGES.map(([, href]) => href), ...events.map((e) => `/events/${e.slug}`)]
-    .map((path) => ({ url: base + path, lastModified: new Date() }));
+  const paths = [...ALL_PAGES.map(([, href]) => href), ...avenues.map((a) => `/avenues/${a.slug}`), ...events.map((e) => `/events/${e.slug}`)];
+  return paths.map((path) => ({ url: SITE_URL + path, lastModified: new Date(), changeFrequency: path.startsWith('/events') ? 'weekly' : 'monthly', priority: path === '/' ? 1 : 0.7 }));
 }

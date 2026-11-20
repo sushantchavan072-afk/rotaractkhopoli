@@ -1,4 +1,5 @@
 import {District} from '../../components/pages';
+import {pageMeta} from '../../lib/seo';
 
-export const metadata = { title: "Rotaract District 3131", description: "Rotaract District 3131 covers the Pune and Raigad revenue districts with 100+ clubs and 2,700+ Rotaractors." };
+export const metadata = pageMeta('/district-3131', "Rotaract District 3131", "Rotaract District 3131 brings together 100+ Rotaract clubs and 2,700+ Rotaractors across the Pune and Raigad regions of Maharashtra.");
 export default function Page(){ return <District/>; }

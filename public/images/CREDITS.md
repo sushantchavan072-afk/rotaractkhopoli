@@ -5,8 +5,7 @@ Replace them with the club's own project photos by saving files with the same na
 
 | File | Unsplash photo |
 |---|---|
-| hero.jpg | https://unsplash.com/photos/photo-1488521787991-ed7bbaae773c |
-| about.jpg | https://unsplash.com/photos/photo-1517486808906-6ca8b3f04846 |
+| hero.jpg (also used for the share image `public/og.jpg`) | https://unsplash.com/photos/photo-1517486808906-6ca8b3f04846 |
 | volunteer.jpg | https://unsplash.com/photos/photo-1559027615-cd4628902d4a |
 | cta.jpg | https://unsplash.com/photos/photo-1582213782179-e0d53f98f2ca |
 | support.jpg | https://unsplash.com/photos/photo-1532629345422-7515f3d16bb6 |

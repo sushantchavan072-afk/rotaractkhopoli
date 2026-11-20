@@ -1,22 +1,30 @@
+import '@fontsource-variable/fraunces';
+import '@fontsource-variable/open-sans';
 import './globals.css';
+import {Analytics} from '@vercel/analytics/next';
 import {Header, Footer, ScrollReveal} from '../components/ui';
+import {club, SITE_URL} from '../data/club';
+import {organizationJsonLd} from '../lib/seo';
 
 export const metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
-  title: { default: 'Rotaract Club of Khopoli', template: '%s | Rotaract Club of Khopoli' },
-  description: 'Community based Rotaract club in Khopoli, chartered November 2020. Community service, environment, professional development and fellowship in District 3131.',
+  metadataBase: new URL(SITE_URL),
+  title: { default: club.name, template: `%s | ${club.name}` },
+  description: 'Community based Rotaract club in Khopoli, chartered November 2020. Community service, professional development and fellowship in District 3131.',
   icons: { icon: '/favicon.png' },
-  openGraph: { siteName: 'Rotaract Club of Khopoli', type: 'website', locale: 'en_IN' },
 };
+
+export const viewport = { themeColor: '#b5124f' };
 
 export default function RootLayout({ children }){
   return (
-    <html lang="en">
+    <html lang="en-IN">
       <body>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }} />
         <Header/>
-        <main id="main">{children}</main>
+        <main id="main" tabIndex={-1}>{children}</main>
         <Footer/>
         <ScrollReveal/>
+        {process.env.VERCEL && <Analytics/>}
       </body>
     </html>
   );

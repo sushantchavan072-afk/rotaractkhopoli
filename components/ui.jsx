@@ -1,133 +1,187 @@
 'use client';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ArrowUpRight, ChevronDown, Menu, X, Plus, Minus, Mail, Phone, Heart } from 'lucide-react';
-import { ALL_PAGES, NAV, club, clubEmail, officers, initials } from '../data/club';
+import {
+  ArrowRight, ArrowUpRight, ChevronDown, Menu, X, Plus, Minus, Mail, Phone, Heart, Search,
+  CalendarPlus, Share2, Check, Instagram, Facebook, Linkedin, Youtube, MapPin,
+} from 'lucide-react';
+import {
+  ALL_PAGES, NAV, club, clubEmail, contact, officers, initials, FORM_ENDPOINT,
+  formatDate, isPast,
+} from '../data/club';
 
-const TONES = ['#fcece5', '#e5f9eb', '#fef5d3', '#ece9f9', '#e3f0fb', '#f9e4ea'];
+const TONES = ['tint-rose', 'tint-sky', 'tint-gold', 'tint-leaf'];
+
+/* ---------------------------------------------------------------- Images */
 
 /**
- * Image with a graceful fallback: until the file exists in /public, a soft coloured tile
- * with initials or a label is shown instead of a broken image.
+ * Optimised image (resized + WebP via next/image) with a graceful fallback:
+ * if the file is missing, a soft tinted tile with a label is shown instead of a broken image.
  */
-export function Photo({ src, alt = '', label, className = '', tone = 0, priority = false }) {
+export function Photo({ src, alt = '', label, className = '', tone = 0, priority = false, sizes = '(max-width: 700px) 100vw, 50vw' }) {
   const [failed, setFailed] = useState(!src);
-  const ref = useRef(null);
-  // An image that 404s before hydration never fires onError in React, so check once mounted.
-  useEffect(() => {
-    const img = ref.current;
+  // An image that 404s before hydration never fires onError, so check when the element attaches.
+  const ref = useCallback((img) => {
     if (img && img.complete && img.naturalWidth === 0) setFailed(true);
   }, []);
   if (failed) {
     return (
-      <div className={`photo-fallback ${className}`} style={{ background: TONES[tone % TONES.length] }} role="img" aria-label={alt}>
+      <div className={`photo-fallback ${TONES[tone % TONES.length]} ${className}`} role="img" aria-label={alt}>
         <span>{label ?? initials(alt || club.shortName)}</span>
       </div>
     );
   }
-  // eslint-disable-next-line @next/next/no-img-element
-  return <img ref={ref} src={src} alt={alt} className={className} loading={priority ? 'eager' : 'lazy'} onError={() => setFailed(true)} />;
+  return (
+    <Image
+      ref={ref}
+      src={src}
+      alt={alt}
+      width={1200}
+      height={900}
+      sizes={sizes}
+      priority={priority}
+      className={`photo ${className}`}
+      onError={() => setFailed(true)}
+    />
+  );
 }
 
-export function Btn({ href = '/join', children, kind = 'dark', className = '', external = false }) {
-  const inner = (<>{children}<span className="btn-arrow"><ArrowUpRight size={18} /></span></>);
-  if (external || href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('http')) {
-    return <a href={href} className={`btn btn-${kind} ${className}`} target={href.startsWith('http') ? '_blank' : undefined} rel="noreferrer">{inner}</a>;
+/* ---------------------------------------------------------------- Basics */
+
+export function Btn({ href = '/join', children, kind = 'primary', className = '', icon = true }) {
+  const inner = (<>{children}{icon && <ArrowRight size={18} aria-hidden="true" />}</>);
+  const cls = `btn btn-${kind} ${className}`;
+  if (/^(https?:|mailto:|tel:)/.test(href)) {
+    const ext = href.startsWith('http');
+    return <a href={href} className={cls} target={ext ? '_blank' : undefined} rel={ext ? 'noreferrer' : undefined}>{inner}</a>;
   }
-  return <Link href={href} className={`btn btn-${kind} ${className}`}>{inner}</Link>;
+  return <Link href={href} className={cls}>{inner}</Link>;
 }
 
 export function Eyebrow({ children }) {
-  return <span className="eyebrow"><span className="eyebrow-dot" />{children}</span>;
+  return <span className="eyebrow">{children}</span>;
 }
 
-export function Intro({ label, title, description, center = false }) {
+export function Intro({ label, title, description, center = false, as: H = 'h2' }) {
   return (
-    <div className={`section-intro ${center ? 'center' : ''}`}>
-      <Eyebrow>{label}</Eyebrow>
-      <h2>{title}</h2>
+    <div className={`section-intro ${center ? 'is-center' : ''}`}>
+      {label && <Eyebrow>{label}</Eyebrow>}
+      <H>{title}</H>
       {description && <p>{description}</p>}
     </div>
   );
 }
 
-export function Section({ children, gray = false, id, extra = '' }) {
-  return <section id={id} className={`section ${gray ? 'section-light' : ''} ${extra}`}><div className="container">{children}</div></section>;
+/** tone: 'plain' | 'cream' | 'rose' */
+export function Section({ children, tone = 'plain', id, className = '' }) {
+  return <section id={id} className={`section section-${tone} ${className}`}><div className="container">{children}</div></section>;
 }
 
-export function PageHero({ eyebrow, title, desc, children }) {
+export function PageHero({ eyebrow, title, desc, children, image }) {
   return (
-    <section className="page-hero">
-      <div className="container">
-        <Eyebrow>{eyebrow}</Eyebrow>
-        <h1>{title}</h1>
-        {desc && <p>{desc}</p>}
-        {children}
+    <section className={`page-hero ${image ? 'has-image' : ''}`}>
+      <div className="container page-hero-inner">
+        <div className="page-hero-copy">
+          <Eyebrow>{eyebrow}</Eyebrow>
+          <h1>{title}</h1>
+          {desc && <p>{desc}</p>}
+          {children}
+        </div>
+        {image && <div className="page-hero-photo"><Photo src={image} alt="" label={title} priority sizes="(max-width: 900px) 100vw, 40vw" /></div>}
       </div>
-      <div className="float-blob blob-one" /><div className="float-blob blob-two" />
     </section>
   );
 }
 
 export function Logo({ light = false }) {
   return (
-    <Link href="/" className={`logo ${light ? 'logo-light' : ''}`} aria-label={`${club.name} home`}>
-      <span className="logo-wheel" aria-hidden="true"><i /><i /><i /><i /><i /><i /></span>
-      <span className="logo-text">Rotaract<small>Khopoli</small></span>
+    <Link href="/" className={`logo ${light ? 'logo-light' : ''}`} aria-label={`${club.name}, home`}>
+      {/* Placeholder mark. TODO(club): replace with the official Rotaract club logo from Rotary's Brand Center. */}
+      <svg className="logo-mark" viewBox="0 0 40 40" aria-hidden="true">
+        <circle cx="20" cy="20" r="16" fill="none" stroke="currentColor" strokeWidth="4" />
+        <circle cx="20" cy="20" r="5" fill="currentColor" />
+        {[0, 60, 120].map((a) => <rect key={a} x="18.5" y="5" width="3" height="30" rx="1.5" fill="currentColor" transform={`rotate(${a} 20 20)`} />)}
+      </svg>
+      <span className="logo-text">Rotaract<small>Club of Khopoli</small></span>
     </Link>
   );
 }
+
+/* ---------------------------------------------------------------- Header / footer */
 
 export function Header() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [pagesOpen, setPagesOpen] = useState(false);
-  useEffect(() => { setOpen(false); setPagesOpen(false); }, [pathname]);
-  const isCurrent = (href) => (href === '/' ? pathname === '/' : pathname.startsWith(href));
+  // Close menus whenever the page changes (adjusting state during render, as React recommends).
+  const [lastPath, setLastPath] = useState(pathname);
+  if (lastPath !== pathname) { setLastPath(pathname); setOpen(false); setPagesOpen(false); }
+  useEffect(() => {
+    if (!pagesOpen) return undefined;
+    const onKey = (e) => { if (e.key === 'Escape') setPagesOpen(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [pagesOpen]);
+  const isCurrent = (href) => (href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`));
   return (
     <header className="site-header">
       <a className="skip-link" href="#main">Skip to content</a>
       <div className="announce-bar">
         <div className="container">
-          <span><Heart size={14} fill="currentColor" /> Membership for the new Rotaract year is open to everyone 18+ in and around Khopoli.</span>
-          <Link href="/join">Apply now <ArrowUpRight size={14} /></Link>
+          <span><Heart size={14} fill="currentColor" aria-hidden="true" /> Membership for the new Rotaract year is open to everyone 18+ in and around Khopoli.</span>
+          <Link href="/join">Apply Now <ArrowUpRight size={14} aria-hidden="true" /></Link>
         </div>
       </div>
       <div className="container nav-wrap">
         <Logo />
-        <button className="mobile-toggle" aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} onClick={() => setOpen(!open)}>
+        <button className="menu-toggle" aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} aria-controls="main-nav" onClick={() => setOpen(!open)}>
           {open ? <X size={22} /> : <Menu size={22} />}
         </button>
-        <nav className={`nav ${open ? 'nav-mobile-open' : ''}`} aria-label="Main">
+        <nav id="main-nav" className={`nav ${open ? 'is-open' : ''}`} aria-label="Main">
           {NAV.map((item) => (
-            <Link key={item.href} href={item.href} className={`nav-link ${isCurrent(item.href) ? 'is-current' : ''}`} aria-current={pathname === item.href ? 'page' : undefined}>
+            <Link key={item.href} href={item.href} className={`nav-link ${isCurrent(item.href) ? 'is-current' : ''}`} aria-current={isCurrent(item.href) ? 'page' : undefined}>
               {item.label}
             </Link>
           ))}
           <div className="pages-wrap">
-            <button type="button" className={`nav-pill pages-toggle ${pagesOpen ? 'active' : ''}`} aria-expanded={pagesOpen} onClick={() => setPagesOpen(!pagesOpen)}>
-              All Pages <ChevronDown size={16} />
+            <button type="button" className={`nav-link pages-toggle ${pagesOpen ? 'is-open' : ''}`} aria-expanded={pagesOpen} aria-controls="pages-menu" onClick={() => setPagesOpen(!pagesOpen)}>
+              More <ChevronDown size={16} aria-hidden="true" />
             </button>
-            {pagesOpen && <button className="dropdown-backdrop" aria-label="Close pages menu" onClick={() => setPagesOpen(false)} />}
+            {pagesOpen && <button className="dropdown-backdrop" tabIndex={-1} aria-hidden="true" onClick={() => setPagesOpen(false)} />}
             {pagesOpen && (
-              <div className="pages-dropdown">
+              <div className="pages-menu" id="pages-menu">
                 {ALL_PAGES.map(([label, href]) => (
-                  <Link key={href} href={href} aria-current={pathname === href ? 'page' : undefined}>{label}<ArrowUpRight size={14} /></Link>
+                  <Link key={href} href={href} aria-current={pathname === href ? 'page' : undefined}>{label}</Link>
                 ))}
               </div>
             )}
           </div>
-          <Link href="/sponsorship" className={`nav-support ${isCurrent('/sponsorship') ? 'is-current' : ''}`}><Heart size={15} /> Support Us</Link>
-          <Link href="/join" className={`nav-donate ${isCurrent('/join') ? 'is-current' : ''}`}>Join the Club <ArrowUpRight size={16} /></Link>
+          <div className="nav-actions">
+            <Link href="/sponsorship" className="btn btn-outline btn-sm"><Heart size={15} aria-hidden="true" /> Support Us</Link>
+            <Link href="/join" className="btn btn-primary btn-sm">Join the Club</Link>
+          </div>
         </nav>
       </div>
     </header>
   );
 }
 
+export function SocialLinks({ className = '' }) {
+  const items = [
+    ['instagram', Instagram, 'Instagram'], ['facebook', Facebook, 'Facebook'],
+    ['linkedin', Linkedin, 'LinkedIn'], ['youtube', Youtube, 'YouTube'],
+  ].filter(([k]) => contact.social[k]);
+  if (!items.length) return null;
+  return (
+    <div className={`social ${className}`}>
+      {items.map(([k, Icon, label]) => <a key={k} href={contact.social[k]} target="_blank" rel="noreferrer" aria-label={`${club.shortName} on ${label}`}><Icon size={18} /></a>)}
+    </div>
+  );
+}
+
 export function Footer() {
-  const president = officers[0];
   return (
     <footer className="footer">
       <div className="container">
@@ -135,33 +189,21 @@ export function Footer() {
           <div className="footer-brand">
             <Logo light />
             <p>{club.tagline}</p>
-            <p className="footer-meta">Club ID {club.clubId} · Chartered {club.charteredOn} · {club.district}</p>
-            <form className="subscribe" onSubmit={(e) => { e.preventDefault(); const em = new FormData(e.currentTarget).get('email'); window.location.href = `mailto:${clubEmail}?subject=${encodeURIComponent('Please add me to club updates')}&body=${encodeURIComponent(`Please keep me posted about upcoming projects and events.\n\nEmail: ${em}`)}`; }}>
-              <label className="sr-only" htmlFor="footer-email">Email address</label>
-              <input id="footer-email" name="email" type="email" placeholder="Your email for project updates" required />
-              <button type="submit">Stay in the loop <ArrowUpRight size={16} /></button>
-            </form>
-            <a className="footer-mail" href={`mailto:${clubEmail}`}><Mail size={16} /> {clubEmail}</a>
+            <SubscribeForm />
           </div>
-          <FooterCol title="The Club" items={[['About us', '/about'], ['Avenues', '/avenues'], ['Members', '/members'], ['Events', '/events']]} />
-          <FooterCol title="Get Involved" items={[['Join the club', '/join'], ['Sponsorship', '/sponsorship'], ['FAQs', '/faqs'], ['Contact', '/contact']]} />
-          <div className="footer-links">
-            <h4>Reach the Board</h4>
-            {officers.map((o) => (
-              <div key={o.role} className="footer-officer">
-                <small>{o.role}</small>
-                <span>{o.name}</span>
-              </div>
-            ))}
-            <a href={`tel:+91${president.phone}`}><Phone size={14} /> +91 {president.phone}</a>
+          <FooterCol title="The Club" items={[['About us', '/about'], ['Avenues', '/avenues'], ['Events', '/events'], ['Gallery', '/gallery'], ['Members', '/members']]} />
+          <FooterCol title="Get Involved" items={[['Join the club', '/join'], ['Sponsor a project', '/sponsorship'], ['Board application', '/bod-application'], ['FAQs', '/faqs']]} />
+          <div className="footer-col">
+            <h2 className="footer-heading">Reach Us</h2>
+            <a href={`mailto:${clubEmail}`}><Mail size={15} aria-hidden="true" /> {clubEmail}</a>
+            <a href={contact.mapUrl} target="_blank" rel="noreferrer"><MapPin size={15} aria-hidden="true" /> {contact.meetingPlace}</a>
+            <Link href="/contact">Contact page</Link>
+            <SocialLinks />
           </div>
         </div>
         <div className="footer-bottom">
-          <span>© {new Date().getFullYear()} {club.name}. A Rotaract club under Rotary International. Views are the club&apos;s own.</span>
-          <div className="social">
-            <a href={`mailto:${clubEmail}`} aria-label="Email"><Mail size={17} /></a>
-            <a href={`tel:+91${president.phone}`} aria-label="Phone"><Phone size={17} /></a>
-          </div>
+          <span>© {new Date().getFullYear()} {club.name} · Club ID {club.clubId} · {club.district}</span>
+          <span><Link href="/privacy-policy">Privacy policy</Link> · A Rotaract club under Rotary International.</span>
         </div>
       </div>
     </footer>
@@ -170,81 +212,292 @@ export function Footer() {
 
 function FooterCol({ title, items }) {
   return (
-    <div className="footer-links">
-      <h4>{title}</h4>
+    <div className="footer-col">
+      <h2 className="footer-heading">{title}</h2>
       {items.map(([n, h]) => <Link href={h} key={h}>{n}</Link>)}
     </div>
   );
 }
 
-export function FaqList({ items }) {
-  const [expanded, setExpanded] = useState(0);
+/* ---------------------------------------------------------------- Forms */
+
+async function deliver(subject, fields) {
+  if (FORM_ENDPOINT) {
+    const res = await fetch(FORM_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ _subject: subject, ...fields }),
+    });
+    if (!res.ok) throw new Error('send failed');
+    return 'sent';
+  }
+  const body = Object.entries(fields).map(([k, v]) => `${k}: ${v}`).join('\n\n');
+  window.location.href = `mailto:${clubEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  return 'mailto';
+}
+
+function SubscribeForm() {
+  const [state, setState] = useState('idle');
+  async function onSubmit(e) {
+    e.preventDefault();
+    const email = String(new FormData(e.currentTarget).get('email') ?? '');
+    try { setState(await deliver('Please add me to club updates', { Email: email, Request: 'Keep me posted about upcoming projects and events.' })); }
+    catch { setState('error'); }
+  }
   return (
-    <div className="faq-items">
-      {items.map((f, i) => (
-        <div className={`faq-item ${expanded === i ? 'is-open' : ''}`} key={f.q}>
-          <button type="button" aria-expanded={expanded === i} onClick={() => setExpanded(expanded === i ? -1 : i)}>
-            <span>{f.q}</span>{expanded === i ? <Minus size={19} /> : <Plus size={19} />}
-          </button>
-          {expanded === i && <div className="faq-answer"><p>{f.a}</p></div>}
-        </div>
-      ))}
-    </div>
+    <>
+      <form className="subscribe" onSubmit={onSubmit}>
+        <label className="sr-only" htmlFor="footer-email">Email address for project updates</label>
+        <input id="footer-email" name="email" type="email" placeholder="Your email for project updates" required autoComplete="email" />
+        <button type="submit">Stay in the Loop</button>
+      </form>
+      <p className="form-status" role="status" aria-live="polite">
+        {state === 'sent' && 'Thank you, you are on the list.'}
+        {state === 'mailto' && 'Your email app should open with the request ready to send.'}
+        {state === 'error' && `That did not go through. Please write to ${clubEmail}.`}
+      </p>
+    </>
   );
 }
 
 /**
- * A form that opens the visitor's email app with the message addressed to the club.
- * fields: [{ name, label, type?, placeholder?, required?, options?, rows? }]
+ * Form that posts to FORM_ENDPOINT when configured, otherwise opens the visitor's email app.
+ * fields: [{ name, label, type?, placeholder?, required?, options?, rows?, minLength?, pattern?, title?, autoComplete? }]
+ * prefill: name of a field to fill from the ?about= query parameter (e.g. from an event page).
  */
-export function MailForm({ title, intro, subject, fields, submitLabel = 'Send message' }) {
-  const [sent, setSent] = useState(false);
-  function onSubmit(e) {
+export function MailForm({ title, intro, subject, fields, submitLabel = 'Send Message', prefill }) {
+  const [state, setState] = useState('idle');
+  const formRef = useRef(null);
+  useEffect(() => {
+    if (!prefill) return;
+    const about = new URLSearchParams(window.location.search).get('about');
+    const el = formRef.current?.elements.namedItem(prefill);
+    if (about && el && !el.value) el.value = `About: ${about}\n\n`;
+  }, [prefill]);
+  async function onSubmit(e) {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
-    const lines = fields.map((f) => `${f.label}: ${String(data.get(f.name) ?? '').trim()}`);
+    const values = Object.fromEntries(fields.map((f) => [f.label, String(data.get(f.name) ?? '').trim()]));
     const who = String(data.get('name') ?? '').trim();
-    const href = `mailto:${clubEmail}?subject=${encodeURIComponent(`${subject}${who ? ` from ${who}` : ''}`)}&body=${encodeURIComponent(lines.join('\n\n'))}`;
-    setSent(true);
-    window.location.href = href;
+    setState('sending');
+    try {
+      setState(await deliver(`${subject}${who ? ` from ${who}` : ''}`, values));
+      if (FORM_ENDPOINT) e.target.reset();
+    } catch { setState('error'); }
   }
   return (
     <div className="form-card">
       <h2>{title}</h2>
       {intro && <p>{intro}</p>}
-      <form onSubmit={onSubmit}>
-        {fields.map((f) => (
-          <label key={f.name}>
-            {f.label}{!f.required && <span className="optional"> (optional)</span>}
-            {f.options ? (
-              <select name={f.name} defaultValue={f.options[0]} required={f.required}>
-                {f.options.map((o) => <option key={o}>{o}</option>)}
-              </select>
-            ) : f.rows ? (
-              <textarea name={f.name} rows={f.rows} placeholder={f.placeholder} required={f.required} minLength={f.minLength} />
-            ) : (
-              <input name={f.name} type={f.type ?? 'text'} placeholder={f.placeholder} required={f.required} pattern={f.pattern} title={f.title} />
-            )}
-          </label>
-        ))}
-        <button type="submit" className="submit-btn">{submitLabel} <ArrowUpRight size={18} /></button>
-        {sent && <small className="notice">Your email app should open with the message ready to send to {clubEmail}. If it did not, write to that address directly.</small>}
+      <form ref={formRef} onSubmit={onSubmit}>
+        {fields.map((f) => {
+          const id = `f-${f.name}`;
+          return (
+            <div className="field" key={f.name}>
+              <label htmlFor={id}>{f.label}{!f.required && <span className="optional"> (optional)</span>}</label>
+              {f.options ? (
+                <select id={id} name={f.name} defaultValue={f.options[0]} required={f.required}>
+                  {f.options.map((o) => <option key={o}>{o}</option>)}
+                </select>
+              ) : f.rows ? (
+                <textarea id={id} name={f.name} rows={f.rows} placeholder={f.placeholder} required={f.required} minLength={f.minLength} />
+              ) : (
+                <input id={id} name={f.name} type={f.type ?? 'text'} placeholder={f.placeholder} required={f.required} pattern={f.pattern} title={f.title} autoComplete={f.autoComplete} minLength={f.minLength} />
+              )}
+              {f.hint && <small className="hint">{f.hint}</small>}
+            </div>
+          );
+        })}
+        <p className="consent">By sending this form you agree to the club using these details to reply to you, as described in our <Link href="/privacy-policy">privacy policy</Link>.</p>
+        <button type="submit" className="btn btn-primary btn-block" disabled={state === 'sending'}>{state === 'sending' ? 'Sending…' : submitLabel} <ArrowRight size={18} aria-hidden="true" /></button>
+        <p className={`form-status ${state === 'error' ? 'is-error' : ''}`} role="status" aria-live="polite">
+          {state === 'sent' && <><Check size={16} aria-hidden="true" /> Thank you, your message has reached the club. We will reply soon.</>}
+          {state === 'mailto' && `Your email app should open with the message ready to send to ${clubEmail}. If nothing opened, write to that address directly.`}
+          {state === 'error' && `Sorry, that did not go through. Please write to ${clubEmail}.`}
+        </p>
       </form>
     </div>
   );
 }
 
-/** Fades sections in as they scroll into view (respects reduced-motion via CSS). */
+/* ---------------------------------------------------------------- FAQs */
+
+export function FaqList({ items, firstOpen = true }) {
+  const [expanded, setExpanded] = useState(firstOpen ? 0 : -1);
+  return (
+    <div className="faq-items">
+      {items.map((f, i) => {
+        const open = expanded === i;
+        const id = `faq-${f.q.replace(/\W+/g, '-').toLowerCase()}`;
+        return (
+          <div className={`faq-item ${open ? 'is-open' : ''}`} key={f.q}>
+            <h3>
+              <button type="button" aria-expanded={open} aria-controls={id} onClick={() => setExpanded(open ? -1 : i)}>
+                <span>{f.q}</span>{open ? <Minus size={19} aria-hidden="true" /> : <Plus size={19} aria-hidden="true" />}
+              </button>
+            </h3>
+            <div id={id} className="faq-answer" hidden={!open}><p>{f.a}</p></div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+export function FaqSearch({ groups }) {
+  const [q, setQ] = useState('');
+  const term = q.trim().toLowerCase();
+  const filtered = useMemo(() => groups
+    .map((g) => ({ ...g, items: g.items.filter((f) => !term || `${f.q} ${f.a}`.toLowerCase().includes(term)) }))
+    .filter((g) => g.items.length), [groups, term]);
+  return (
+    <>
+      <div className="search-box">
+        <Search size={20} aria-hidden="true" />
+        <label className="sr-only" htmlFor="faq-search">Search questions</label>
+        <input id="faq-search" type="search" placeholder="Search questions, e.g. fees, meetings, age" value={q} onChange={(e) => setQ(e.target.value)} />
+      </div>
+      <p className="sr-only" role="status" aria-live="polite">{filtered.reduce((n, g) => n + g.items.length, 0)} questions shown</p>
+      {filtered.length === 0 && <p className="empty-note">No questions match “{q}”. <Link href="/contact">Ask us directly</Link>.</p>}
+      {filtered.map((g) => (
+        <div className="faq-group" key={g.title}>
+          <h2>{g.title}</h2>
+          <FaqList items={g.items} firstOpen={false} key={term} />
+        </div>
+      ))}
+    </>
+  );
+}
+
+/* ---------------------------------------------------------------- Events */
+
+/** The visitor's current time: null while rendering on the server, a fixed timestamp once in the browser. */
+let clientNow;
+const noopSubscribe = () => () => {};
+function useNow() {
+  return useSyncExternalStore(noopSubscribe, () => (clientNow ??= Date.now()), () => null);
+}
+
+/** Upcoming / Completed badge, worked out in the visitor's browser so it never goes stale between deploys. */
+export function EventStatus({ event, className = '' }) {
+  const now = useNow();
+  const past = now === null ? isPast(event) : isPast(event, now);
+  return <span className={`status ${past ? 'is-past' : 'is-upcoming'} ${className}`} suppressHydrationWarning>{past ? 'Completed' : 'Upcoming'}</span>;
+}
+
+export function EventCard({ e, i = 0, headingLevel = 3 }) {
+  const H = `h${headingLevel}`;
+  return (
+    <article className="event-card">
+      <Link href={`/events/${e.slug}`} className="event-card-photo" tabIndex={-1} aria-hidden="true">
+        <Photo src={`/images/events/${e.slug}.jpg`} alt="" label={e.title} tone={i} sizes="(max-width: 700px) 100vw, (max-width: 1040px) 50vw, 33vw" />
+      </Link>
+      <div className="event-card-body">
+        <div className="event-card-meta"><span className="chip">{e.avenue}</span><EventStatus event={e} /></div>
+        <H><Link href={`/events/${e.slug}`}>{e.title}</Link></H>
+        <p>{e.summary}</p>
+        <dl className="event-card-facts">
+          <div><dt>Date</dt><dd>{formatDate(e.date)}</dd></div>
+          <div><dt>Venue</dt><dd>{e.venue}</dd></div>
+        </dl>
+      </div>
+    </article>
+  );
+}
+
+export function EventsExplorer({ events }) {
+  const [when, setWhen] = useState('all');
+  const [avenue, setAvenue] = useState('All avenues');
+  const now = useNow();
+  const avenueNames = ['All avenues', ...new Set(events.map((e) => e.avenue))];
+  const list = events.filter((e) => (avenue === 'All avenues' || e.avenue === avenue)
+    && (when === 'all' || now === null || (when === 'past' ? isPast(e, now) : !isPast(e, now))));
+  const upcomingCount = now === null ? null : events.filter((e) => !isPast(e, now)).length;
+  return (
+    <>
+      {upcomingCount === 0 && (
+        <div className="notice-banner">
+          <div><strong>The next calendar is being finalised.</strong><p>Project dates for the new Rotaract year are being confirmed with the board. Write to us to hear first.</p></div>
+          <Btn href="/contact?about=Upcoming%20events" kind="dark">Get Notified</Btn>
+        </div>
+      )}
+      <div className="filters" role="group" aria-label="Filter events">
+        <div className="segmented">
+          {[['all', 'All'], ['upcoming', 'Upcoming'], ['past', 'Completed']].map(([k, l]) => (
+            <button key={k} type="button" aria-pressed={when === k} className={when === k ? 'is-active' : ''} onClick={() => setWhen(k)}>{l}</button>
+          ))}
+        </div>
+        <label className="sr-only" htmlFor="avenue-filter">Filter by avenue</label>
+        <select id="avenue-filter" value={avenue} onChange={(e) => setAvenue(e.target.value)}>
+          {avenueNames.map((a) => <option key={a}>{a}</option>)}
+        </select>
+      </div>
+      <p className="sr-only" role="status" aria-live="polite">{list.length} events shown</p>
+      {list.length ? (
+        <div className="card-grid">{list.map((e, i) => <EventCard e={e} i={i} key={e.slug} headingLevel={2} />)}</div>
+      ) : (
+        <p className="empty-note">No events match these filters yet.</p>
+      )}
+    </>
+  );
+}
+
+function icsDate(iso, hhmm) {
+  return `${iso.replace(/-/g, '')}T${hhmm.replace(':', '')}00`;
+}
+function to24(t) {
+  const m = t.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+  if (!m) return null;
+  let h = Number(m[1]) % 12;
+  if (m[3].toUpperCase() === 'PM') h += 12;
+  return `${String(h).padStart(2, '0')}:${m[2]}`;
+}
+
+export function EventActions({ event }) {
+  const [copied, setCopied] = useState(false);
+  function addToCalendar() {
+    const [startT, endT] = event.time.split(/\s*-\s*/).map(to24);
+    const start = startT ? `DTSTART;TZID=Asia/Kolkata:${icsDate(event.date, startT)}` : `DTSTART;VALUE=DATE:${event.date.replace(/-/g, '')}`;
+    const end = endT ? `DTEND;TZID=Asia/Kolkata:${icsDate(event.endDate ?? event.date, endT)}` : '';
+    const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Rotaract Khopoli//EN', 'BEGIN:VEVENT',
+      `UID:${event.slug}@rotaractkhopoli`, `SUMMARY:${event.title}`, start, end, `LOCATION:${event.venue}`,
+      `DESCRIPTION:${event.summary}`, 'END:VEVENT', 'END:VCALENDAR'].filter(Boolean).join('\r\n');
+    const url = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }));
+    const a = Object.assign(document.createElement('a'), { href: url, download: `${event.slug}.ics` });
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+  async function share() {
+    const data = { title: event.title, text: event.summary, url: window.location.href };
+    try {
+      if (navigator.share) { await navigator.share(data); return; }
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true); setTimeout(() => setCopied(false), 2500);
+    } catch { /* user cancelled */ }
+  }
+  return (
+    <div className="event-actions">
+      {!isPast(event) && <button type="button" className="btn btn-outline btn-sm" onClick={addToCalendar}><CalendarPlus size={16} aria-hidden="true" /> Add to Calendar</button>}
+      <button type="button" className="btn btn-outline btn-sm" onClick={share}><Share2 size={16} aria-hidden="true" /> {copied ? 'Link Copied' : 'Share'}</button>
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------------- Motion */
+
+/** Fades content in as it scrolls into view. Content stays visible without JS or with reduced motion. */
 export function ScrollReveal() {
   const pathname = usePathname();
   useEffect(() => {
-    const els = document.querySelectorAll('.section .container > *');
-    els.forEach((el) => el.classList.add('enter-on-scroll'));
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) return undefined;
+    const els = [...document.querySelectorAll('.section .container > *')].filter((el) => el.getBoundingClientRect().top > window.innerHeight);
+    els.forEach((el) => el.classList.add('reveal'));
     const io = new IntersectionObserver((entries) => entries.forEach((en) => {
-      if (en.isIntersecting) { en.target.classList.add('has-entered'); io.unobserve(en.target); }
-    }), { rootMargin: '0px 0px -60px 0px' });
+      if (en.isIntersecting) { en.target.classList.add('is-visible'); io.unobserve(en.target); }
+    }), { rootMargin: '0px 0px -40px 0px' });
     els.forEach((el) => io.observe(el));
     return () => io.disconnect();
   }, [pathname]);
   return null;
 }
+
