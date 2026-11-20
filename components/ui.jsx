@@ -2,13 +2,14 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import RidgelineDitherFooter from '@/components/ui/ridgeline-dither-footer';
 // Icons: react-icons (Font Awesome 6), the same icon library Kindora uses.
 import {
   FaArrowRight as ArrowRight, FaArrowRight as ArrowUpRight, FaChevronDown as ChevronDown, FaBars as Menu,
   FaXmark as X, FaPlus as Plus, FaRegEnvelope as Mail, FaMagnifyingGlass as Search,
   FaRegCalendarPlus as CalendarPlus, FaShareNodes as Share2, FaCheck as Check, FaInstagram as Instagram,
-  FaFacebookF as Facebook, FaLinkedinIn as Linkedin, FaYoutube as Youtube, FaSun, FaMoon,
+  FaFacebookF as Facebook, FaLinkedinIn as Linkedin, FaYoutube as Youtube,
 } from 'react-icons/fa6';
 import {
   ALL_PAGES, NAV, club, clubEmail, contact, officers, initials, FORM_ENDPOINT, FAMILY_LOGOS,
@@ -151,48 +152,6 @@ export function FamilyLogos({ title = 'Proudly part of the Rotary family in Dist
   );
 }
 
-/* ---------------------------------------------------------------- Theme */
-
-/** Current site theme, read from <html data-theme>. 'light' while rendering on the server. */
-const subscribeTheme = (cb) => {
-  const mo = new MutationObserver(cb);
-  mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-  return () => mo.disconnect();
-};
-function useTheme() {
-  return useSyncExternalStore(subscribeTheme, () => document.documentElement.dataset.theme || 'light', () => 'light');
-}
-
-export function ThemeToggle({ className = '' }) {
-  const theme = useTheme();
-  const dark = theme === 'dark';
-  // Follow the device setting until the visitor picks a theme themselves.
-  useEffect(() => {
-    const mq = window.matchMedia('(prefers-color-scheme: dark)');
-    const onChange = (e) => {
-      let stored = null;
-      try { stored = localStorage.getItem('theme'); } catch { /* storage blocked */ }
-      if (!stored) document.documentElement.dataset.theme = e.matches ? 'dark' : 'light';
-    };
-    mq.addEventListener('change', onChange);
-    return () => mq.removeEventListener('change', onChange);
-  }, []);
-  const toggle = () => {
-    const next = dark ? 'light' : 'dark';
-    const root = document.documentElement;
-    root.classList.add('theme-switching');
-    root.dataset.theme = next;
-    try { localStorage.setItem('theme', next); } catch { /* storage blocked */ }
-    window.setTimeout(() => root.classList.remove('theme-switching'), 400);
-  };
-  return (
-    <button type="button" className={`theme-toggle ${className}`} onClick={toggle} aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'} title={dark ? 'Light mode' : 'Dark mode'}>
-      <FaMoon className="icon-moon" aria-hidden="true" />
-      <FaSun className="icon-sun" aria-hidden="true" />
-    </button>
-  );
-}
-
 /* ---------------------------------------------------------------- Header / footer */
 
 export function Header() {
@@ -224,13 +183,11 @@ export function Header() {
       <div className="container nav-wrap">
         <Logo />
         <div className="header-mobile-actions">
-          <ThemeToggle />
           <button className="menu-toggle" aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} aria-controls="main-nav" onClick={() => setOpen(!open)}>
             {open ? <X size={22} /> : <Menu size={22} />}
           </button>
         </div>
         <nav id="main-nav" className={`nav ${open ? 'is-open' : ''}`} aria-label="Main">
-          <ThemeToggle className="is-desktop" />
           <div
             className="pages-wrap"
             onMouseEnter={() => { if (!pagesOpen && window.matchMedia('(hover: hover) and (min-width: 1041px)').matches) { setPagesByHover(true); setPagesOpen(true); } }}
@@ -273,35 +230,44 @@ export function SocialLinks({ className = '' }) {
   );
 }
 
-export function Footer() {
-  return (
-    <footer className="footer">
-      <div className="container">
-        <div className="footer-top">
-          <div className="footer-brand">
-            <Logo />
-            <p>{club.tagline}</p>
-            <SubscribeForm />
-          </div>
-          <FooterCol title="Quick Links" items={[['Sponsorship', '/sponsorship'], ['About Us', '/about'], ['Events', '/events'], ['Avenues', '/avenues']]} />
-          <FooterCol title="More" items={[['Blog', '/blog'], ['Our Team', '/teams'], ['Reviews', '/reviews'], ['Gallery', '/gallery']]} />
-          <FooterCol title="Legal & Policy Links" items={[['Privacy Policy', '/privacy-policy'], ['Terms & Conditions', '/terms-and-conditions'], ['Contact Us', '/contact']]} />
-        </div>
-        <div className="footer-bottom">
-          <span>© {new Date().getFullYear()} {club.name} · Club ID {club.clubId} · {club.district}</span>
-          <SocialLinks />
-          <a href={`mailto:${clubEmail}`} className="footer-mail"><Mail size={15} aria-hidden="true" /> {clubEmail}</a>
-        </div>
-      </div>
-    </footer>
-  );
-}
+const FOOTER_COLUMNS = [
+  { title: 'Quick Links', links: [{ label: 'About Us', href: '/about' }, { label: 'Events', href: '/events' }, { label: 'Avenues', href: '/avenues' }, { label: 'Sponsorship', href: '/sponsorship' }] },
+  { title: 'More', links: [{ label: 'Our Team', href: '/teams' }, { label: 'Blog', href: '/blog' }, { label: 'Gallery', href: '/gallery' }, { label: 'Reviews', href: '/reviews' }] },
+  { title: 'Get in Touch', links: [{ label: 'Join the Club', href: '/join' }, { label: 'Contact Us', href: '/contact' }, { label: 'Email Us', href: `mailto:${clubEmail}` }, { label: 'Privacy Policy', href: '/privacy-policy' }, { label: 'Terms & Conditions', href: '/terms-and-conditions' }] },
+];
 
-function FooterCol({ title, items }) {
+/** Site footer: the Ridgeline dither footer (components/ui/ridgeline-dither-footer.tsx) with the club's links. */
+export function Footer() {
+  const router = useRouter();
+  // The footer renders plain <a> links; send same-site ones through the Next router so pages change without a full reload.
+  const onClickCapture = (e) => {
+    const a = e.target.closest?.('a[href^="/"]');
+    if (!a || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || a.target) return;
+    e.preventDefault();
+    router.push(a.getAttribute('href'));
+  };
+  const socials = ['instagram', 'linkedin', 'youtube']
+    .filter((k) => contact.social[k])
+    .map((k) => ({ icon: k, href: contact.social[k], label: `${club.shortName} on ${k === 'linkedin' ? 'LinkedIn' : k === 'youtube' ? 'YouTube' : 'Instagram'}` }));
   return (
-    <div className="footer-col">
-      <h2 className="footer-heading">{title}</h2>
-      {items.map(([n, h]) => <Link href={h} key={h}>{n}</Link>)}
+    <div className="site-footer" onClickCapture={onClickCapture}>
+      <RidgelineDitherFooter
+        preset="evergreen"
+        palette={{ muted: '#56655d' }}
+        seed={31}
+        ridges={6}
+        name=""
+        brandHref="/"
+        logo={<Image src="/images/logos/rotaract-khopoli.png" alt={`${club.name}, home`} width={866} height={297} sizes="190px" className="site-footer-logo" />}
+        tagline={`${club.tagline} Club ID ${club.clubId} · ${club.district}.`}
+        columns={FOOTER_COLUMNS}
+        socials={socials}
+        copyright={`© ${new Date().getFullYear()} ${club.name}. All rights reserved.`}
+        credit={{ label: 'the Rotaractors of Khopoli', href: '/teams' }}
+        fontFamily="var(--font)"
+        maxWidth="1240px"
+        height="640px"
+      />
     </div>
   );
 }
@@ -321,31 +287,6 @@ async function deliver(subject, fields) {
   const body = Object.entries(fields).map(([k, v]) => `${k}: ${v}`).join('\n\n');
   window.location.href = `mailto:${clubEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   return 'mailto';
-}
-
-function SubscribeForm() {
-  const [state, setState] = useState('idle');
-  async function onSubmit(e) {
-    e.preventDefault();
-    const email = String(new FormData(e.currentTarget).get('email') ?? '');
-    try { setState(await deliver('Please add me to club updates', { Email: email, Request: 'Keep me posted about upcoming projects and events.' })); }
-    catch { setState('error'); }
-  }
-  return (
-    <>
-      <form className="subscribe" onSubmit={onSubmit}>
-        <Mail size={18} aria-hidden="true" />
-        <label className="sr-only" htmlFor="footer-email">Email address for project updates</label>
-        <input id="footer-email" name="email" type="email" placeholder="Enter your email" required autoComplete="email" />
-        <button type="submit">Subscribe</button>
-      </form>
-      <p className="form-status" role="status" aria-live="polite">
-        {state === 'sent' && 'Thank you, you are on the list.'}
-        {state === 'mailto' && 'Your email app should open with the request ready to send.'}
-        {state === 'error' && `That did not go through. Please write to ${clubEmail}.`}
-      </p>
-    </>
-  );
 }
 
 /**
@@ -605,7 +546,6 @@ const REVEAL_RULES = [
   ['.section-intro, .split-intro, .team-head, .strip-title, .page-hero-inner, .faq-head, .cta-band, .detail-hero .container > *', 'fade-up', 150],
   ['.metric-grid, .story-block > *', 'fade-up', 100],
   ['.leader-card, .about-text, .timeline, .four-way, .focus-grid, .ways-grid, .value-grid, .logo-strip, .impact-band, .facts-grid, .green-counter, .yellow-band, .featured-card, .page-hero-wide, .form-layout > *, .donate-grid > *, .prose.narrow, .filters, .notice-banner, .pill-links', 'fade-up', 200],
-  ['.footer-top', 'fade-up', 150],
 ];
 
 /** Numbers that count up when they scroll into view (like Kindora's stats). Years and ranges are left alone. */

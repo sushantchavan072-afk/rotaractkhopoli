@@ -5,7 +5,7 @@ The website of **Rotaract Club of Khopoli** (Club ID 21869318, Rotaract District
 - **Design:** modelled on the Kindora charity layout:
   - pill navigation over the home-page hero photo, and a header that sticks to the top on scroll;
   - coral, black, yellow and green cards, a green volunteering block, a bordered "ways to help" grid, a coral closing call-to-action and a grey FAQ panel;
-  - a white footer;
+  - a footer over a dithered mountain range (the Sahyadri ghats Khopoli sits under);
   - the **Segoe UI** font (from the visitor's device; Windows has it built in, other devices use their closest system font) and the **react-icons** (Font Awesome 6) icon set Kindora uses.
 - **Content:** everything lives in **`data/club.js`**.
 
@@ -53,28 +53,29 @@ Visitor statistics (Vercel Analytics, which uses no cookies) switch on automatic
 
 Kindora's `/elements` page is a template style guide, so it is not included.
 
-## Light and dark mode
+## Background and footer
 
-- The sun/moon button in the header switches themes. The choice is saved in the browser. Until a visitor picks a theme, the site follows their device setting.
-- A small script in `app/layout.jsx` applies the theme before the first paint, so the page never flashes the wrong theme.
-- Colours are CSS variables in `app/globals.css` (`--bg`, `--surface`, `--surface-2`, `--line`, `--text`, `--ink`, ...). Dark values are under `:root[data-theme='dark']`. Brand-coloured cards and white cards that sit on photos keep their light colours in both themes (the "light islands" list in the same file).
+The site is **light mode only**.
 
-## Animated background
+**Background:** `components/ui/background-ascii-wake.tsx` (WakeGlyph). A faint scatter of monospace characters sits behind the page. When the mouse moves, it leaves a short trail of characters that fades away. It is tuned to stay light:
 
-`components/ui/background-pixel-stars.tsx` draws twinkling pixel stars and the occasional shooting star on a full-screen canvas behind the page. It uses soft brand colours in light mode and bright stars on a dark grid in dark mode. It is tuned to stay light:
+- it draws once and then does nothing until the mouse moves, so an idle page uses no CPU;
+- the animation runs only while a trail is fading, and stops while the tab is hidden;
+- touch drags (scrolling on phones) don't draw trails, and visitors who prefer reduced motion get the still scatter only;
+- the character colour is the `color` of `.site-bg` in `app/globals.css`.
 
-- it draws at half resolution, scaled up with crisp pixels;
-- it runs at 16 fps, updates twinkles at 4 fps, and repaints only when something changes;
-- it stops completely while the tab is hidden;
-- it shows a single still frame for visitors who prefer reduced motion;
-- it uses fewer stars and no shooting stars on data-saver connections;
-- it debounces resizing.
+**Footer:** `components/ui/ridgeline-dither-footer.tsx` (Ridgeline Dither Footer), set up in `Footer()` in `components/ui.jsx`. That function holds the club's logo, tagline, link columns, copyright and "Made with ♥" credit.
+
+- The mountains build in when the footer scrolls into view.
+- The mist drifts while the footer is on screen, at about 15 fps. The pointer clears the mist and shows an altitude readout, and a click sends a gust of wind.
+- Nothing runs while the footer is off screen or the tab is hidden.
+- Social icons appear automatically once `contact.social` is filled in `data/club.js` (Instagram, LinkedIn, YouTube).
 
 ### Why there is TypeScript but no Tailwind or shadcn
 
-The component is TypeScript, so the project now includes TypeScript (`tsconfig.json`, with the `@/*` import alias). It also uses shadcn's convention of keeping shared UI components in `components/ui/`, so tools and copy-paste components find them at the expected path.
+These components are TypeScript, so the project now includes TypeScript (`tsconfig.json`, with the `@/*` import alias). It also uses shadcn's convention of keeping shared UI components in `components/ui/`, so tools and copy-paste components find them at the expected path.
 
-Tailwind is **not** installed on purpose. The component only used three utility classes (`pointer-events-none fixed inset-0`), which are now the `.site-bg` rule in `globals.css`. Tailwind's base styles ("preflight") would reset this site's hand-written stylesheet. If you later want Tailwind or shadcn components anyway:
+Tailwind is **not** installed on purpose. The background only used a few utility classes (`block h-full w-full text-foreground`, plus `fixed inset-0` for placement), which are now the `.site-bg` rule in `globals.css`; the footer carries its own scoped styles. Tailwind's base styles ("preflight") would reset this site's hand-written stylesheet. If you later want Tailwind or shadcn components anyway:
 
 ```bash
 npx shadcn@latest init
@@ -95,7 +96,7 @@ This sets up Tailwind and `components.json`. Then check every page, because the 
 
 ## Forms
 
-The Join, Board application, Sponsorship, Contact and footer forms work in two ways:
+The Join, Board application, Sponsorship and Contact forms work in two ways:
 
 1. **With `NEXT_PUBLIC_FORM_ENDPOINT` set** (recommended): submissions are posted to a form service such as [Formspree](https://formspree.io), which emails them to the club inbox. The visitor sees a confirmation on the page.
 2. **Without it:** the form opens the visitor's email app with the message ready to send to the club email.
@@ -104,7 +105,7 @@ The Join, Board application, Sponsorship, Contact and footer forms work in two w
 
 The official logos are in `public/images/logos/`:
 
-- `rotaract-khopoli.png`: the club logo, used in the header and on the share image. `rotaract-khopoli-white.png` is the white version for the footer.
+- `rotaract-khopoli.png`: the club logo, used in the header, the footer and on the share image. `rotaract-khopoli-white.png` is a white version for dark backgrounds.
 - `rotaract-district-3131.png`, `rotary-district-3131.png` and `interact-district-3131.png`: used in the "Rotary family" strip on the home page, on the About page, and on the District and Rotary pages.
 
 The browser-tab icon (`app/icon.png`) and the home-screen icon (`app/apple-icon.png`) are cut from the club logo's wheel. Use the logos unchanged, as Rotary's brand guidelines require.
