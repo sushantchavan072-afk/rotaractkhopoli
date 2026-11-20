@@ -6,7 +6,7 @@ The website of **Rotaract Club of Khopoli** (Club ID 21869318, Rotaract District
   - pill navigation over the home-page hero photo, and a header that sticks to the top on scroll;
   - coral, black, yellow and green cards, a green volunteering block, a bordered "ways to help" grid, a coral closing call-to-action and a grey FAQ panel;
   - a white footer;
-  - the **Plus Jakarta Sans** font, self-hosted.
+  - Kindora's **Urbanist** font (self-hosted) and the **react-icons** (Font Awesome 6) icon set Kindora uses.
 - **Content:** everything lives in **`data/club.js`**.
 
 ## Run it

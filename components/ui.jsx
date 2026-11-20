@@ -3,10 +3,13 @@ import React, { useCallback, useEffect, useMemo, useRef, useState, useSyncExtern
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+// Icons: react-icons (Font Awesome 6), the same icon library Kindora uses.
 import {
-  ArrowRight, ArrowUpRight, ChevronDown, Menu, X, Plus, Mail, Search,
-  CalendarPlus, Share2, Check, Instagram, Facebook, Linkedin, Youtube, MapPin,
-} from 'lucide-react';
+  FaArrowRight as ArrowRight, FaArrowRight as ArrowUpRight, FaChevronDown as ChevronDown, FaBars as Menu,
+  FaXmark as X, FaPlus as Plus, FaRegEnvelope as Mail, FaMagnifyingGlass as Search,
+  FaRegCalendarPlus as CalendarPlus, FaShareNodes as Share2, FaCheck as Check, FaInstagram as Instagram,
+  FaFacebookF as Facebook, FaLinkedinIn as Linkedin, FaYoutube as Youtube,
+} from 'react-icons/fa6';
 import {
   ALL_PAGES, NAV, club, clubEmail, contact, officers, initials, FORM_ENDPOINT, FAMILY_LOGOS,
   formatDate, isPast,

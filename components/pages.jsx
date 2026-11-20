@@ -2,11 +2,15 @@ import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import Link from 'next/link';
 import Image from 'next/image';
+// Icons: react-icons (Font Awesome 6), the same icon library Kindora uses.
 import {
-  ArrowRight, CalendarDays, Clock, MapPin, Handshake, Mail, Phone, Check, Star,
-  HandHeart, GraduationCap, Users, Globe2, Megaphone, HeartHandshake, Sparkles,
-  ShieldCheck, UserPlus, Lightbulb, Package, MessageCircle, Play,
-} from 'lucide-react';
+  FaArrowRight as ArrowRight, FaRegCalendar as CalendarDays, FaRegClock as Clock, FaLocationDot as MapPin,
+  FaHandshake as Handshake, FaRegEnvelope as Mail, FaPhone as Phone, FaCheck as Check, FaStar as Star,
+  FaHandHoldingHeart as HandHeart, FaGraduationCap as GraduationCap, FaUsers as Users, FaEarthAsia as Globe2,
+  FaBullhorn as Megaphone, FaHandshakeAngle as HeartHandshake, FaWandMagicSparkles as Sparkles,
+  FaShieldHalved as ShieldCheck, FaUserPlus as UserPlus, FaRegLightbulb as Lightbulb, FaBoxOpen as Package,
+  FaRegCommentDots as MessageCircle, FaPlay as Play,
+} from 'react-icons/fa6';
 import {
   club, clubFacts, officers, clubEmail, contact, avenues, events, eventsNewestFirst, formatDate,
   coreMembers, boardOfDirectors, chairpersons, uniqueMemberCount, initials, testimonials,
@@ -72,7 +76,7 @@ function Testimonials({ tone = 'plain', intro = true }) {
       <div className="quote-grid">
         {testimonials.map((r, i) => (
           <figure className="quote-card" key={r.name}>
-            <div className="stars" aria-label="5 out of 5">{Array.from({ length: 5 }, (_, n) => <Star key={n} size={20} fill="currentColor" aria-hidden="true" />)}</div>
+            <div className="stars" aria-label="5 out of 5">{Array.from({ length: 5 }, (_, n) => <Star key={n} size={20} aria-hidden="true" />)}</div>
             <blockquote>“{r.quote}”</blockquote>
             <figcaption><span className={`avatar tint-${TINTS[i % 3]}`}>{initials(r.name)}</span><span><strong>{r.name}</strong>{r.role}</span></figcaption>
           </figure>
@@ -249,10 +253,12 @@ function VolunteerBlock() {
             })}
           </ul>
         </div>
-        <p className="volunteer-lead">Most community projects are open to volunteers. Come for one drive and see how it feels.</p>
-        <div className="volunteer-photo"><Photo src="/images/gallery/4.jpg" alt="Young people at a club fellowship" label=" " sizes="(max-width: 900px) 100vw, 50vw" /></div>
-        <Link href="/gallery" className="story-reel"><span><small>See our</small><strong>photo gallery</strong></span><span className="play-button" aria-hidden="true"><Play size={16} fill="currentColor" /></span></Link>
-        <span className="volunteer-tag">Real projects, real people</span>
+        <div className="volunteer-media">
+          <p className="volunteer-lead">Most community projects are open to volunteers. Come for one drive and see how it feels.</p>
+          <div className="volunteer-photo"><Photo src="/images/gallery/4.jpg" alt="Young people at a club fellowship" label=" " sizes="(max-width: 900px) 100vw, 50vw" /></div>
+          <Link href="/gallery" className="story-reel"><span><small>See our</small><strong>photo gallery</strong></span><span className="play-button" aria-hidden="true"><Play size={14} /></span></Link>
+          <span className="volunteer-tag">Real projects,<br />real people</span>
+        </div>
       </div>
     </Section>
   );
@@ -387,11 +393,12 @@ export function Home() {
           <div className="home-hero-art">
             <Photo src="/images/hero.jpg" alt="Young volunteers of Rotaract Club of Khopoli" label=" " priority sizes="(max-width: 900px) 100vw, 50vw" />
             <div className="hero-quote"><span className="hero-small-avatar" aria-hidden="true">♥</span><p>“Service above self, written in the voice of a small town with big plans.”</p></div>
-            <Link href="/gallery" className="story-reel"><span><small>See our</small><strong>photo gallery</strong></span><span className="play-button" aria-hidden="true"><Play size={16} fill="currentColor" /></span></Link>
+            <Link href="/gallery" className="story-reel"><span><small>See our</small><strong>photo gallery</strong></span><span className="play-button" aria-hidden="true"><Play size={14} /></span></Link>
             <Link href={`/events/${latest.slug}`} className="hero-info-card">
-              <strong>Latest project</strong>
-              <span>{latest.title}, {formatDate(latest.date)}.</span>
-              <div><span className="avatar-stack" aria-hidden="true">{coreMembers.slice(2, 5).map((m, i) => <span key={m.name} className={`avatar tint-${TINTS[i]}`}>{initials(m.name)}</span>)}</span><b>{events.length}</b></div>
+              <small>Latest project</small>
+              <strong>{latest.title}</strong>
+              <span>{formatDate(latest.date)}</span>
+              <div><span className="avatar-stack" aria-hidden="true">{coreMembers.slice(2, 5).map((m, i) => <span key={m.name} className={`avatar tint-${TINTS[i]}`}>{initials(m.name)}</span>)}</span><span className="hero-info-count"><b>{events.length}</b> projects this year</span></div>
             </Link>
             <div className="hero-small-tag">Chartered<br />{club.charteredOn}</div>
           </div>
