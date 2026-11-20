@@ -65,9 +65,17 @@ The site is **light mode only**.
 - Touch screens and visitors who prefer reduced motion see only the plain dots.
 
 **Cursor** (`components/ui/custom-cursor.tsx`), matched to rotaractscop.org:
-- On mouse and trackpad devices, the system pointer is replaced by a 14px navy arrow.
-- Every click gives a small pink spark burst.
+- On mouse and trackpad devices, the system pointer is replaced by a 14px arrow. Its colour depends on the page: navy on the home page, cranberry on Teams, Rotary blue on the Rotary page, and so on (`PAGES` in `lib/accent.js`).
+- Every click gives a small spark burst.
 - Phones and tablets keep their normal behaviour. Tapping no longer flashes a blue box or selects text.
+
+**Colours that follow the scroll** (`lib/accent.js`): the dot grid, the glow around the mouse and the click sparks blend through Rotaract cranberry, Rotary blue, Rotary gold, Interact blue, green and coral as you scroll, one colour every 700px. Each page starts at a different colour.
+
+**Member badges** (`components/ui/lanyard-badge.tsx`, from the club's original site): clicking any member on the Teams page or the home page opens their badge on a swinging lanyard.
+- You can drag it and flick it to spin.
+- Tap it, or use "Show back", to flip it. The front has their photo and name; the back lists every role they hold this year.
+- Esc, the × button or a click outside closes it.
+- It loads only when someone opens a badge.
 
 **Hover to expand:**
 - Leader messages (RI President, District Governor, DRR) unfold to the full message when the mouse rests on them (`HoverOpen` in `components/ui.jsx`). "Show less" folds them again, and on phones the button still opens them.
@@ -131,7 +139,9 @@ The browser-tab icon (`app/icon.png`) and the home-screen icon (`app/apple-icon.
 
 ## Photos
 
-Many photos are **temporary Unsplash stock images** (see `public/images/CREDITS.md`). To use the club's own photos, replace each file and keep its name. Then regenerate the share image `public/og.jpg` (1200×630).
+Until a photo is added, its slot shows a soft coloured tile with a label, so nothing looks broken.
+
+**Member portraits** are in `public/images/members/` as `<photo>.webp`. `<photo>` is the `photo:` value in `data/club.js`, and `.png` or `.jpg` also work. The current files are `vageesh`, `rohan`, `khadija-bearingwala`, `gargi-gaikwad`, `sarvesh`, `jayesh-dalvi` and `gaurav`, taken from the club's original Lovable site. To add someone, drop in a square portrait and set `photo:` on every entry for that person.
 
 ## Still needed from the club
 

@@ -923,14 +923,12 @@ section:nth-of-type(6n) .eyebrow-dot { background: var(--interact); }
 .leader-copy { padding-bottom: 6px; }
 .leader-copy h2 { font-size: clamp(2rem, 3.2vw, 2.8rem); margin: 18px 0 6px; }
 .leader-role { font-size: 17px; color: var(--text-2); margin: 0 0 24px; }
-.leader-theme { display: flex; align-items: center; gap: 20px; background: var(--surface); border-radius: 24px; padding: 16px 24px 16px 16px; border: 1px solid rgba(0,0,0,.05); box-shadow: 0 12px 30px rgba(0,0,0,.05); max-width: 640px; }
-.leader-theme img { width: 96px; height: 96px; object-fit: contain; border-radius: 14px; flex: none; }
-.leader-theme img.is-wide { width: 190px; height: auto; border-radius: 0; }
-.leader-theme > div { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-.leader-theme small { align-self: flex-start; display: inline-flex; align-items: center; gap: 7px; margin-bottom: 4px; padding: 5px 12px; border-radius: 30px; background: color-mix(in srgb, var(--lc) 13%, #fff); font-size: 11.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--lc-dark); }
-.leader-theme small::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--lc); flex: none; }
-.leader-theme strong { font-size: clamp(1.3rem, 2.2vw, 1.8rem); font-weight: 600; color: var(--ink); line-height: 1.2; }
-.leader-theme span { font-size: 14.5px; color: var(--text-2); }
+.leader-card { position: relative; }
+/* The theme logo sits in the card's top-right corner, on its own (no box, no repeated text) */
+.leader-logo { position: absolute; top: 34px; right: 34px; width: 108px; height: auto; border-radius: 16px; }
+.leader-logo.is-wide { width: 210px; border-radius: 0; }
+.leader-vision { display: flex; flex-direction: column; gap: 6px; margin: 0; max-width: 640px; font: 600 clamp(1.3rem, 2.2vw, 1.8rem)/1.25 var(--font-head); color: var(--ink); }
+.leader-vision small { font: 600 12px/1 var(--font); letter-spacing: .08em; text-transform: uppercase; color: var(--lc-dark); }
 .leader-highlight { margin: 22px 0 0; font-size: 18px; line-height: 1.6; color: var(--ink); font-style: italic; max-width: 640px; }
 .leader-letter { margin-top: 36px; background: var(--surface); border-radius: 24px; padding: 36px 40px; }
 .leader-letter h3 { font-size: 22px; margin-bottom: 16px; }
@@ -958,21 +956,21 @@ section:nth-of-type(6n) .eyebrow-dot { background: var(--interact); }
 .leader-signoff .is-name { font-weight: 600; color: var(--ink); }
 @media (max-width: 900px) {
   .leader-card { padding: 26px; }
+  .leader-logo { position: static; display: block; margin: 0 0 18px auto; width: 76px; }
+  .leader-logo.is-wide { width: 160px; }
   .leader-top { grid-template-columns: 1fr; gap: 24px; }
   .leader-photo { max-width: 320px; }
   .leader-letter { padding: 26px 22px; }
 }
 @media (max-width: 520px) {
-  .leader-theme { flex-direction: column; align-items: flex-start; }
-  .leader-theme img.is-wide { width: 100%; max-width: 240px; }
 }
 
 
 /* ---------- Background ---------- */
 /* Dot grid + glow + ASCII trail (components/ui/background-dot-glow.tsx); it sits behind everything. */
 .site-bg { position: fixed; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; pointer-events: none;
-  /* the resting dot grid: 32px apart, very faint */
-  background-image: radial-gradient(circle at 16px 16px, rgba(35, 45, 60, .1) 1.05px, transparent 1.6px); background-size: 32px 32px; }
+  /* the resting dot grid: 32px apart, faint; its colour follows the scroll (see lib/accent.js) */
+  background-image: radial-gradient(circle at 16px 16px, rgba(var(--dot-rgb, 212, 19, 103), .2) 1.05px, transparent 1.6px); background-size: 32px 32px; }
 main, .footer { position: relative; z-index: 1; }
 .footer { background: transparent; }
 .header-mobile-actions { display: none; align-items: center; gap: 10px; }
@@ -991,8 +989,10 @@ main, .footer { position: relative; z-index: 1; }
 .footer-bottom::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; border-radius: 2px; background: linear-gradient(90deg, var(--rotary-blue), var(--rotary-gold), var(--rotaract), var(--interact)); opacity: .85; }
 
 /* ---------- Custom cursor (components/ui/custom-cursor.tsx), as on rotaractscop.org ---------- */
-@media (pointer: fine) { html.custom-cursor, html.custom-cursor * { cursor: none !important; } }
-.cursor-arrow { position: fixed; left: 0; top: 0; z-index: 200; pointer-events: none; opacity: 0; color: hsl(220 65% 22%); transition: opacity .1s ease-out; will-change: transform, opacity; }
+@media (pointer: fine) { html.custom-cursor, html.custom-cursor :not(dialog[open], dialog[open] *) { cursor: none !important; } }
+/* The member badge opens in a modal (the browser's top layer, above the custom arrow), so it uses the normal cursor */
+html:has(dialog[open]) .cursor-arrow, html:has(dialog[open]) .cursor-sparks { display: none; }
+.cursor-arrow { position: fixed; left: 0; top: 0; z-index: 200; pointer-events: none; opacity: 0; color: hsl(220 65% 22%); transition: opacity .1s ease-out, color .3s ease; will-change: transform, opacity; }
 .cursor-arrow svg { display: block; width: 14px; height: 14px; }
 .cursor-sparks { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 100; pointer-events: none; user-select: none; }
 
@@ -1004,6 +1004,36 @@ a, button, summary, label, [role='button'], .btn, .nav-pill, .nav-cta, .card-btn
 /* A thin Rotary family rule above the footer's bottom line: Rotary blue, gold, Rotaract cranberry, Interact blue */
 .footer-bottom::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; border-radius: 2px; background: linear-gradient(90deg, var(--rotary-blue), var(--rotary-gold), var(--rotaract), var(--interact)); opacity: .85; }
 
+
+/* ---------- Member badge: clicking a member opens their lanyard (components/ui/lanyard-badge.tsx) ---------- */
+.member-card { position: relative; }
+.member-open { position: absolute; inset: 0; z-index: 2; width: 100%; border: 0; padding: 0; background: transparent; border-radius: 24px; }
+.member-open:focus-visible { outline: 2px solid var(--rotary-blue); outline-offset: 4px; }
+@media (hover: hover) { .member-card:hover .member-photo img { transform: scale(1.04); } .member-photo img { transition: transform .5s ease; } }
+html:has(dialog[open]) { overflow: hidden; }
+.badge-dialog { width: min(94vw, 32rem); max-width: none; max-height: 94svh; padding: 0; border: 0; border-radius: 24px; background: #fff; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,.35); }
+.badge-dialog[open] { animation: badge-in .35s cubic-bezier(.2,.8,.2,1); }
+.badge-dialog::backdrop { background: rgba(12,12,12,.62); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
+@keyframes badge-in { from { opacity: 0; transform: translateY(18px) scale(.97); } }
+@media (prefers-reduced-motion: reduce) { .badge-dialog[open] { animation: none; } }
+.badge-close { position: absolute; top: 16px; left: 16px; z-index: 11; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line-strong); background: rgba(255,255,255,.88); color: var(--ink); display: grid; place-items: center; cursor: pointer; }
+.badge-close:hover { background: var(--surface-2); }
+.lyd-flip { position: absolute; right: 16px; top: 16px; z-index: 10; display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; border: 1px solid var(--line-strong); background: rgba(255,255,255,.88); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); padding: 8px 16px; font-size: 14px; font-weight: 500; color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.06); cursor: pointer; transition: background .2s; }
+.lyd-flip:hover { background: var(--surface-2); }
+.lyd-flip-icon { transition: transform .5s ease; }
+.lyd-card { outline: none; }
+.lyd-card:focus-visible { outline: 2px solid var(--rotary-blue); outline-offset: 4px; border-radius: 12px; }
+.badge-face { height: 100%; background: #fff; color: #1d1d1d; display: flex; flex-direction: column; }
+.badge-photo { position: relative; height: 68%; overflow: hidden; background: #2a2a2a; display: grid; place-items: center; }
+.badge-photo img { width: 100%; height: 100%; object-fit: cover; object-position: center top; pointer-events: none; }
+.badge-photo span { font: 600 56px/1 var(--font-head); color: rgba(255,255,255,.75); }
+.badge-id { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 8px 16px 12px; text-align: center; }
+.badge-kicker { margin: 0; font-size: 9.5px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: #b5174f; }
+.badge-kicker.is-blue { color: var(--rotary-blue); }
+.badge-name { margin: 4px 0 0; font: 600 20px/1.15 var(--font-head); color: #1d1d1d; }
+.badge-name.is-big { font-size: 24px; }
+.badge-back { justify-content: center; gap: 10px; padding: 0 20px; text-align: center; }
+.badge-back ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: 13.5px; color: #555; }
 
 /* ---------- Leave a note (Reviews page, "Share your experience") ---------- */
 .note-head { text-align: center; max-width: 640px; margin: 0 auto 48px; display: flex; flex-direction: column; align-items: center; }
@@ -1060,5 +1090,5 @@ a, button, summary, label, [role='button'], .btn, .nav-pill, .nav-cta, .card-btn
 
 /* Large display figures use the heading font too */
 .metric-card > strong, .stat-cards dd, .counters strong, .impact-band dd, .green-counter strong, .mini-stats strong,
-.stat-boxes b, .outcome-grid dd, .hero-info-count b, .error-code, .timeline strong, .package strong, .leader-theme strong,
+.stat-boxes b, .outcome-grid dd, .hero-info-count b, .error-code, .timeline strong, .package strong, 
 .cta-stat b, .photo-badge strong { font-family: var(--font-head); }

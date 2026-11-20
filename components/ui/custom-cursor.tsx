@@ -1,19 +1,21 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
+import { accent, pageAccent } from "@/lib/accent";
 
 // ---------------------------------------------------------------------------
 // Custom cursor, matched to the one on rotaractscop.org:
-// - on mouse / trackpad devices the system pointer is hidden and a 14px navy
-//   arrow (hsl(220 65% 22%)) follows the mouse, its tip 1px up-left of the
-//   pointer; it fades in on move and out when the mouse leaves the window;
-// - every click (or tap) gives a burst of 8 short pink lines (hsl(339 72% 58%))
-//   that fly 18px outwards over 420ms with an ease-out.
+// - on mouse / trackpad devices the system pointer is hidden and a 14px arrow
+//   follows the mouse, its tip 1px up-left of the pointer; it fades in on move
+//   and out when the mouse leaves the window. Its colour depends on the page
+//   (navy on the home page, as on rotaractscop.org; see lib/accent.js);
+// - every click (or tap) gives a burst of 8 short lines that fly 18px outwards
+//   over 420ms with an ease-out, in the current scroll colour.
 // Touch screens keep their normal behaviour (no arrow). Reduced-motion
 // visitors get the arrow but no sparks.
 // ---------------------------------------------------------------------------
 
-const SPARK_COLOR = "hsl(339 72% 58%)";
 const SPARK_SIZE = 8;
 const SPARK_RADIUS = 18;
 const SPARK_COUNT = 8;
@@ -24,6 +26,8 @@ type Spark = { x: number; y: number; angle: number; start: number };
 export function CustomCursor() {
   const arrowRef = useRef<HTMLSpanElement>(null);
   const sparkRef = useRef<HTMLCanvasElement>(null);
+  const pathname = usePathname();
+  const cursorColor = pageAccent(pathname).cursor;
 
   // The arrow (fine pointers only)
   useEffect(() => {
@@ -79,7 +83,7 @@ export function CustomCursor() {
       ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
       ctx.lineCap = "round";
       ctx.lineWidth = 1.5;
-      ctx.strokeStyle = SPARK_COLOR;
+      ctx.strokeStyle = `rgb(${accent.rgb.join(", ")})`;
       sparks = sparks.filter((s) => {
         const t = (now - s.start) / SPARK_MS;
         if (t >= 1) return false;
@@ -119,7 +123,7 @@ export function CustomCursor() {
   return (
     <>
       <canvas ref={sparkRef} className="cursor-sparks" aria-hidden="true" />
-      <span ref={arrowRef} className="cursor-arrow" aria-hidden="true">
+      <span ref={arrowRef} className="cursor-arrow" aria-hidden="true" style={{ color: cursorColor }}>
         <svg viewBox="0 0 20 20" width="14" height="14" fill="none" focusable="false" xmlns="http://www.w3.org/2000/svg">
           <path fill="currentColor" d="M19.438 6.716 1.115.05A.832.832 0 0 0 .05 1.116L6.712 19.45a.834.834 0 0 0 1.557.025l3.198-8 7.995-3.2a.833.833 0 0 0 0-1.559h-.024Z" />
         </svg>

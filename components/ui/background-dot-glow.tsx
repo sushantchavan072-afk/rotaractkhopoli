@@ -1,14 +1,18 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
+import { accent, pageAccent, paletteAt, SCROLL_STEP } from "@/lib/accent";
 
 // ---------------------------------------------------------------------------
 // Site background: a quiet dot grid that glows around the mouse, merged with
 // the ASCII "wake" trail.
 //
 // - Dots sit on a 32px grid at very low opacity.
-// - Dots within ~150px of the (eased) pointer swell slightly and glow in
-//   Rotaract cranberry, fading out with distance.
+// - Dots within ~150px of the (eased) pointer swell slightly and glow,
+//   fading out with distance.
+// - The dots, the glow and the click sparks drift through the Rotary family
+//   colours as the page scrolls (lib/accent.js); each page starts elsewhere.
 // - Moving the mouse also stamps a short-lived trail of monospace characters
 //   in the Rotary family colours; fast passes leave thin, quick trails, slow
 //   passes leave fatter ones that linger.
@@ -20,7 +24,6 @@ import { useEffect, useRef } from "react";
 const DOT_GAP = 32; // px between dots (must match background-size of .site-bg)
 const DOT_R = 1.05; // resting dot radius (the grid itself is drawn by CSS)
 const GLOW_RADIUS = 150; // px around the pointer that glows
-const GLOW_RGB = "212, 19, 103"; // Rotaract cranberry
 const EASE = 0.14; // how quickly the glow follows the pointer
 
 const CELL = 12; // ASCII trail cell size
@@ -31,6 +34,14 @@ const COLOR_STEP_MS = 90; // the trail moves on to the next colour every ~90 ms
 
 export function DotGlowBackground({ className = "" }: { className?: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const pathname = usePathname();
+  const pathRef = useRef(pathname);
+  const recolorRef = useRef<() => void>(() => {});
+  // A new page starts the colour cycle at its own colour.
+  useEffect(() => {
+    pathRef.current = pathname;
+    recolorRef.current();
+  }, [pathname]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -92,7 +103,7 @@ export function DotGlowBackground({ className = "" }: { className?: string }) {
       // The resting dot grid is a static CSS background on the canvas (see .site-bg in globals.css),
       // so each frame only paints the few glowing dots inside the glow radius.
       if (glowing) {
-        ctx.fillStyle = `rgba(${GLOW_RGB}, 0.32)`;
+        ctx.fillStyle = `rgba(${accent.rgb.join(", ")}, 0.32)`;
         const x0 = Math.max(0, Math.floor((glow.x - GLOW_RADIUS) / DOT_GAP));
         const x1 = Math.ceil((glow.x + GLOW_RADIUS) / DOT_GAP);
         const y0 = Math.max(0, Math.floor((glow.y - GLOW_RADIUS) / DOT_GAP));
@@ -221,6 +232,24 @@ export function DotGlowBackground({ className = "" }: { className?: string }) {
       if (!document.hidden) wake();
     };
 
+    // Scroll colour: blend along the palette as the page scrolls.
+    let lastRgb = "";
+    let scrollRaf = 0;
+    const recolor = () => {
+      scrollRaf = 0;
+      const rgb = paletteAt(pageAccent(pathRef.current).start + window.scrollY / SCROLL_STEP);
+      const key = rgb.join(", ");
+      if (key === lastRgb) return;
+      lastRgb = key;
+      accent.rgb = rgb;
+      canvas.style.setProperty("--dot-rgb", key);
+      if (target.active) wake();
+    };
+    recolorRef.current = recolor;
+    const onScroll = () => {
+      if (!scrollRaf) scrollRaf = requestAnimationFrame(recolor);
+    };
+
     let resizeTimer: ReturnType<typeof setTimeout> | null = null;
     const onResize = () => {
       if (resizeTimer) clearTimeout(resizeTimer);
@@ -232,8 +261,10 @@ export function DotGlowBackground({ className = "" }: { className?: string }) {
     };
 
     resize();
+    recolor();
     draw(0);
     window.addEventListener("resize", onResize, { passive: true });
+    window.addEventListener("scroll", onScroll, { passive: true });
     if (interactive) {
       window.addEventListener("pointermove", onMove, { passive: true });
       document.documentElement.addEventListener("pointerleave", onLeave);
@@ -242,8 +273,11 @@ export function DotGlowBackground({ className = "" }: { className?: string }) {
 
     return () => {
       cancelAnimationFrame(raf);
+      cancelAnimationFrame(scrollRaf);
+      recolorRef.current = () => {};
       if (resizeTimer) clearTimeout(resizeTimer);
       window.removeEventListener("resize", onResize);
+      window.removeEventListener("scroll", onScroll);
       window.removeEventListener("pointermove", onMove);
       document.documentElement.removeEventListener("pointerleave", onLeave);
       document.removeEventListener("visibilitychange", onVisibility);

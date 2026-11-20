@@ -19,7 +19,7 @@ import {
   postsNewestFirst, PAGE_SIZE, riPresident, drr, districtGovernor,
 } from '../data/club';
 import {
-  Btn, Eyebrow, Intro, Section, PageHero, Photo, FaqList, FaqSearch, MailForm, NoteWall, HoverOpen, SocialLinks,
+  Btn, Eyebrow, Intro, Section, PageHero, Photo, FaqList, FaqSearch, MailForm, NoteWall, HoverOpen, MemberBadgeCard, SocialLinks,
   EventCard, EventsExplorer, EventStatus, EventActions, FamilyLogos, LogoMarquee,
 } from './ui';
 
@@ -28,8 +28,11 @@ const eventImage = (e) => `/images/events/${e.slug}.jpg`;
 /** Only point at a member photo that actually exists in /public, so missing portraits never trigger a 404. */
 const memberImage = (m) => {
   if (!m.photo) return undefined;
-  const rel = `/images/members/${m.photo}.png`;
-  return existsSync(join(process.cwd(), 'public', rel)) ? rel : undefined;
+  for (const ext of ['webp', 'png', 'jpg']) {
+    const rel = `/images/members/${m.photo}.${ext}`;
+    if (existsSync(join(process.cwd(), 'public', rel))) return rel;
+  }
+  return undefined;
 };
 const partnerCount = new Set(events.map((e) => e.partner).filter(Boolean)).size;
 const TINTS = ['rose', 'sky', 'gold'];
@@ -58,13 +61,17 @@ function Pills({ children }) {
   return <p className="pill-text"><span>{children}</span></p>;
 }
 
+/** Every role a member holds this year, across the core team, board and chairs (for the back of their badge). */
+const allRoles = (name) => [...new Set([...coreMembers, ...boardOfDirectors, ...chairpersons].filter((x) => x.name === name).flatMap((x) => x.roles))];
+
 function MemberCard({ m, i = 0, size = 'md' }) {
+  const src = memberImage(m);
   return (
-    <div className={`member-card is-${size}`}>
-      <div className="member-photo"><Photo src={memberImage(m)} alt={m.name} tone={i} sizes="(max-width: 700px) 50vw, 300px" /></div>
+    <MemberBadgeCard className={`member-card is-${size}`} member={{ name: m.name, roles: allRoles(m.name) }} portrait={src}>
+      <div className="member-photo"><Photo src={src} alt={m.name} tone={i} sizes="(max-width: 700px) 50vw, 300px" /></div>
       <h3>{m.name}</h3>
       <ul className="member-roles">{m.roles.map((r) => <li key={r}>{r}</li>)}</ul>
-    </div>
+    </MemberBadgeCard>
   );
 }
 
@@ -769,16 +776,14 @@ function LeaderCard({ leader, eyebrow, tone = 'coral', preview = 3 }) {
   const rest = leader.message.slice(preview);
   return (
     <article className={`leader-card is-${tone}`}>
+      {leader.themeLogo && <Image src={leader.themeLogo.src} alt={leader.themeLogo.alt} width={leader.themeLogo.w} height={leader.themeLogo.h} sizes="220px" className={`leader-logo ${leader.themeLogo.w > leader.themeLogo.h ? 'is-wide' : ''}`} />}
       <div className="leader-top">
         <div className="leader-photo"><Photo src={leader.photo || undefined} alt={leader.name} label={initials(leader.name)} sizes="(max-width: 900px) 80vw, 400px" /></div>
         <div className="leader-copy">
           <Eyebrow>{eyebrow}</Eyebrow>
           <h2>{leader.name}</h2>
           <p className="leader-role">{leader.role} · {leader.year}</p>
-          <div className="leader-theme">
-            {leader.themeLogo && <Image src={leader.themeLogo.src} alt={leader.themeLogo.alt} width={leader.themeLogo.w} height={leader.themeLogo.h} sizes="200px" className={leader.themeLogo.w > leader.themeLogo.h ? 'is-wide' : ''} />}
-            <div><small className="leader-theme-label">{leader.themeLabel} {leader.year}</small><strong>{leader.theme}</strong>{leader.themeSub && <span>{leader.themeSub}</span>}</div>
-          </div>
+          {!leader.themeInLogo && <p className="leader-vision"><small>{leader.themeLabel} {leader.year}</small>{leader.theme}</p>}
           {leader.highlight && <blockquote className="leader-highlight">“{leader.highlight}”</blockquote>}
         </div>
       </div>

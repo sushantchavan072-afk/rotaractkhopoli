@@ -1,6 +1,7 @@
 'use client';
 import React, { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import Image from 'next/image';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 // Icons: react-icons (Font Awesome 6), the same icon library Kindora uses.
@@ -12,8 +13,11 @@ import {
 } from 'react-icons/fa6';
 import {
   ALL_PAGES, NAV, club, clubEmail, contact, officers, initials, FORM_ENDPOINT, FAMILY_LOGOS,
-  formatDate, isPast,
+  formatDate, isPast, rotaractYear,
 } from '../data/club';
+
+// The lanyard badge is only downloaded when someone opens a member's badge.
+const LanyardBadge = dynamic(() => import('@/components/ui/lanyard-badge'), { ssr: false });
 
 const TONES = ['tint-rose', 'tint-sky', 'tint-gold', 'tint-leaf'];
 
@@ -476,6 +480,71 @@ export function NoteWall() {
         )}
       </div>
     </div>
+  );
+}
+
+/* ---------------------------------------------------------------- Member badge (lanyard) */
+
+/**
+ * A member card that opens the member's lanyard badge when clicked, as on the club's original site.
+ * The card's own content is passed as children; a transparent button covers it.
+ */
+export function MemberBadgeCard({ member, portrait, className = '', children }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className={className}>
+      {children}
+      <button type="button" className="member-open" aria-label={`View ${member.name}'s badge`} onClick={() => setOpen(true)} />
+      {open && <MemberBadgeDialog member={member} portrait={portrait} onClose={() => setOpen(false)} />}
+    </div>
+  );
+}
+
+function MemberBadgeDialog({ member, portrait, onClose }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const d = ref.current;
+    if (d && !d.open) d.showModal();
+    return () => { if (d?.open) d.close(); };
+  }, []);
+  const close = () => ref.current?.close();
+  return (
+    <dialog
+      ref={ref}
+      className="badge-dialog"
+      aria-label={`${member.name}, member badge`}
+      onClose={onClose}
+      onClick={(e) => { if (e.target === e.currentTarget) close(); }}
+    >
+      <button type="button" className="badge-close" onClick={close} aria-label="Close badge"><X size={16} aria-hidden="true" /></button>
+      <p className="sr-only">Member badge. Drag to swing it, tap it to flip and see their roles.</p>
+      <LanyardBadge
+        height="min(82svh, 640px)"
+        cardWidth={230}
+        strapText="rotaract club of khopoli"
+        strapLabel={`RID 3131 · ${rotaractYear}`}
+        strapColor="#b5174f"
+        inkColor="#f2b51c"
+        front={
+          <div className="badge-face badge-front">
+            <div className="badge-photo">
+              {portrait ? <Image src={portrait} alt="" fill sizes="240px" draggable={false} /> : <span aria-hidden="true">{initials(member.name)}</span>}
+            </div>
+            <div className="badge-id">
+              <p className="badge-kicker">Rotaract Khopoli</p>
+              <p className="badge-name">{member.name}</p>
+            </div>
+          </div>
+        }
+        back={
+          <div className="badge-face badge-back">
+            <p className="badge-kicker is-blue">Portfolio</p>
+            <p className="badge-name is-big">{member.name}</p>
+            <ul>{member.roles.map((r) => <li key={r}>{r}</li>)}</ul>
+          </div>
+        }
+      />
+    </dialog>
   );
 }
 

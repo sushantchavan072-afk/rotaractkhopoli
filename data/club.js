@@ -156,7 +156,7 @@ export const eventsNewestFirst = [...events].sort((a, b) => b.date.localeCompare
 /* ---------------- Members ---------------- */
 
 export const coreMembers = [
-  { name: 'Rtr. Vageesh Baheti', roles: ['President'], bio: "Leads the club's service year, chairs board meetings and owns every commitment the club makes publicly." },
+  { name: 'Rtr. Vageesh Baheti', photo: 'vageesh', roles: ['President'], bio: "Leads the club's service year, chairs board meetings and owns every commitment the club makes publicly." },
   { name: 'Rtr. Srushti Sathe', roles: ['Secretary'], bio: 'Keeps minutes, correspondence, membership records and the club calendar in order.' },
   { name: 'Rtr. Mihir Butala', roles: ['President Elect'], bio: "Prepares to lead the club's next service year, deputises at meetings and shepherds cross-avenue projects." },
   { name: 'Rtr. Anvay Narwekar', roles: ['Treasurer'], bio: 'Maintains club accounts, dues, project budgets and the annual statement placed before the general body.' },
@@ -164,7 +164,7 @@ export const coreMembers = [
 ];
 
 export const boardOfDirectors = [
-  { name: 'Rtr. Vageesh Baheti', roles: ['Club Service Director (CSD)', 'International Service Director (ISD)'] },
+  { name: 'Rtr. Vageesh Baheti', photo: 'vageesh', roles: ['Club Service Director (CSD)', 'International Service Director (ISD)'] },
   { name: 'Rtr. Piyush Phatak', roles: ['Club Service Director (CSD)'] },
   { name: 'Rtr. Shreya Salunkhe', roles: ['Community Service Director (CMD)', 'Sergeant-at-Arms (SAA)'] },
   { name: 'Rtr. Khadija Bearingwala', photo: 'khadija-bearingwala', roles: ['Professional Development Director (PDD)', 'Diversity, Equity & Inclusion Director (DEID)'] },
@@ -182,7 +182,7 @@ export const chairpersons = [
   { name: 'Rtr. Rutika Zavar', roles: ['Financial Chair'] },
   { name: 'Rtr. Gargi Gaikwad', photo: 'gargi-gaikwad', roles: ['Creative Head'] },
   { name: 'Rtr. Khadija Bearingwala', photo: 'khadija-bearingwala', roles: ['Creative Head'] },
-  { name: 'Rtr. Vageesh Baheti', roles: ['Social Media Chair'] },
+  { name: 'Rtr. Vageesh Baheti', photo: 'vageesh', roles: ['Social Media Chair'] },
   { name: 'Rtr. Rohan Puri', photo: 'rohan', roles: ['Professional Assistance Officer (PAO)'] },
 ];
 
@@ -253,6 +253,7 @@ export const riPresident = {
   year: 'RIY 2026-27',
   theme: 'Create Lasting Impact',
   themeLabel: 'Presidential theme',
+  themeInLogo: true, // the logo already spells out the theme, so the text is not repeated
   themeLogo: { src: '/images/themes/create-lasting-impact.png', w: 409, h: 409, alt: 'Create Lasting Impact, Rotary theme 2026-27' },
   photo: '/images/leaders/ri-president.webp',
   highlight: 'When we work alongside communities, invest in people\u2019s skills and leadership abilities, and measure our progress, we ensure that positive changes can continue in our communities and in ourselves long after a single project ends.',
@@ -307,6 +308,7 @@ export const drr = {
   theme: 'REIGN',
   themeSub: 'Rotaract Empowering Individuals for Growth and Networking',
   themeLabel: 'District theme',
+  themeInLogo: true,
   themeLogo: { src: '/images/themes/reign.png', w: 651, h: 267, alt: 'REIGN, Rotaract Empowering Individuals for Growth and Networking, DRR Dr. Karishma Awari, RIY 2026-27, RID 3131' },
   photo: '/images/leaders/drr.webp',
   greeting: 'Dear Rotaractors of District 3131,',
