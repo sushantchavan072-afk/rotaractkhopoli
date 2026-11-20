@@ -166,7 +166,7 @@ section:nth-of-type(3n+2) .eyebrow-dot { background: var(--coral); }
 .page-hero-wide { margin-top: 44px; height: 520px; border-radius: var(--radius); overflow: hidden; }
 
 /* ---------- Home hero ---------- */
-.home-hero { padding: 0 0 20px; }
+.home-hero { padding: 0 0 20px; overflow-x: clip; }
 .home-hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: stretch; }
 .home-hero-copy { padding: 150px 0 20px; display: flex; flex-direction: column; }
 .donorline { display: flex; align-items: center; gap: 12px; font-size: 15px; color: var(--muted); margin-bottom: 22px; }
@@ -175,7 +175,7 @@ section:nth-of-type(3n+2) .eyebrow-dot { background: var(--coral); }
 .avatar { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 14px; color: var(--accent); flex: none; }
 .home-hero h1 { font-size: clamp(3rem, 5.2vw, 4.9rem); line-height: 1.12; font-weight: 500; letter-spacing: -0.02em; margin: 0 0 26px; }
 .home-hero .lead { max-width: 500px; margin-bottom: 34px; }
-.home-hero-art { position: relative; margin-top: 20px; min-height: 860px; border-radius: 36px; overflow: hidden; background: #dfe9e3; }
+.home-hero-art { position: relative; margin-top: 20px; min-height: 860px; border-radius: 36px; overflow: hidden; background: #dfe9e3; /* extend past the content edge towards the window edge, so the menu sits inside the photo */ margin-right: calc(-1 * min(80px, max(32px, (100vw - 1284px) / 2) - 20px)); }
 .home-hero-art > .photo, .home-hero-art > .photo-fallback { position: absolute; inset: 0; }
 .hero-quote, .story-reel, .hero-info-card, .hero-small-tag { position: absolute; z-index: 2; }
 .hero-quote { top: 24%; left: 15%; max-width: 380px; border-radius: 40px; background: #fff; padding: 10px 22px 10px 10px; display: flex; gap: 12px; align-items: center; }
@@ -593,7 +593,7 @@ section:nth-of-type(3n+2) .eyebrow-dot { background: var(--coral); }
   .site-header.is-overlay { position: absolute; }
   .home-hero-grid { grid-template-columns: 1fr; gap: 0; }
   .home-hero-copy { padding: 130px 0 30px; }
-  .home-hero-art { min-height: 640px; margin-top: 0; }
+  .home-hero-art { min-height: 640px; margin-top: 0; margin-right: 0; }
   .metric-grid, .card-grid, .quote-grid, .package-grid, .post-grid.is-three { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .avenue-grid { grid-template-columns: repeat(2, 1fr); }
   .ways-grid { grid-template-columns: repeat(2, 1fr); }
@@ -688,3 +688,8 @@ section:nth-of-type(3n+2) .eyebrow-dot { background: var(--coral); }
 .cta-band .cta-stat, .cta-band .cta-stat strong, .cta-band .cta-stat span, .cta-band .cta-stat b { color: var(--ink); }
 .numbered .way-icon { color: var(--ink); }
 .hero-small-avatar { color: var(--ink); }
+
+/* Keep the home-page menu at least ~40px inside the hero photo's rounded edge on narrower laptops */
+@media (min-width: 1041px) {
+  .site-header.is-overlay:not(.is-stuck) .nav { margin-right: max(0px, calc(60px - max(32px, (100vw - 1284px) / 2))); }
+}
