@@ -131,7 +131,7 @@ function CommunityCTA() {
             <b>{uniqueMemberCount}+ Rotaractors</b>
           </div>
           <div className="cta-pills"><Pills>Serving schools, the environment and local livelihoods in Khopoli.</Pills></div>
-          <div className="cta-people"><Photo src="/images/hero.jpg" alt="Young volunteers smiling together" label=" " sizes="(max-width: 900px) 100vw, 60vw" /></div>
+          <div className="cta-people"><Photo src="/images/cta-team.jpg" alt="Members of Rotaract Club of Khopoli sitting together outdoors" label=" " sizes="(max-width: 900px) 100vw, 60vw" /></div>
         </div>
       </div>
     </section>

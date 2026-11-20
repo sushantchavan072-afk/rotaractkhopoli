@@ -449,7 +449,8 @@ section:nth-of-type(6n) .eyebrow-dot { background: var(--interact); }
 .cta-stat b { font-size: 26px; font-weight: 500; }
 .cta-pills { position: absolute; right: 56px; top: 360px; z-index: 3; text-align: left; max-width: calc(24% - 56px); }
 .cta-pills .pill-text { max-width: 230px; }
-.cta-people { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); width: min(680px, 52%); height: 330px; border-radius: 360px 360px 0 0; overflow: hidden; filter: grayscale(1); box-shadow: 0 0 0 46px rgba(255,255,255,.14); }
+.cta-people .photo { object-position: center top; }
+.cta-people { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); width: min(680px, 52%); height: 330px; border-radius: 240px 240px 0 0; /* a gentler arch than a semicircle, so faces at both ends of the team photo stay inside */ overflow: hidden; filter: grayscale(1); box-shadow: 0 0 0 46px rgba(255,255,255,.14); }
 
 /* ---------- FAQ box (grey panel) ---------- */
 .faq-box { background: var(--panel); border-radius: var(--radius); padding: 56px; }
@@ -689,7 +690,7 @@ section:nth-of-type(6n) .eyebrow-dot { background: var(--interact); }
   .volunteer-tag { display: none; }
   .metric-grid > :last-child { grid-column: auto; }
   .cta-band { padding: 48px 22px 0; min-height: 560px; }
-  .cta-people { width: 92%; height: 260px; }
+  .cta-people { width: 92%; height: auto; aspect-ratio: 16 / 9; border-radius: 120px 120px 0 0; }
   .stat-boxes { grid-template-columns: 1fr; }
   .stat-boxes > div + div { border-left: 0; border-top: 1px solid var(--line); }
   .chart-card { left: 50%; transform: translateX(-50%); bottom: 20px; width: 240px; }
