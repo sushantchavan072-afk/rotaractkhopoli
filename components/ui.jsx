@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  ArrowRight, ArrowUpRight, ChevronDown, Menu, X, Plus, Minus, Mail, Search,
+  ArrowRight, ArrowUpRight, ChevronDown, Menu, X, Plus, Mail, Search,
   CalendarPlus, Share2, Check, Instagram, Facebook, Linkedin, Youtube, MapPin,
 } from 'lucide-react';
 import {
@@ -155,6 +155,7 @@ export function Header() {
   const isHome = pathname === '/';
   const [open, setOpen] = useState(false);
   const [pagesOpen, setPagesOpen] = useState(false);
+  const [pagesByHover, setPagesByHover] = useState(false); // opened by hovering (desktop) rather than a click
   const [stuck, setStuck] = useState(false);
   // Close menus whenever the page changes (adjusting state during render, as React recommends).
   const [lastPath, setLastPath] = useState(pathname);
@@ -181,11 +182,15 @@ export function Header() {
           {open ? <X size={22} /> : <Menu size={22} />}
         </button>
         <nav id="main-nav" className={`nav ${open ? 'is-open' : ''}`} aria-label="Main">
-          <div className="pages-wrap">
-            <button type="button" className={`nav-pill pages-toggle ${pagesOpen ? 'is-open' : ''}`} aria-expanded={pagesOpen} aria-controls="pages-menu" onClick={() => setPagesOpen(!pagesOpen)}>
+          <div
+            className="pages-wrap"
+            onMouseEnter={() => { if (!pagesOpen && window.matchMedia('(hover: hover) and (min-width: 1041px)').matches) { setPagesByHover(true); setPagesOpen(true); } }}
+            onMouseLeave={() => { if (pagesByHover) { setPagesOpen(false); setPagesByHover(false); } }}
+          >
+            <button type="button" className={`nav-pill pages-toggle ${pagesOpen ? 'is-open' : ''}`} aria-expanded={pagesOpen} aria-controls="pages-menu" onClick={() => { if (pagesOpen && pagesByHover) { setPagesByHover(false); } else { setPagesByHover(false); setPagesOpen(!pagesOpen); } }}>
               All Pages <ChevronDown size={16} aria-hidden="true" />
             </button>
-            {pagesOpen && <button className="dropdown-backdrop" tabIndex={-1} aria-hidden="true" onClick={() => setPagesOpen(false)} />}
+            {pagesOpen && !pagesByHover && <button className="dropdown-backdrop" tabIndex={-1} aria-hidden="true" onClick={() => setPagesOpen(false)} />}
             {pagesOpen && (
               <div className="pages-menu" id="pages-menu">
                 {ALL_PAGES.map(([label, href]) => (
@@ -367,7 +372,7 @@ export function FaqList({ items, firstOpen = true }) {
           <div className={`faq-item ${open ? 'is-open' : ''}`} key={f.q}>
             <h3>
               <button type="button" aria-expanded={open} aria-controls={id} onClick={() => setExpanded(open ? -1 : i)}>
-                <span>{f.q}</span>{open ? <Minus size={19} aria-hidden="true" /> : <Plus size={19} aria-hidden="true" />}
+                <span>{f.q}</span><span className="faq-icon" aria-hidden="true"><Plus size={19} /></span>
               </button>
             </h3>
             <div id={id} className="faq-answer" inert={!open}><div><p>{f.a}</p></div></div>
@@ -554,12 +559,40 @@ const REVEAL_RULES = [
   ['.footer-top', 'fade-up', 150],
 ];
 
+/** Numbers that count up when they scroll into view (like Kindora's stats). Years and ranges are left alone. */
+const COUNT_SELECTOR = '.metric-card > strong, .stat-boxes b, .counters strong, .impact-band dd, .green-counter strong, .hero-info-card b, .outcome-grid dd';
+
+function countUp(el) {
+  const final = el.textContent;
+  const m = final.match(/^([^\d]*)([\d,]*\.?\d+)(.*)$/);
+  if (!m || /^(19|20)\d\d$/.test(m[2]) || /^\s*-/.test(m[3])) return;
+  const [, prefix, numText, suffix] = m;
+  const target = parseFloat(numText.replace(/,/g, ''));
+  const decimals = (numText.split('.')[1] || '').length;
+  const commas = numText.includes(',');
+  const fmt = (v) => {
+    const n = v.toFixed(decimals);
+    return commas ? Number(n).toLocaleString('en-IN', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }) : n;
+  };
+  el.setAttribute('aria-label', final);
+  const start = performance.now();
+  const duration = 2000;
+  const tick = (now) => {
+    const t = Math.min(1, (now - start) / duration);
+    const eased = 1 - (1 - t) ** 3;
+    el.textContent = `${prefix}${fmt(target * eased)}${suffix}`;
+    if (t < 1) requestAnimationFrame(tick); else { el.textContent = final; el.removeAttribute('aria-label'); }
+  };
+  el.textContent = `${prefix}${fmt(0)}${suffix}`;
+  requestAnimationFrame(tick);
+}
+
 export function ScrollReveal() {
   const pathname = usePathname();
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) return undefined;
     const io = new IntersectionObserver((entries) => entries.forEach((en) => {
-      if (en.isIntersecting) { en.target.classList.add('aos-animate'); io.unobserve(en.target); }
+      if (en.isIntersecting) { en.target.setAttribute('data-aos-in', ''); io.unobserve(en.target); } // an attribute, not a class: React rewrites className on re-render
     }), { rootMargin: '0px 0px -60px 0px' });
     const apply = () => {
       for (const [selector, effect, base, step = 0, cycle = 0] of REVEAL_RULES) {
@@ -578,10 +611,14 @@ export function ScrollReveal() {
       }
     };
     apply();
+    const counter = new IntersectionObserver((entries) => entries.forEach((en) => {
+      if (en.isIntersecting) { counter.unobserve(en.target); countUp(en.target); }
+    }), { threshold: 0.6 });
+    document.querySelectorAll(COUNT_SELECTOR).forEach((el) => { if (!el.dataset.counted) { el.dataset.counted = '1'; counter.observe(el); } });
     // Re-scan when client components add content (filters, pagination, search results).
     const mo = new MutationObserver(apply);
     mo.observe(document.querySelector('main') ?? document.body, { childList: true, subtree: true });
-    return () => { io.disconnect(); mo.disconnect(); };
+    return () => { io.disconnect(); mo.disconnect(); counter.disconnect(); };
   }, [pathname]);
   return null;
 }

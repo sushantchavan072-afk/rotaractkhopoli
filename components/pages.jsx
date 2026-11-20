@@ -1058,10 +1058,10 @@ export function NotFound() {
   return (
     <section className="error-page">
       <div className="container">
-        <p className="error-code" aria-hidden="true">404</p>
-        <h1>This page took a different avenue</h1>
-        <p>The page you are looking for does not exist or has moved.</p>
-        <div className="btn-row center-row"><Btn href="/" icon={false}>Back to Home</Btn><Btn href="/events" kind="outline" icon={false}>See Events</Btn></div>
+        <svg className="error-icon" viewBox="0 0 96 88" aria-hidden="true"><path d="M41.1 5.5a8 8 0 0 1 13.8 0l38 66A8 8 0 0 1 86 83.5H10a8 8 0 0 1-6.9-12z" fill="currentColor" /><rect x="44" y="28" width="8" height="30" rx="4" fill="#fff" /><circle cx="48" cy="68" r="5" fill="#fff" /></svg>
+        <h1>Sorry! Page not found</h1>
+        <p>It looks like the page you are looking for does not exist or has moved. Let&apos;s get you back on track.</p>
+        <div className="btn-row center-row"><Btn href="/" icon={false}>Back To Home</Btn></div>
       </div>
     </section>
   );
