@@ -62,13 +62,21 @@ The Join, Board application, Sponsorship, Contact and footer forms work in two w
 1. **With `NEXT_PUBLIC_FORM_ENDPOINT` set** (recommended): submissions are posted to a form service such as [Formspree](https://formspree.io), which emails them to the club inbox. The visitor sees a confirmation on the page.
 2. **Without it:** the form opens the visitor's email app with the message ready to send to the club email.
 
+## Logos
+
+The official logos are in `public/images/logos/`:
+
+- `rotaract-khopoli.png`: the club logo, used in the header and on the share image. `rotaract-khopoli-white.png` is the white version for the footer.
+- `rotaract-district-3131.png`, `rotary-district-3131.png` and `interact-district-3131.png`: used in the "Rotary family" strip on the home page, on the About page, and on the District and Rotary pages.
+
+The browser-tab icon (`app/icon.png`) and the home-screen icon (`app/apple-icon.png`) are cut from the club logo's wheel. Use the logos unchanged, as Rotary's brand guidelines require.
+
 ## Photos
 
 Many photos are **temporary Unsplash stock images** (see `public/images/CREDITS.md`). To use the club's own photos, replace each file and keep its name. Then regenerate the share image `public/og.jpg` (1200×630).
 
 ## Still needed from the club
 
-- [ ] The official Rotaract club logo from Rotary's Brand Center, to replace the placeholder wheel in `components/ui.jsx` (`Logo`)
 - [ ] A shared club email (`contact.email`) and social media links
 - [ ] Real photos of projects and members
 - [ ] Full names for Rtr. Harsh, Rtr. Sarvesh and Rtr. Gaurav

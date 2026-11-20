@@ -9,12 +9,13 @@ import {
   club, clubFacts, officers, clubEmail, contact, avenues, events, eventsNewestFirst, formatDate,
   coreMembers, boardOfDirectors, chairpersons, uniqueMemberCount, initials, testimonials,
   faqGroups, district, rotary, sponsorTiers, joinCommitments, rotaractYear,
-  membersWithRoles, eventsForAvenue, SITE_URL,
+  membersWithRoles, eventsForAvenue, SITE_URL, FAMILY_LOGOS,
 } from '../data/club';
 import {
   Btn, Eyebrow, Intro, Section, PageHero, Photo, FaqSearch, MailForm, SocialLinks,
-  EventCard, EventsExplorer, EventStatus, EventActions,
+  EventCard, EventsExplorer, EventStatus, EventActions, FamilyLogos,
 } from './ui';
+import Image from 'next/image';
 
 const ICONS = { HandHeart, GraduationCap, Users, Globe2, Megaphone, HeartHandshake, Sparkles };
 const eventImage = (e) => `/images/events/${e.slug}.jpg`;
@@ -24,7 +25,6 @@ const memberImage = (m) => {
   const rel = `/images/members/${m.photo}.png`;
   return existsSync(join(process.cwd(), 'public', rel)) ? rel : undefined;
 };
-const PARTNERS = ['Rotary International', 'Rotaract District 3131', 'Rotary Club of Khopoli', 'RAC Saanjh, Delhi', 'RAC Bicholim', 'Khopoli Municipal Council'];
 const partnerCount = new Set(events.map((e) => e.partner).filter(Boolean)).size;
 const TINTS = ['rose', 'sky', 'gold'];
 
@@ -209,10 +209,7 @@ export function Home() {
             </Link>
           </div>
         </div>
-        <div className="container partner-strip">
-          <span>Working alongside</span>
-          <ul>{PARTNERS.map((p) => <li key={p}>{p}</li>)}</ul>
-        </div>
+        <div className="container"><FamilyLogos /></div>
       </section>
 
       <ImpactBand />
@@ -344,12 +341,13 @@ export function About() {
         <Intro center label="The Rotary family" title="Rotary, Rotaract and Interact" />
         <div className="info-grid">
           {[
-            ['Rotary', 'A worldwide network of service clubs for working professionals. Rotary sponsors and mentors Rotaract clubs, including ours.', '/rotary-information'],
-            ['Rotaract', "Rotary's programme for young adults. Clubs govern themselves, plan their own projects and report through their district: for us, District 3131.", '/district-3131'],
-            ['Interact', 'The school-age wing of Rotary. Where we can, we support Interact clubs nearby so service starts before college.', null],
-          ].map(([t, d, href], i) => (
-            <div className={`info-card tint-${['sky', 'rose', 'gold'][i]}`} key={t}>
-              <h3>{t}</h3><p>{d}</p>
+            ['Rotary', 'A worldwide network of service clubs for working professionals. Rotary sponsors and mentors Rotaract clubs, including ours.', '/rotary-information', FAMILY_LOGOS[1]],
+            ['Rotaract', "Rotary's programme for young adults. Clubs govern themselves, plan their own projects and report through their district: for us, District 3131.", '/district-3131', FAMILY_LOGOS[0]],
+            ['Interact', 'The school-age wing of Rotary. Where we can, we support Interact clubs nearby so service starts before college.', null, FAMILY_LOGOS[2]],
+          ].map(([t, d, href, logo]) => (
+            <div className="info-card family-card" key={t}>
+              <Image src={logo.src} alt={logo.alt} width={logo.w} height={logo.h} sizes="240px" className="family-card-logo" />
+              <h3 className="sr-only">{t}</h3><p>{d}</p>
               {href && <Link href={href} className="text-link">Learn more <ArrowRight size={16} aria-hidden="true" /></Link>}
             </div>
           ))}
@@ -527,7 +525,7 @@ export function Members() {
 export function District() {
   return (
     <>
-      <PageHero eyebrow="Our district" title={district.name} desc={district.intro}>
+      <PageHero eyebrow="Our district" title={district.name} desc={district.intro} logo={FAMILY_LOGOS[0]}>
         <div className="btn-row"><Btn href={district.website} kind="dark">Visit the District Website</Btn></div>
       </PageHero>
       <Section>
@@ -545,7 +543,7 @@ export function District() {
 export function RotaryInfo() {
   return (
     <>
-      <PageHero eyebrow="Rotary International" title="People of action, since 1905" desc={rotary.intro}>
+      <PageHero eyebrow="Rotary International" title="People of action, since 1905" desc={rotary.intro} logo={FAMILY_LOGOS[1]}>
         <div className="btn-row"><Btn href={rotary.website} kind="dark">Visit Rotary.org</Btn></div>
       </PageHero>
       <Section>

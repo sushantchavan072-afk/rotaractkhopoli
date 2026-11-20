@@ -10,10 +10,9 @@ export const metadata = {
   metadataBase: new URL(SITE_URL),
   title: { default: club.name, template: `%s | ${club.name}` },
   description: 'Community based Rotaract club in Khopoli, chartered November 2020. Community service, professional development and fellowship in District 3131.',
-  icons: { icon: '/favicon.png' },
 };
 
-export const viewport = { themeColor: '#b5124f' };
+export const viewport = { themeColor: '#d22163' };
 
 export default function RootLayout({ children }){
   return (

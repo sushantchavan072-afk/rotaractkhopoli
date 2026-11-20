@@ -56,6 +56,13 @@ export const clubFacts = [
   { label: 'Parent organisation', value: club.sponsor },
 ];
 
+/** District 3131 family logos (Rotaract, Rotary, Interact) in public/images/logos. */
+export const FAMILY_LOGOS = [
+  { src: '/images/logos/rotaract-district-3131.png', alt: 'Rotaract District 3131', w: 790, h: 276, href: '/district-3131' },
+  { src: '/images/logos/rotary-district-3131.png', alt: 'Rotary District 3131', w: 743, h: 286, href: '/rotary-information' },
+  { src: '/images/logos/interact-district-3131.png', alt: 'Interact District 3131', w: 754, h: 276, href: null },
+];
+
 export const NAV = [
   { href: '/', label: 'Home' },
   { href: '/about', label: 'About' },

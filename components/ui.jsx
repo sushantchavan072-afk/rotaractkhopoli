@@ -8,7 +8,7 @@ import {
   CalendarPlus, Share2, Check, Instagram, Facebook, Linkedin, Youtube, MapPin,
 } from 'lucide-react';
 import {
-  ALL_PAGES, NAV, club, clubEmail, contact, officers, initials, FORM_ENDPOINT,
+  ALL_PAGES, NAV, club, clubEmail, contact, officers, initials, FORM_ENDPOINT, FAMILY_LOGOS,
   formatDate, isPast,
 } from '../data/club';
 
@@ -79,9 +79,9 @@ export function Section({ children, tone = 'plain', id, className = '' }) {
   return <section id={id} className={`section section-${tone} ${className}`}><div className="container">{children}</div></section>;
 }
 
-export function PageHero({ eyebrow, title, desc, children, image }) {
+export function PageHero({ eyebrow, title, desc, children, image, logo }) {
   return (
-    <section className={`page-hero ${image ? 'has-image' : ''}`}>
+    <section className={`page-hero ${image || logo ? 'has-image' : ''}`}>
       <div className="container page-hero-inner">
         <div className="page-hero-copy">
           <Eyebrow>{eyebrow}</Eyebrow>
@@ -90,22 +90,42 @@ export function PageHero({ eyebrow, title, desc, children, image }) {
           {children}
         </div>
         {image && <div className="page-hero-photo"><Photo src={image} alt="" label={title} priority sizes="(max-width: 900px) 100vw, 40vw" /></div>}
+        {logo && <div className="page-hero-logo"><Image src={logo.src} alt={logo.alt} width={logo.w} height={logo.h} priority sizes="(max-width: 900px) 80vw, 420px" /></div>}
       </div>
     </section>
   );
 }
 
+/** The official Rotaract Club of Khopoli logo (white version on dark backgrounds). */
 export function Logo({ light = false }) {
   return (
-    <Link href="/" className={`logo ${light ? 'logo-light' : ''}`} aria-label={`${club.name}, home`}>
-      {/* Placeholder mark. TODO(club): replace with the official Rotaract club logo from Rotary's Brand Center. */}
-      <svg className="logo-mark" viewBox="0 0 40 40" aria-hidden="true">
-        <circle cx="20" cy="20" r="16" fill="none" stroke="currentColor" strokeWidth="4" />
-        <circle cx="20" cy="20" r="5" fill="currentColor" />
-        {[0, 60, 120].map((a) => <rect key={a} x="18.5" y="5" width="3" height="30" rx="1.5" fill="currentColor" transform={`rotate(${a} 20 20)`} />)}
-      </svg>
-      <span className="logo-text">Rotaract<small>Club of Khopoli</small></span>
+    <Link href="/" className={`logo ${light ? 'logo-light' : ''}`}>
+      <Image
+        src={light ? '/images/logos/rotaract-khopoli-white.png' : '/images/logos/rotaract-khopoli.png'}
+        alt={`${club.name}, home`}
+        width={867}
+        height={296}
+        priority={!light}
+        sizes="200px"
+        className="logo-img"
+      />
     </Link>
+  );
+}
+
+
+/** Strip of District 3131 family logos (Rotaract, Rotary, Interact). */
+export function FamilyLogos({ title = 'Proudly part of the Rotary family in District 3131' }) {
+  return (
+    <div className="family-logos">
+      <span>{title}</span>
+      <ul>
+        {FAMILY_LOGOS.map((l) => {
+          const img = <Image src={l.src} alt={l.alt} width={l.w} height={l.h} sizes="200px" />;
+          return <li key={l.src}>{l.href ? <Link href={l.href}>{img}</Link> : img}</li>;
+        })}
+      </ul>
+    </div>
   );
 }
 
