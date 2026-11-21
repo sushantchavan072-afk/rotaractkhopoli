@@ -85,6 +85,8 @@ The site is **light mode only**.
 
 For smoothness, only transform, opacity and clip-path are animated, so the browser can hand the work to the GPU. The photo is never resized frame by frame.
 
+**Sound:** the dust sound bundled with vanilla-disintegrate plays as the logo crumbles. Its wind sound plays as the photo rises, and again more softly as the photo slides right, panning toward the right speaker. Browsers only allow sound after a visitor has interacted with the site, so on many first visits the intro plays silently. Nothing waits for the sound, and the sound files are downloaded only when sound is allowed. Volumes and timings are in `playSound(...)` calls in `components/ui/intro-overlay.jsx`.
+
 It plays once per browser session, only on the home page. It never plays for visitors who prefer reduced motion. Any click, key press, scroll or tap skips it.
 - A small script in `app/layout.jsx` decides before the first paint, so nothing flashes, and it always uncovers the page after 8 seconds.
 - Add `?intro=1` to the home page URL to replay it.

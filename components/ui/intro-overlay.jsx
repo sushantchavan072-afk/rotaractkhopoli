@@ -18,6 +18,11 @@ import Image, { getImageProps } from 'next/image';
  * goes wrong, that script removes the class after 8 seconds so the page is never left hidden.
  * Add ?intro=1 to the URL to replay it.
  *
+ * Sound: the dust and wind sounds bundled with vanilla-disintegrate play with the dust and with the
+ * photo's rise and slide (the slide pans towards the right, following the photo). Browsers only allow
+ * sound once the visitor has interacted with the site, so on many first visits the intro is silent;
+ * nothing ever waits for the sound, and the audio files are only downloaded when sound is allowed.
+ *
  * React owns the overlay's markup, so nothing here removes React's nodes: the overlay is hidden
  * when done, and the disintegrated logo is hidden through the library's `detach` hook.
  */
@@ -38,6 +43,52 @@ function hasWebGL2() {
   } catch {
     return false;
   }
+}
+
+/** Starts audio if the browser allows it right now; resolves to null otherwise (never blocks the intro). */
+async function loadIntroSound() {
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  if (!Ctx) return null;
+  let ctx;
+  try {
+    ctx = new Ctx();
+    await Promise.race([ctx.resume(), new Promise((r) => { setTimeout(r, 250); })]);
+    if (ctx.state !== 'running') { ctx.close(); return null; }
+    const { builtInSounds } = await import('vanilla-disintegrate/sounds');
+    const load = async (url) => ctx.decodeAudioData(await (await fetch(url)).arrayBuffer());
+    const [dust, wind] = await Promise.all([load(builtInSounds.dust), load(builtInSounds.wind)]);
+    return { ctx, dust, wind, sources: [] };
+  } catch {
+    ctx?.close().catch(() => {});
+    return null;
+  }
+}
+
+/** Plays part of a sound with a short fade in/out, optionally panning across the speakers while it plays. */
+function playSound(snd, buffer, { gain = 0.4, offset = 0, duration, rate = 1, panFrom = 0, panTo = panFrom, fadeIn = 0.03, fadeOut = 0.35 } = {}) {
+  if (!snd || !buffer) return;
+  const { ctx } = snd;
+  const t = ctx.currentTime;
+  const len = Math.min(duration ?? Infinity, (buffer.duration - offset) / rate);
+  const src = ctx.createBufferSource();
+  src.buffer = buffer;
+  src.playbackRate.value = rate;
+  const g = ctx.createGain();
+  g.gain.setValueAtTime(0, t);
+  g.gain.linearRampToValueAtTime(gain, t + fadeIn);
+  g.gain.setValueAtTime(gain, t + Math.max(fadeIn, len - fadeOut));
+  g.gain.linearRampToValueAtTime(0, t + len);
+  src.connect(g);
+  if (ctx.createStereoPanner) {
+    const pan = ctx.createStereoPanner();
+    pan.pan.setValueAtTime(panFrom, t);
+    pan.pan.linearRampToValueAtTime(panTo, t + len);
+    g.connect(pan).connect(ctx.destination);
+  } else {
+    g.connect(ctx.destination);
+  }
+  src.start(t, offset, len * rate);
+  snd.sources.push(src);
 }
 
 export default function IntroOverlay() {
@@ -63,6 +114,18 @@ export default function IntroOverlay() {
     if (FRAME_IMG.srcSet) photo.srcset = FRAME_IMG.srcSet;
     photo.src = FRAME_IMG.src;
     frame.replaceChildren(photo);
+
+    // Sound loads alongside the particle library; whatever is ready in time is used.
+    let sound = null;
+    const soundReady = loadIntroSound().then((s) => { sound = s; return s; });
+    const stopSound = (fade = 0.15) => {
+      soundReady.then((s) => {
+        if (!s) return;
+        const t = s.ctx.currentTime;
+        s.sources.forEach((src) => { try { src.stop(t + fade); } catch { /* already stopped */ } });
+        window.setTimeout(() => s.ctx.close().catch(() => {}), fade * 1000 + 2500);
+      });
+    };
 
     // Load the particle library in the background while the logo fades in.
     let effects = null;
@@ -122,6 +185,7 @@ export default function IntroOverlay() {
       timers.forEach((t) => window.clearTimeout(t));
       running.forEach((a) => a.cancel());
       effects?.destroy();
+      stopSound();
       hide();
       revealCopy(skipped ? 0.4 : 1);
       revealOnPhoto(skipped ? 0.4 : 1);
@@ -138,6 +202,7 @@ export default function IntroOverlay() {
       if (done) return;
 
       // ...and turns to dust (or simply fades where WebGL2 is unavailable).
+      playSound(sound, sound?.dust, { gain: 0.55, fadeOut: 0.25 });
       if (effects) {
         const op = effects.remove(logoImg, { detach: (el) => { el.style.visibility = 'hidden'; } });
         // Start the photo while the last of the dust is still drifting.
@@ -179,6 +244,7 @@ export default function IntroOverlay() {
       frame.style.clipPath = clipB;
       frame.style.visibility = 'visible';
       play(frame, [{ opacity: 0, transform: `translateY(${Math.round(vh * 0.3)}px)` }, { opacity: 1, transform: 'none' }], { duration: 1000, easing: EASE_OUT });
+      playSound(sound, sound?.wind, { gain: 0.32, duration: 1.15, fadeIn: 0.08, fadeOut: 0.5 });
       play(photo, [{ transform: toTransform(cover(B, 1.08)) }, { transform: toTransform(cover(B)) }], { duration: 1300, easing: EASE_OUT });
       await wait(1250);
       if (done) return;
@@ -192,6 +258,9 @@ export default function IntroOverlay() {
         play(frame, [{ clipPath: clipB }, { clipPath: clipA }], { duration: 1100, easing: EASE_IN_OUT });
         play(photo, [{ transform: toTransform(cover(B)) }, { transform: 'none' }], { duration: 1100, easing: EASE_IN_OUT });
       }
+      playSound(sound, sound?.wind, A.top > vh * 0.5
+        ? { gain: 0.24, offset: 0.5, duration: 0.9, rate: 1.15, panFrom: 0, panTo: 0.8, fadeIn: 0.06, fadeOut: 0.4 }
+        : { gain: 0.24, offset: 0.5, duration: 1.1, rate: 1.1, panFrom: -0.1, panTo: 0.6, fadeIn: 0.06, fadeOut: 0.45 });
       if (bg) play(bg, [{ opacity: 1 }, { opacity: 0 }], { duration: 800, delay: 250, easing: 'ease' });
       await wait(350);
       if (done) return;
@@ -204,6 +273,7 @@ export default function IntroOverlay() {
       removeSkip();
       hide();
       effects?.destroy();
+      stopSound(0.4);
       revealOnPhoto();
     };
     sequence().catch(() => finish(true));
@@ -212,6 +282,7 @@ export default function IntroOverlay() {
       timers.forEach((t) => window.clearTimeout(t));
       removeSkip();
       effects?.destroy();
+      stopSound(0);
     };
   }, []);
 
