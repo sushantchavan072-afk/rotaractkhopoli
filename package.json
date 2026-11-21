@@ -11,10 +11,12 @@
   "dependencies": {
     "@fontsource-variable/urbanist": "^5.3.0",
     "@vercel/analytics": "^2.0.1",
+    "@zumer/snapdom": "3.7.1",
     "next": "^16.0.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "react-icons": "^5.7.0"
+    "react-icons": "^5.7.0",
+    "vanilla-disintegrate": "1.6.1"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",

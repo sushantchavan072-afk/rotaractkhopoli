@@ -58,8 +58,8 @@ Kindora's `/elements` page is a template style guide, so it is not included.
 The site is **light mode only**.
 
 **Home page intro** (`components/ui/intro-overlay.jsx`), modelled on radiatinghope.org:
-1. The club logo appears on white and fades away.
-2. The hero photo opens as a small window and grows to fill the screen.
+1. The club logo appears on white and **turns to dust**, using [vanilla-disintegrate](https://github.com/uvarov-frontend/vanilla-disintegrate)'s `dust` preset with SnapDOM. The sound is off. The library is downloaded only when the intro plays, and browsers without WebGL2 get a simple fade instead.
+2. As the dust drifts away, the hero photo opens as a small window and grows to fill the screen.
 3. The photo glides into its place in the hero. On phones, where the hero photo is below the fold, it fades away instead.
 4. The menu fades in and the headline and text rise into place.
 
