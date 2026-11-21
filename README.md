@@ -182,7 +182,7 @@ The browser-tab icon (`app/icon.png`) and the home-screen icon (`app/apple-icon.
 
 Until a photo is added, its slot shows a soft coloured tile with a label, so nothing looks broken.
 
-**Member portraits** are in `public/images/members/` as `<photo>.webp`. `<photo>` is the `photo:` value in `data/club.js`, and `.png` or `.jpg` also work. The current files are `vageesh`, `rohan`, `khadija-bearingwala`, `gargi-gaikwad`, `sarvesh`, `jayesh-dalvi` and `gaurav` (from the club's original Lovable site), plus `mihir-butala` and `rutika-zavar`. To add someone, drop in a square portrait and set `photo:` on every entry for that person.
+**Member portraits** are in `public/images/members/` as `<photo>.webp`. `<photo>` is the `photo:` value in `data/club.js`, and `.png` or `.jpg` also work. The current files are `vageesh`, `rohan`, `khadija-bearingwala`, `gargi-gaikwad`, `sarvesh`, `jayesh-dalvi` and `gaurav` (from the club's original Lovable site), plus `mihir-butala`, `rutika-zavar` and `srushti-sathe`. To add someone, drop in a square portrait and set `photo:` on every entry for that person.
 
 ## Still needed from the club
 

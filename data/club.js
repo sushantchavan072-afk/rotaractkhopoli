@@ -170,7 +170,7 @@ export const eventsNewestFirst = [...events].sort((a, b) => b.date.localeCompare
 
 export const coreMembers = [
   { name: 'Rtr. Vageesh Baheti', photo: 'vageesh', roles: ['President'], bio: "Leads the club's service year, chairs board meetings and owns every commitment the club makes publicly." },
-  { name: 'Rtr. Srushti Sathe', roles: ['Secretary'], bio: 'Keeps minutes, correspondence, membership records and the club calendar in order.' },
+  { name: 'Rtr. Srushti Sathe', photo: 'srushti-sathe', roles: ['Secretary'], bio: 'Keeps minutes, correspondence, membership records and the club calendar in order.' },
   { name: 'Rtr. Mihir Butala', photo: 'mihir-butala', roles: ['President Elect'], bio: "Prepares to lead the club's next service year, deputises at meetings and shepherds cross-avenue projects." },
   { name: 'Rtr. Anvay Narwekar', roles: ['Treasurer'], bio: 'Maintains club accounts, dues, project budgets and the annual statement placed before the general body.' },
   { name: 'Rtr. Rohan Puri', roles: ['Club Mentor'], photo: 'rohan', bio: 'Guides the board through planning, protocol and district expectations.' },
