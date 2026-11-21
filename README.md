@@ -88,12 +88,14 @@ It plays once per browser session, only on the home page. It never plays for vis
 - Add `?intro=1` to the home page URL to replay it.
 
 
-**Background:** the site sits on a light paper texture (`public/images/paper.webp`, a mirrored tile so it repeats without seams) shown at 50% strength through a white veil, with a soft wash of coral, Rotary blue, cranberry and green on top (`--page-gradient` on `body` in `app/globals.css`).
+**Background:** a faint checkerboard (black squares at 10% opacity, 44px) with a soft wash of coral, Rotary blue, cranberry and green on top (`--checker` and `--page-gradient` on `body` in `app/globals.css`).
 
-**Mouse trail** (`components/ui/background-dot-glow.tsx`):
+**Warp and mouse trail** (`components/ui/background-dot-glow.tsx`):
+- The checkerboard bulges and warps around the cursor. It swells while the mouse moves, settles to a gentle bulge when it rests, and goes flat when the mouse leaves. Strength and size are `WARP_PUSH`, `WARP_RADIUS` and `WARP_REST` at the top of the file.
+- CSS draws the same checkerboard until the canvas loads, so nothing pops in.
 - Moving the mouse leaves a short trail of characters in the Rotary family colours.
 - Nothing is redrawn while the mouse is still, and the animation stops while the tab is hidden.
-- Touch screens and visitors who prefer reduced motion get no trail.
+- Touch screens and visitors who prefer reduced motion get a flat checkerboard and no trail.
 
 **Cursor** (`components/ui/custom-cursor.tsx`), matched to rotaractscop.org:
 - On mouse and trackpad devices, the system pointer is replaced by a 14px arrow. Its colour depends on the page: navy on the home page, cranberry on Teams, Rotary blue on the Rotary page, and so on (`PAGES` in `lib/accent.js`).

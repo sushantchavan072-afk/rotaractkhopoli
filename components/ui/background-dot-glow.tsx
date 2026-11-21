@@ -5,8 +5,14 @@ import { usePathname } from "next/navigation";
 import { accent, pageAccent, paletteAt, SCROLL_STEP } from "@/lib/accent";
 
 // ---------------------------------------------------------------------------
-// Site background layer: the ASCII "wake" mouse trail. (The page itself sits on
-// the paper texture and colour wash set on <body> in app/globals.css.)
+// Site background layer: a faint checkerboard (black at 10%) that bulges and
+// warps around the mouse, with the ASCII "wake" mouse trail on top. (The colour
+// wash is on <body> in app/globals.css, which also draws the same checkerboard
+// in CSS until this canvas takes over, so nothing pops in on load.)
+//
+// - The warp is a soft lens: grid points near the eased pointer are pushed
+//   outwards, more strongly while the mouse is moving, and it relaxes to a
+//   gentle bulge when the mouse rests, then flat when it leaves.
 //
 // - Moving the mouse stamps a short-lived trail of monospace characters in the
 //   Rotary family colours; fast passes leave thin, quick trails, slow passes
@@ -19,6 +25,11 @@ import { accent, pageAccent, paletteAt, SCROLL_STEP } from "@/lib/accent";
 // - Touch screens and reduced-motion visitors get no trail.
 // ---------------------------------------------------------------------------
 
+const CHECK = 44; // checkerboard square size (must match the CSS fallback in globals.css)
+const CHECK_FILL = "rgba(0, 0, 0, 0.1)"; // 10% opacity
+const WARP_RADIUS = 190; // px around the pointer that warps
+const WARP_PUSH = 34; // px the grid is pushed outwards at full strength
+const WARP_REST = 0.35; // warp strength while the mouse rests on the page
 const CELL = 12; // ASCII trail cell size
 const RAMP = " .:-=+*#%@";
 // Rotary royal blue, Rotary gold, Rotaract cranberry, Interact sky blue, plus the site's coral and green.
@@ -58,6 +69,12 @@ export function DotGlowBackground({ className = "" }: { className?: string }) {
     let raf = 0;
     let last = 0;
     const trail = { x: 0, y: 0, t: 0, has: false };
+    // Warp: eased pointer position and strength.
+    const warp = { x: -1e4, y: -1e4, tx: -1e4, ty: -1e4, k: 0, target: 0 };
+    let gw = 0;
+    let gh = 0;
+    let gx = new Float32Array(0);
+    let gy = new Float32Array(0);
     let trailColor = 0;
 
     const resize = () => {
@@ -77,11 +94,67 @@ export function DotGlowBackground({ className = "" }: { className?: string }) {
       heat = new Float32Array(cols * rows);
       rate = new Float32Array(cols * rows).fill(1.4);
       hue = new Uint8Array(cols * rows);
+      gw = Math.ceil(width / CHECK) + 2;
+      gh = Math.ceil(height / CHECK) + 2;
+      gx = new Float32Array(gw * gh);
+      gy = new Float32Array(gw * gh);
+    };
+
+    /** The checkerboard, every other square filled, with the grid warped around the pointer. */
+    const drawChecker = () => {
+      const k = warp.k;
+      const r2 = WARP_RADIUS * WARP_RADIUS;
+      for (let j = 0; j < gh; j++) {
+        for (let i = 0; i < gw; i++) {
+          const x = i * CHECK;
+          const y = j * CHECK;
+          let px = x;
+          let py = y;
+          if (k > 0.001) {
+            const dx = x - warp.x;
+            const dy = y - warp.y;
+            const d2 = dx * dx + dy * dy;
+            if (d2 < r2 * 4) {
+              const d = Math.sqrt(d2) || 1;
+              const f = Math.exp(-d2 / r2) * k * WARP_PUSH;
+              px += (dx / d) * f;
+              py += (dy / d) * f;
+            }
+          }
+          gx[j * gw + i] = px;
+          gy[j * gw + i] = py;
+        }
+      }
+      ctx.fillStyle = CHECK_FILL;
+      ctx.beginPath();
+      for (let j = 0; j < gh - 1; j++) {
+        for (let i = (j + 1) & 1; i < gw - 1; i += 2) { // same squares as the CSS conic-gradient fallback
+          const a = j * gw + i;
+          const b = a + 1;
+          const c = a + gw + 1;
+          const e = a + gw;
+          ctx.moveTo(gx[a]!, gy[a]!);
+          ctx.lineTo(gx[b]!, gy[b]!);
+          ctx.lineTo(gx[c]!, gy[c]!);
+          ctx.lineTo(gx[e]!, gy[e]!);
+          ctx.closePath();
+        }
+      }
+      ctx.fill();
     };
 
     /** Paint one frame. Returns true while something is still moving. */
     const draw = (dt: number): boolean => {
       ctx.clearRect(0, 0, width, height);
+
+      // Ease the warp toward the pointer and its target strength.
+      const ease = 1 - Math.pow(0.84, dt * 60);
+      warp.x += (warp.tx - warp.x) * ease;
+      warp.y += (warp.ty - warp.y) * ease;
+      warp.target += (WARP_REST * (trail.has ? 1 : 0) - warp.target) * (1 - Math.pow(0.9, dt * 60));
+      warp.k += (warp.target - warp.k) * (1 - Math.pow(0.88, dt * 60));
+      drawChecker();
+      const warping = Math.abs(warp.target - warp.k) > 0.002 || Math.abs(warp.tx - warp.x) + Math.abs(warp.ty - warp.y) > 0.3 || Math.abs(warp.target - WARP_REST * (trail.has ? 1 : 0)) > 0.002;
 
 
       // ASCII trail: decay heat and draw, one pass per colour.
@@ -110,7 +183,7 @@ export function DotGlowBackground({ className = "" }: { className?: string }) {
         ctx.globalAlpha = 1;
       }
 
-      return hot;
+      return hot || warping;
     };
 
     const loop = (now: number) => {
@@ -154,11 +227,16 @@ export function DotGlowBackground({ className = "" }: { className?: string }) {
       const y = e.clientY;
       const now = performance.now();
       trailColor = Math.floor(now / COLOR_STEP_MS) % TRAIL_COLORS.length;
+      if (!trail.has) { warp.x = x; warp.y = y; }
+      warp.tx = x;
+      warp.ty = y;
       if (trail.has) {
         const dx = x - trail.x;
         const dy = y - trail.y;
         const dist = Math.hypot(dx, dy);
         const speed = dist / Math.max(1, now - trail.t);
+        // Moving the mouse swells the warp; it settles back to the resting bulge when the mouse stops.
+        warp.target = Math.max(warp.target, Math.min(1, WARP_REST + speed * 0.9));
         const radiusCells = Math.max(0.6, Math.min(2.6, 2.4 / (1 + speed * 1.6)));
         const decay = Math.max(0.8, Math.min(4.5, 1 + speed * 3.2));
         const steps = Math.max(1, Math.ceil(dist / (CELL * 0.5)));
@@ -209,6 +287,7 @@ export function DotGlowBackground({ className = "" }: { className?: string }) {
     resize();
     recolor();
     draw(0);
+    document.documentElement.classList.add("checker-live"); // the canvas now draws the checkerboard
     window.addEventListener("resize", onResize, { passive: true });
     window.addEventListener("scroll", onScroll, { passive: true });
     if (interactive) {
@@ -218,6 +297,7 @@ export function DotGlowBackground({ className = "" }: { className?: string }) {
     }
 
     return () => {
+      document.documentElement.classList.remove("checker-live");
       cancelAnimationFrame(raf);
       cancelAnimationFrame(scrollRaf);
       recolorRef.current = () => {};
