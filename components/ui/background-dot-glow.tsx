@@ -175,6 +175,7 @@ export function DotGlowBackground({ className = "" }: { className?: string }) {
       trail.has = false;
       wake();
     };
+    const onOut = (e: MouseEvent) => { if (!e.relatedTarget) onLeave(); };
     const onVisibility = () => {
       if (!document.hidden) wake();
     };
@@ -213,6 +214,8 @@ export function DotGlowBackground({ className = "" }: { className?: string }) {
     if (interactive) {
       window.addEventListener("pointermove", onMove, { passive: true });
       document.documentElement.addEventListener("pointerleave", onLeave);
+      document.addEventListener("mouseout", onOut);
+      window.addEventListener("blur", onLeave);
       document.addEventListener("visibilitychange", onVisibility);
     }
 
@@ -225,6 +228,8 @@ export function DotGlowBackground({ className = "" }: { className?: string }) {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("pointermove", onMove);
       document.documentElement.removeEventListener("pointerleave", onLeave);
+      document.removeEventListener("mouseout", onOut);
+      window.removeEventListener("blur", onLeave);
       document.removeEventListener("visibilitychange", onVisibility);
     };
   }, []);

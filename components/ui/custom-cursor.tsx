@@ -52,13 +52,21 @@ export function CustomCursor() {
     const onLeave = () => {
       if (arrowRef.current) arrowRef.current.style.opacity = "0";
     };
+    // Leaving the window (especially quickly, through the top toward the address bar) doesn't always
+    // fire mouseleave, which left a frozen arrow at the edge. mouseout with no relatedTarget always
+    // means the pointer left the page; blur covers switching windows or tabs.
+    const onOut = (e: MouseEvent) => { if (!e.relatedTarget) onLeave(); };
     window.addEventListener("mousemove", onMove, { passive: true });
     root.addEventListener("mouseleave", onLeave);
+    document.addEventListener("mouseout", onOut);
+    window.addEventListener("blur", onLeave);
     return () => {
       if (raf) cancelAnimationFrame(raf);
       root.classList.remove("custom-cursor");
       window.removeEventListener("mousemove", onMove);
       root.removeEventListener("mouseleave", onLeave);
+      document.removeEventListener("mouseout", onOut);
+      window.removeEventListener("blur", onLeave);
     };
   }, []);
 
