@@ -5,11 +5,11 @@ import Image, { getImageProps } from 'next/image';
 
 /**
  * Home page intro (modelled on radiatinghope.org's opening):
- *   1. the club logo appears alone on white, then disintegrates into dust
- *      (vanilla-disintegrate's `dust` preset, captured with SnapDOM);
- *   2. as the dust drifts away, the hero photo opens as a small window and grows to fill the screen;
- *   3. the photo glides into its place in the home hero while the page appears around it
- *      (on phones, where the hero photo is below the fold, it fades away instead);
+ *   1. the club logo fades in alone on white (a plain fade), then disintegrates into dust as it
+ *      leaves (vanilla-disintegrate's `dust` preset, captured with SnapDOM);
+ *   2. the hero photo fades in, rising from the bottom as a rounded card covering 80% of the screen;
+ *   3. the card slides across into its place in the home hero on the right while the page appears
+ *      around it (on phones, where the hero photo is below the fold, it slides off to the right);
  *   4. the menu fades in and the headline and text rise into place.
  *
  * It plays once per browser session, only on the home page, and never for visitors who prefer
@@ -122,7 +122,7 @@ export default function IntroOverlay() {
 
     const sequence = async () => {
       // 1. The logo appears...
-      await play(logoBox, [{ opacity: 0, transform: 'translateY(10px) scale(.94)' }, { opacity: 1, transform: 'none' }], { duration: 520, easing: EASE_OUT }).finished;
+      await play(logoBox, [{ opacity: 0 }, { opacity: 1 }], { duration: 700, easing: 'ease' }).finished;
       await Promise.all([wait(650), Promise.race([effectsReady, wait(1200)])]);
       if (done) return;
 
@@ -136,29 +136,32 @@ export default function IntroOverlay() {
       }
       if (done) return;
 
-      // 2. The photo opens as a small window and grows to fill the screen.
-      frame.style.visibility = 'visible';
-      play(frame, [{ clipPath: 'inset(56% 35% 14% 35% round 6px)' }, { clipPath: 'inset(0% 0% 0% 0% round 0px)' }], { duration: 1150, easing: EASE_IN_OUT });
-      play(photo, [{ transform: 'scale(1.28)' }, { transform: 'scale(1)' }], { duration: 1150, easing: EASE_IN_OUT });
-      await wait(1300);
+      // 2. The photo fades in, rising from the bottom as a rounded card over 80% of the screen.
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const card = { top: `${vh * 0.1}px`, left: `${vw * 0.1}px`, width: `${vw * 0.8}px`, height: `${vh * 0.8}px`, borderRadius: '32px' };
+      Object.assign(frame.style, card, { visibility: 'visible' });
+      play(frame, [{ opacity: 0, transform: `translateY(${Math.round(vh * 0.35)}px)` }, { opacity: 1, transform: 'none' }], { duration: 1100, easing: EASE_OUT });
+      play(photo, [{ transform: 'scale(1.15)' }, { transform: 'scale(1)' }], { duration: 1400, easing: EASE_OUT });
+      await wait(1350);
       if (done) return;
 
-      // 3. It glides into the hero's photo slot as the page fades in around it.
+      // 3. It slides across into the hero's photo slot on the right as the page fades in around it.
       const art = document.querySelector('.home-hero-art');
       const box = art?.getBoundingClientRect();
       if (!art || !box || box.width === 0) { finish(false); return; }
       const radius = getComputedStyle(art).borderTopLeftRadius || '36px';
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
+      running.forEach((a) => { if (a.effect?.target === frame) { a.commitStyles?.(); a.cancel(); } });
       if (box.top > vh * 0.5) {
-        play(frame, [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'scale(1.04)' }], { duration: 800, easing: 'ease' });
+        // Phones: the hero photo sits below the fold, so the card slides off to the right.
+        play(frame, [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: `translateX(${Math.round(vw * 0.9)}px)` }], { duration: 850, easing: EASE_IN_OUT });
       } else {
         play(frame, [
-          { top: '0px', left: '0px', width: `${vw}px`, height: `${vh}px`, borderRadius: '0px', clipPath: 'none' },
-          { top: `${box.top}px`, left: `${box.left}px`, width: `${box.width}px`, height: `${box.height}px`, borderRadius: radius, clipPath: 'none' },
-        ], { duration: 950, easing: EASE_IN_OUT });
+          { ...card, opacity: 1, transform: 'none' },
+          { top: `${box.top}px`, left: `${box.left}px`, width: `${box.width}px`, height: `${box.height}px`, borderRadius: radius, opacity: 1, transform: 'none' },
+        ], { duration: 1000, easing: EASE_IN_OUT });
       }
-      play(overlay, [{ backgroundColor: 'rgba(255,255,255,1)' }, { backgroundColor: 'rgba(255,255,255,0)' }], { duration: 700, delay: 250, easing: 'ease' });
+      play(overlay, [{ backgroundColor: 'rgba(255,255,255,1)' }, { backgroundColor: 'rgba(255,255,255,0)' }], { duration: 700, delay: 300, easing: 'ease' });
       await wait(700);
       if (done) return;
 
