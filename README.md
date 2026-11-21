@@ -53,15 +53,20 @@ Visitor statistics (Vercel Analytics, which uses no cookies) switch on automatic
 
 Kindora's `/elements` page is a template style guide, so it is not included.
 
-## Background, cursor and colours
+## Header, background, cursor and colours
+
+**Header:** the logo and the menu float as two separate pills, on every page and while scrolling. On phones the menu opens as a floating rounded card.
+
 
 The site is **light mode only**.
 
 **Home page intro** (`components/ui/intro-overlay.jsx`), modelled on radiatinghope.org:
 1. The club logo fades in on white with a plain fade, then **turns to dust** as it leaves. This uses [vanilla-disintegrate](https://github.com/uvarov-frontend/vanilla-disintegrate)'s `dust` preset with SnapDOM, with the sound off. The library is downloaded only when the intro plays, and browsers without WebGL2 get a simple fade instead.
-2. The hero photo fades in, rising from the bottom as a rounded card covering 80% of the screen.
-3. The card slides across into its place in the hero on the right. On phones, where the hero photo is below the fold, it slides off to the right instead.
-4. The menu fades in and the headline and text rise into place.
+2. The hero photo fades in, rising from the bottom as a big rounded card that almost fills the screen.
+3. The card slides across into its place in the hero on the right while the headline rises. On phones, where the hero photo is below the fold, it slides off to the right instead.
+4. Once the photo has landed, the menu pill and the things on the photo (quote, gallery link, project card) come in.
+
+For smoothness, only transform, opacity and clip-path are animated, so the browser can hand the work to the GPU. The photo is never resized frame by frame.
 
 It plays once per browser session, only on the home page. It never plays for visitors who prefer reduced motion. Any click, key press, scroll or tap skips it.
 - A small script in `app/layout.jsx` decides before the first paint, so nothing flashes, and it always uncovers the page after 8 seconds.

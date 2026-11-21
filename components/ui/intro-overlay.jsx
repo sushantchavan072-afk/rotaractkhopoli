@@ -86,11 +86,9 @@ export default function IntroOverlay() {
     const wait = (ms) => new Promise((resolve) => { timers.push(window.setTimeout(resolve, ms)); });
     const hide = () => { overlay.classList.remove('is-playing'); overlay.style.display = 'none'; };
 
-    /** Reveal the page: menu fades in, hero text rises line by line. */
-    const revealPage = (fast) => {
+    /** Hero text rises line by line. */
+    const revealCopy = (d = 1) => {
       root.classList.remove('intro-on');
-      const d = fast ? 0.4 : 1;
-      document.querySelector('.site-header')?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 700 * d, easing: 'ease', fill: 'backwards' });
       document.querySelectorAll('.home-hero-copy > *').forEach((el, i) => {
         const isTitle = el.tagName === 'H1';
         el.animate(
@@ -100,8 +98,13 @@ export default function IntroOverlay() {
           { duration: (isTitle ? 900 : 700) * d, delay: i * 110 * d, easing: EASE_OUT, fill: 'backwards' },
         );
       });
+    };
+    /** The things that sit on the photo (menu pill, quote, gallery link, project card) come in once it has landed. */
+    const revealOnPhoto = (d = 1) => {
+      root.classList.remove('intro-on');
+      document.querySelector('.site-header')?.animate([{ opacity: 0, transform: 'translateY(-10px)' }, { opacity: 1, transform: 'none' }], { duration: 600 * d, easing: EASE_OUT, fill: 'backwards' });
       document.querySelectorAll('.home-hero-art > :not(.photo):not(.photo-fallback)').forEach((el, i) => {
-        el.animate([{ opacity: 0, transform: 'translateY(18px)' }, { opacity: 1, transform: 'none' }], { duration: 600 * d, delay: (250 + i * 120) * d, easing: EASE_OUT, fill: 'backwards' });
+        el.animate([{ opacity: 0, transform: 'translateY(18px) scale(.98)' }, { opacity: 1, transform: 'none' }], { duration: 650 * d, delay: (80 + i * 110) * d, easing: EASE_OUT, fill: 'backwards' });
       });
     };
 
@@ -113,7 +116,8 @@ export default function IntroOverlay() {
       running.forEach((a) => a.cancel());
       effects?.destroy();
       hide();
-      revealPage(skipped);
+      revealCopy(skipped ? 0.4 : 1);
+      revealOnPhoto(skipped ? 0.4 : 1);
       removeSkip();
     };
     const onSkip = () => finish(true);
@@ -136,45 +140,64 @@ export default function IntroOverlay() {
       }
       if (done) return;
 
-      // 2. The photo fades in, rising from the bottom as a rounded card over 80% of the screen.
+      // 2. The photo fades in, rising from the bottom as a big rounded card that almost fills the screen.
+      //    Only transform, opacity and clip-path are animated, so the browser can run it smoothly: the
+      //    frame is a full-screen layer clipped to the card, and the photo inside is positioned once at
+      //    its final size and moved/scaled with a transform.
+      await Promise.race([photo.decode().catch(() => {}), wait(1500)]);
+      if (done) return;
       const vw = window.innerWidth;
       const vh = window.innerHeight;
-      const card = { top: `${vh * 0.1}px`, left: `${vw * 0.1}px`, width: `${vw * 0.8}px`, height: `${vh * 0.8}px`, borderRadius: '32px' };
-      Object.assign(frame.style, card, { visibility: 'visible' });
-      play(frame, [{ opacity: 0, transform: `translateY(${Math.round(vh * 0.35)}px)` }, { opacity: 1, transform: 'none' }], { duration: 1100, easing: EASE_OUT });
-      play(photo, [{ transform: 'scale(1.15)' }, { transform: 'scale(1)' }], { duration: 1400, easing: EASE_OUT });
-      await wait(1350);
-      if (done) return;
-
-      // 3. It slides across into the hero's photo slot on the right as the page fades in around it.
       const art = document.querySelector('.home-hero-art');
-      const box = art?.getBoundingClientRect();
-      if (!art || !box || box.width === 0) { finish(false); return; }
-      const radius = getComputedStyle(art).borderTopLeftRadius || '36px';
-      running.forEach((a) => { if (a.effect?.target === frame) { a.commitStyles?.(); a.cancel(); } });
-      if (box.top > vh * 0.5) {
-        // Phones: the hero photo sits below the fold, so the card slides off to the right.
-        play(frame, [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: `translateX(${Math.round(vw * 0.9)}px)` }], { duration: 850, easing: EASE_IN_OUT });
-      } else {
-        play(frame, [
-          { ...card, opacity: 1, transform: 'none' },
-          { top: `${box.top}px`, left: `${box.left}px`, width: `${box.width}px`, height: `${box.height}px`, borderRadius: radius, opacity: 1, transform: 'none' },
-        ], { duration: 1000, easing: EASE_IN_OUT });
-      }
-      play(overlay, [{ backgroundColor: 'rgba(255,255,255,1)' }, { backgroundColor: 'rgba(255,255,255,0)' }], { duration: 700, delay: 300, easing: 'ease' });
-      await wait(700);
+      const A = art?.getBoundingClientRect();
+      if (!art || !A || A.width === 0) { finish(false); return; }
+      const m = Math.round(Math.min(vw, vh) * 0.035);
+      const B = { left: m, top: m, width: vw - 2 * m, height: vh - 2 * m };
+      const ratio = (photo.naturalWidth || 1400) / (photo.naturalHeight || 1810);
+      const cover = (r, zoom = 1) => {
+        let w = r.width; let h = r.width / ratio;
+        if (h < r.height) { h = r.height; w = r.height * ratio; }
+        w *= zoom; h *= zoom;
+        return { left: r.left + (r.width - w) / 2, top: r.top + (r.height - h) / 2, width: w, height: h };
+      };
+      const F = cover(A); // where the photo ends: exactly as the hero shows it
+      Object.assign(photo.style, { left: `${F.left}px`, top: `${F.top}px`, width: `${F.width}px`, height: `${F.height}px` });
+      const toTransform = (r) => `translate(${(r.left - F.left).toFixed(2)}px, ${(r.top - F.top).toFixed(2)}px) scale(${(r.width / F.width).toFixed(4)})`;
+      const R = 28;
+      const clipB = `inset(${m}px ${m}px ${m}px ${m}px round ${R}px)`;
+      const artRadius = parseFloat(getComputedStyle(art).borderTopLeftRadius) || 36;
+      const below = A.bottom > vh; // the hero photo runs past the bottom of the screen
+      const clipA = `inset(${A.top.toFixed(1)}px ${(vw - A.right).toFixed(1)}px ${Math.max(0, vh - A.bottom).toFixed(1)}px ${A.left.toFixed(1)}px round ${artRadius}px ${artRadius}px ${below ? 0 : artRadius}px ${below ? 0 : artRadius}px)`;
+
+      frame.style.clipPath = clipB;
+      frame.style.visibility = 'visible';
+      play(frame, [{ opacity: 0, transform: `translateY(${Math.round(vh * 0.3)}px)` }, { opacity: 1, transform: 'none' }], { duration: 1000, easing: EASE_OUT });
+      play(photo, [{ transform: toTransform(cover(B, 1.08)) }, { transform: toTransform(cover(B)) }], { duration: 1300, easing: EASE_OUT });
+      await wait(1250);
       if (done) return;
 
-      // 4. The page comes in.
-      revealPage(false);
-      await wait(300);
+      // 3. It slides across into its place on the right; the hero text rises as it goes.
+      const bg = overlay.querySelector('.intro-bg');
+      if (A.top > vh * 0.5) {
+        // Phones: the hero photo sits below the fold, so the card slides off to the right instead.
+        play(frame, [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: `translateX(${Math.round(vw * 0.9)}px)` }], { duration: 900, easing: EASE_IN_OUT });
+      } else {
+        play(frame, [{ clipPath: clipB }, { clipPath: clipA }], { duration: 1100, easing: EASE_IN_OUT });
+        play(photo, [{ transform: toTransform(cover(B)) }, { transform: 'none' }], { duration: 1100, easing: EASE_IN_OUT });
+      }
+      if (bg) play(bg, [{ opacity: 1 }, { opacity: 0 }], { duration: 800, delay: 250, easing: 'ease' });
+      await wait(350);
       if (done) return;
+      revealCopy();
+      await wait(800);
+      if (done) return;
+
+      // 4. The photo has landed: hand over to the real hero, then the things on it come in.
       done = true;
       removeSkip();
-      const fade = overlay.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 250, easing: 'ease' });
-      await fade.finished.catch(() => {});
       hide();
       effects?.destroy();
+      revealOnPhoto();
     };
     sequence().catch(() => finish(true));
 
@@ -187,6 +210,7 @@ export default function IntroOverlay() {
 
   return (
     <div className="intro" aria-hidden="true">
+      <div className="intro-bg" />
       <div className="intro-logo">
         {/* Same file and size as the header logo, so it is already downloaded */}
         <Image src="/images/logos/rotaract-khopoli.png" alt="" width={867} height={296} priority sizes="200px" />

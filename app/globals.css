@@ -1093,14 +1093,35 @@ html:has(dialog[open]) { overflow: hidden; }
   :is(.btn, .card-btn, .nav-cta, .submit-btn, .chip-btn, .pill-links a, .note-pin-btn, .letter-toggle, .back-link)[data-hue]:not(:disabled):hover { background: var(--hue-bg) !important; border-color: var(--hue-bg) !important; color: var(--hue-fg) !important; }
 }
 
+/* ---------- Header: the logo and the menu float as two separate pills ---------- */
+.site-header .logo { padding: 8px 16px 8px 14px; border-radius: 20px; background: rgba(255,255,255,.86); border: 1px solid rgba(0,0,0,.06); box-shadow: 0 10px 28px -14px rgba(0,0,0,.22); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+.site-header .logo-img { height: 46px; }
+/* While scrolling, the bar itself disappears and only the two pills float over the page */
+.site-header, .site-header.is-stuck, .site-header.is-overlay.is-stuck { background: transparent; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+@media (max-width: 1040px) {
+  /* The phone menu opens as a floating rounded card that matches the pills */
+  .nav { left: 12px; right: 12px; top: calc(100% - 6px); border-radius: 24px; border: 1px solid rgba(0,0,0,.06); box-shadow: 0 24px 50px -18px rgba(0,0,0,.3); }
+}
+@media (min-width: 1041px) {
+  .nav { gap: 4px; padding: 6px; border-radius: 999px; background: rgba(255,255,255,.86); border: 1px solid rgba(0,0,0,.06); box-shadow: 0 10px 28px -14px rgba(0,0,0,.22); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+  .nav-pill, .is-overlay:not(.is-stuck) .nav-pill { background: transparent; padding: 10px 18px; }
+  .nav-pill:hover, .nav-pill.is-current { background: #efefef; }
+  .nav-cta { margin-left: 4px; padding: 13px 28px; }
+}
+@media (max-width: 700px) {
+  .site-header .logo { padding: 6px 12px 6px 10px; border-radius: 16px; }
+  .site-header .logo-img { height: 38px; }
+}
+
 /* ---------- Home page intro (components/ui/intro-overlay.jsx; switched on by INTRO_SCRIPT in app/layout.jsx) ---------- */
 .intro { display: none; }
-html.intro-on .intro, .intro.is-playing { display: block; position: fixed; inset: 0; z-index: 500; background: #fff; }
+html.intro-on .intro, .intro.is-playing { display: block; position: fixed; inset: 0; z-index: 500; }
+.intro-bg { position: absolute; inset: 0; background: #fff; will-change: opacity; }
 html.intro-on { overflow: hidden; scrollbar-gutter: stable; }
 .intro-logo { position: absolute; inset: 0; display: grid; place-items: center; opacity: 0; }
 .intro-logo img { width: min(240px, 58vw); height: auto; }
-.intro-frame { position: fixed; top: 10vh; left: 10vw; width: 80vw; height: 80vh; border-radius: 32px; overflow: hidden; visibility: hidden; box-shadow: 0 30px 80px rgba(0,0,0,.18); }
-.intro-frame img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.intro-frame { position: fixed; inset: 0; overflow: hidden; visibility: hidden; will-change: transform, opacity, clip-path; }
+.intro-frame img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; max-width: none; transform-origin: 0 0; will-change: transform; }
 html.intro-on :is(.site-header, .home-hero-copy > *, .home-hero-art > :not(.photo):not(.photo-fallback)) { opacity: 0; }
 @media (prefers-reduced-motion: reduce) { .intro { display: none !important; } }
 @media print { .intro { display: none !important; } }
