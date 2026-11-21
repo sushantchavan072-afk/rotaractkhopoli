@@ -73,7 +73,7 @@ It plays once per browser session, only on the home page. It never plays for vis
 - Add `?intro=1` to the home page URL to replay it.
 
 
-**Background:** the site sits on a light paper texture (`public/images/paper.webp`, a mirrored tile so it repeats without seams), with a soft wash of coral, Rotary blue, cranberry and green on top (`--page-gradient` on `body` in `app/globals.css`).
+**Background:** the site sits on a light paper texture (`public/images/paper.webp`, a mirrored tile so it repeats without seams) shown at 50% strength through a white veil, with a soft wash of coral, Rotary blue, cranberry and green on top (`--page-gradient` on `body` in `app/globals.css`).
 
 **Mouse trail** (`components/ui/background-dot-glow.tsx`):
 - Moving the mouse leaves a short trail of characters in the Rotary family colours.
@@ -165,7 +165,7 @@ The browser-tab icon (`app/icon.png`) and the home-screen icon (`app/apple-icon.
 
 Until a photo is added, its slot shows a soft coloured tile with a label, so nothing looks broken.
 
-**Member portraits** are in `public/images/members/` as `<photo>.webp`. `<photo>` is the `photo:` value in `data/club.js`, and `.png` or `.jpg` also work. The current files are `vageesh`, `rohan`, `khadija-bearingwala`, `gargi-gaikwad`, `sarvesh`, `jayesh-dalvi` and `gaurav`, taken from the club's original Lovable site. To add someone, drop in a square portrait and set `photo:` on every entry for that person.
+**Member portraits** are in `public/images/members/` as `<photo>.webp`. `<photo>` is the `photo:` value in `data/club.js`, and `.png` or `.jpg` also work. The current files are `vageesh`, `rohan`, `khadija-bearingwala`, `gargi-gaikwad`, `sarvesh`, `jayesh-dalvi` and `gaurav` (from the club's original Lovable site), plus `mihir-butala` and `rutika-zavar`. To add someone, drop in a square portrait and set `photo:` on every entry for that person.
 
 ## Still needed from the club
 
