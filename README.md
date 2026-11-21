@@ -90,7 +90,7 @@ It plays once per browser session, only on the home page. It never plays for vis
 - Add `?intro=1` to the home page URL to replay it.
 
 
-**Background:** a drafting grid (`public/images/grid.svg`, a 120px tile: fine dots every 6px, a darker dot every 60px and a cross every 120px), with a soft wash of coral, Rotary blue, cranberry and green on top (`--page-gradient` on `body` in `app/globals.css`). It is static, with no warp.
+**Background:** a drafting grid (`public/images/grid.svg`, a 120px tile: fine dots every 6px, a darker dot every 60px and a cross every 120px) shown at 20% through a white veil, with a soft wash of coral, Rotary blue, cranberry and green on top (`--page-gradient` on `body` in `app/globals.css`). It is static, with no warp.
 
 **Mouse trail** (`components/ui/background-dot-glow.tsx`):
 - Moving the mouse leaves a short trail of characters in the Rotary family colours.

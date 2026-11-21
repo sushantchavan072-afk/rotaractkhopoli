@@ -86,26 +86,33 @@ export default function IntroOverlay() {
     const wait = (ms) => new Promise((resolve) => { timers.push(window.setTimeout(resolve, ms)); });
     const hide = () => { overlay.classList.remove('is-playing'); overlay.style.display = 'none'; };
 
-    /** Hero text rises line by line. */
+    // An animation only takes effect once it has started (a frame or two later), so elements are
+    // un-hidden only when their fade-ins are running; un-hiding first made them flash in for a frame.
+    const whenRunning = (anims, fn) => Promise.all(anims.map((a) => a.ready)).then(fn, fn);
+
+    /** Hero text rises line by line (the menu and the things on the photo stay hidden). */
     const revealCopy = (d = 1) => {
-      root.classList.remove('intro-on');
+      const anims = [];
       document.querySelectorAll('.home-hero-copy > *').forEach((el, i) => {
         const isTitle = el.tagName === 'H1';
-        el.animate(
+        anims.push(el.animate(
           isTitle
             ? [{ opacity: 0, transform: 'translateY(48px)', clipPath: 'inset(0 0 100% 0)' }, { opacity: 1, transform: 'none', clipPath: 'inset(0 0 -10% 0)' }]
             : [{ opacity: 0, transform: 'translateY(28px)' }, { opacity: 1, transform: 'none' }],
           { duration: (isTitle ? 900 : 700) * d, delay: i * 110 * d, easing: EASE_OUT, fill: 'backwards' },
-        );
+        ));
       });
+      whenRunning(anims, () => root.classList.add('intro-copy'));
     };
     /** The things that sit on the photo (menu pill, quote, gallery link, project card) come in once it has landed. */
     const revealOnPhoto = (d = 1) => {
-      root.classList.remove('intro-on');
-      document.querySelector('.site-header')?.animate([{ opacity: 0, transform: 'translateY(-10px)' }, { opacity: 1, transform: 'none' }], { duration: 600 * d, easing: EASE_OUT, fill: 'backwards' });
+      const anims = [];
+      const header = document.querySelector('.site-header');
+      if (header) anims.push(header.animate([{ opacity: 0, transform: 'translateY(-10px)' }, { opacity: 1, transform: 'none' }], { duration: 600 * d, easing: EASE_OUT, fill: 'backwards' }));
       document.querySelectorAll('.home-hero-art > :not(.photo):not(.photo-fallback)').forEach((el, i) => {
-        el.animate([{ opacity: 0, transform: 'translateY(18px) scale(.98)' }, { opacity: 1, transform: 'none' }], { duration: 650 * d, delay: (80 + i * 110) * d, easing: EASE_OUT, fill: 'backwards' });
+        anims.push(el.animate([{ opacity: 0, transform: 'translateY(18px) scale(.98)' }, { opacity: 1, transform: 'none' }], { duration: 650 * d, delay: (80 + i * 110) * d, easing: EASE_OUT, fill: 'backwards' }));
       });
+      whenRunning(anims, () => root.classList.remove('intro-on', 'intro-copy'));
     };
 
     const removeSkip = () => skipEvents.forEach((ev) => window.removeEventListener(ev, onSkip));
@@ -146,8 +153,8 @@ export default function IntroOverlay() {
       //    its final size and moved/scaled with a transform.
       await Promise.race([photo.decode().catch(() => {}), wait(1500)]);
       if (done) return;
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
+      const vw = document.documentElement.clientWidth; // the visible width, without the scrollbar gutter
+      const vh = document.documentElement.clientHeight;
       const art = document.querySelector('.home-hero-art');
       const A = art?.getBoundingClientRect();
       if (!art || !A || A.width === 0) { finish(false); return; }
