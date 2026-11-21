@@ -161,7 +161,7 @@ section:nth-of-type(6n) .eyebrow-dot { background: var(--interact); }
 /* ---------- Footer (white, like Kindora) ---------- */
 .footer { background: var(--surface); padding: 70px 0 28px; }
 .footer-top { display: grid; grid-template-columns: 2fr 1fr 1fr 1.2fr; gap: 48px; padding: 0 0 56px 0; }
-.footer-brand .logo-img { height: 66px; }
+.footer-brand .logo-img { height: 48px; }
 .footer-brand p { max-width: 360px; margin: 22px 0 26px; font-size: 18px; }
 .footer-heading { font-size: 18px; font-weight: 500; letter-spacing: -0.01em; margin: 10px 0 22px; }
 .footer-col { display: flex; flex-direction: column; gap: 18px; }
@@ -954,32 +954,7 @@ section:nth-of-type(6n) .eyebrow-dot { background: var(--interact); }
 
 /* ---------- Leader cards (RI President, District Governor, DRR) ---------- */
 .leader-stack { display: flex; flex-direction: column; gap: 32px; }
-.leader-card { border-radius: var(--radius); padding: 44px; }
-.leader-card.is-coral { background: var(--coral-50); --lc: var(--coral); --lc-dark: var(--coral-dark); }
-.leader-card.is-green { background: var(--mint-50); --lc: var(--green); --lc-dark: var(--green-dark); }
-.leader-card.is-sun { background: var(--sun-50); --lc: var(--yellow-strong); --lc-dark: #7a5c00; }
-.leader-card.is-rotary { background: var(--rotary-50); --lc: var(--rotary-blue); --lc-dark: var(--rotary-blue); }
-.leader-card.is-gold { background: var(--gold-50); --lc: var(--rotary-gold); --lc-dark: #7d5100; }
-.leader-card.is-rotaract { background: var(--rotaract-50); --lc: var(--rotaract); --lc-dark: #a80f52; }
-.leader-top { display: grid; grid-template-columns: minmax(240px, 360px) 1fr; gap: 52px; align-items: end; }
-.leader-photo { position: relative; aspect-ratio: 4 / 5; border-radius: 24px; overflow: hidden; background: radial-gradient(circle at 50% 70%, #fff 0%, rgba(255,255,255,.55) 60%, rgba(255,255,255,.2) 100%); }
-.leader-photo .photo { object-fit: contain; object-position: center bottom; }
-.leader-copy { padding-bottom: 6px; }
-.leader-copy h2 { font-size: clamp(2rem, 3.2vw, 2.8rem); margin: 18px 0 6px; }
-.leader-role { font-size: 17px; color: var(--text-2); margin: 0 0 24px; }
-.leader-card { position: relative; }
 /* The theme logo sits in the card's top-right corner, on its own (no box, no repeated text) */
-.leader-logo { position: absolute; top: 34px; right: 34px; width: 108px; height: auto; border-radius: 16px; }
-.leader-logo.is-wide { width: 210px; border-radius: 0; }
-.leader-vision { display: flex; flex-direction: column; gap: 6px; margin: 0; max-width: 640px; font: 600 clamp(1.3rem, 2.2vw, 1.8rem)/1.25 var(--font-head); color: var(--ink); }
-.leader-vision small { font: 600 12px/1 var(--font); letter-spacing: .08em; text-transform: uppercase; color: var(--lc-dark); }
-.leader-highlight { margin: 22px 0 0; font-size: 18px; line-height: 1.6; color: var(--ink); font-style: italic; max-width: 640px; }
-.leader-letter { margin-top: 36px; background: var(--surface); border-radius: 24px; padding: 36px 40px; }
-.leader-letter h3 { font-size: 22px; margin-bottom: 16px; }
-.leader-letter p { font-size: 16.5px; line-height: 1.75; color: var(--text-2); margin-bottom: 1em; }
-.leader-greeting { font-weight: 600; color: var(--ink) !important; }
-.leader-letter { transition: box-shadow .35s ease; }
-@media (hover: hover) and (pointer: fine) { .leader-letter:hover { box-shadow: 0 18px 40px rgba(0,0,0,.06); } }
 /* The rest of the message unfolds smoothly (grid rows 0fr -> 1fr animates the real height) */
 .letter-more { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows .7s cubic-bezier(.22,.7,.2,1), opacity .5s ease; }
 .letter-more > div { overflow: hidden; min-height: 0; visibility: hidden; transition: visibility 0s .7s; }
@@ -989,15 +964,7 @@ section:nth-of-type(6n) .eyebrow-dot { background: var(--interact); }
 .letter-toggle span { font-size: 18px; line-height: 1; }
 .letter-toggle:hover { border-color: var(--ink); }
 @media (prefers-reduced-motion: reduce) { .letter-more { transition: none; } }
-.leader-signoff { display: flex; flex-direction: column; gap: 2px; margin-top: 8px !important; color: var(--text-2) !important; }
-.leader-signoff .is-name { font-weight: 600; color: var(--ink); }
 @media (max-width: 900px) {
-  .leader-card { padding: 26px; }
-  .leader-logo { position: static; display: block; margin: 0 0 18px auto; width: 76px; }
-  .leader-logo.is-wide { width: 160px; }
-  .leader-top { grid-template-columns: 1fr; gap: 24px; }
-  .leader-photo { max-width: 320px; }
-  .leader-letter { padding: 26px 22px; }
 }
 @media (max-width: 520px) {
 }
@@ -1131,6 +1098,62 @@ html:has(dialog[open]) { overflow: hidden; }
 :is(.btn, .card-btn, .nav-cta, .submit-btn, .chip-btn, .pill-links a, .note-pin-btn, .letter-toggle, .back-link) { transition: background-color .25s ease, border-color .25s ease, color .25s ease, transform .2s ease, box-shadow .25s ease; }
 @media (hover: hover) {
   :is(.btn, .card-btn, .nav-cta, .submit-btn, .chip-btn, .pill-links a, .note-pin-btn, .letter-toggle, .back-link)[data-hue]:not(:disabled):hover { background: var(--hue-bg) !important; border-color: var(--hue-bg) !important; color: var(--hue-fg) !important; }
+}
+
+/* ---------- Leader messages (RI President, District Governor, DRR) ---------- */
+.leader { --lc: var(--rotary-blue); --lc-dark: var(--rotary-blue); --lc-ink: #fff;
+  position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: 28px; overflow: clip;
+  box-shadow: 0 1px 2px rgba(16,24,40,.04), 0 24px 48px -28px rgba(16,24,40,.18); }
+.leader.is-rotary { --lc: var(--rotary-blue); --lc-dark: #0f3470; --lc-ink: #fff; }
+.leader.is-gold { --lc: var(--rotary-gold); --lc-dark: #c98500; --lc-ink: #1d1d1d; }
+.leader.is-rotaract { --lc: var(--rotaract); --lc-dark: #a80f52; --lc-ink: #fff; }
+.leader-band { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 36px; background: linear-gradient(90deg, var(--lc), var(--lc-dark)); color: var(--lc-ink); }
+.leader-band-office { font: 600 15px/1.2 var(--font-head); letter-spacing: .02em; }
+.leader-band-meta { font-size: 13px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; opacity: .9; text-align: right; }
+.leader-grid { display: grid; grid-template-columns: minmax(260px, 340px) minmax(0, 1fr); gap: 56px; padding: 40px 40px 44px; align-items: start; }
+.leader-aside { position: sticky; top: 120px; display: flex; flex-direction: column; gap: 22px; }
+.leader-portrait { position: relative; aspect-ratio: 4 / 5; border-radius: 20px; overflow: hidden;
+  background: radial-gradient(120% 80% at 50% 100%, color-mix(in srgb, var(--lc) 26%, #fff), color-mix(in srgb, var(--lc) 7%, #fff) 70%); }
+.leader-portrait .photo { object-fit: contain; object-position: center bottom; }
+.leader-ident h2 { margin: 0 0 6px; font-size: clamp(1.6rem, 2.4vw, 2rem); line-height: 1.15; letter-spacing: -0.015em; }
+.leader-ident p { margin: 0; font-size: 15px; line-height: 1.5; color: var(--muted); }
+.leader-theme { display: flex; align-items: center; gap: 14px; padding-top: 20px; border-top: 1px solid var(--line); }
+.leader-theme img { width: 64px; height: 64px; object-fit: contain; border-radius: 12px; flex: none; }
+.leader-theme img.is-wide { width: 132px; height: auto; border-radius: 0; }
+.leader-theme > div { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.leader-theme small { font-size: 11.5px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.leader-theme strong { font: 600 15.5px/1.35 var(--font-head); color: var(--ink); }
+.leader-main { min-width: 0; max-width: 700px; }
+.leader-kicker { margin: 0 0 18px; display: inline-flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.leader-kicker::before { content: ''; width: 28px; height: 2px; border-radius: 2px; background: var(--lc); }
+.leader-pull { position: relative; margin: 0 0 30px; padding: 0 0 0 52px; }
+.leader-pull-mark { position: absolute; left: 0; top: -6px; font: 700 72px/1 var(--font-head); color: var(--lc); opacity: .9; }
+.leader-pull p { margin: 0; font: 500 clamp(1.25rem, 1.9vw, 1.55rem)/1.45 var(--font-head); color: var(--ink); letter-spacing: -0.01em; }
+.leader .leader-letter { margin: 0; padding: 0; background: none; border-radius: 0; box-shadow: none !important; }
+.leader .leader-letter p { font-size: 16.5px; line-height: 1.8; color: var(--text-2); margin: 0 0 1.1em; }
+.leader .leader-greeting { font-weight: 600; color: var(--ink) !important; }
+.leader .letter-toggle { margin-top: 6px; }
+.leader-signoff { margin-top: 28px; padding-top: 22px; border-top: 1px solid var(--line); }
+.leader .leader-letter .leader-signoff p { margin: 0; line-height: 1.5; }
+.leader .leader-letter .leader-closing { font-size: 15px; color: var(--muted); }
+.leader .leader-letter .leader-signature { margin-top: 6px; font: 600 22px/1.25 var(--font-head); color: var(--ink); letter-spacing: -0.01em; }
+.leader .leader-letter .leader-signoff-title { font-size: 14px; color: var(--muted); }
+.leader-stack { display: flex; flex-direction: column; gap: 40px; }
+@media (max-width: 960px) {
+  .leader-grid { grid-template-columns: 1fr; gap: 32px; padding: 28px; }
+  .leader-aside { position: static; display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 18px 22px; align-items: center; }
+  .leader-portrait { grid-row: span 2; }
+  .leader-theme { grid-column: 2; padding-top: 14px; }
+  .leader-main { max-width: none; }
+}
+@media (max-width: 560px) {
+  .leader-band { padding: 12px 20px; flex-direction: column; align-items: flex-start; gap: 2px; }
+  .leader-band-meta { text-align: left; font-size: 11.5px; }
+  .leader-grid { padding: 22px 20px 26px; }
+  .leader-aside { grid-template-columns: 110px minmax(0, 1fr); }
+  .leader-theme { grid-column: 1 / -1; }
+  .leader-pull { padding-left: 38px; }
+  .leader-pull-mark { font-size: 56px; }
 }
 
 /* ---------- Header: the logo and the menu float as two separate pills ---------- */

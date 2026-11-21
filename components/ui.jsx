@@ -603,7 +603,7 @@ export function LeaderLetter({ title, greeting, preview = [], rest = [], signoff
   const id = useId();
   return (
     <div className={`leader-letter ${open ? 'is-open' : ''}`} {...(rest.length ? hover : {})}>
-      <h3>{title}</h3>
+      {title && <h3>{title}</h3>}
       {greeting && <p className="leader-greeting">{greeting}</p>}
       {preview.map((para) => <p key={para.slice(0, 48)}>{para}</p>)}
       {rest.length > 0 ? (
@@ -841,7 +841,7 @@ const REVEAL_RULES = [
   ['.metric-grid, .story-block > *', 'fade-up', 100],
   ['.footer-top', 'fade-up', 150],
   ['.note-head, .note-layout > *', 'fade-up', 150],
-  ['.post-featured, .post-hero-head, .post-cover, .post-prose, .leader-card, .about-text, .timeline, .four-way, .focus-grid, .ways-grid, .value-grid, .logo-strip, .impact-band, .facts-grid, .green-counter, .yellow-band, .featured-card, .page-hero-wide, .form-layout > *, .donate-grid > *, .prose.narrow, .filters, .notice-banner, .pill-links', 'fade-up', 200],
+  ['.post-featured, .post-hero-head, .post-cover, .post-prose, .leader, .about-text, .timeline, .four-way, .focus-grid, .ways-grid, .value-grid, .logo-strip, .impact-band, .facts-grid, .green-counter, .yellow-band, .featured-card, .page-hero-wide, .form-layout > *, .donate-grid > *, .prose.narrow, .filters, .notice-banner, .pill-links', 'fade-up', 200],
 ];
 
 /** Numbers that count up when they scroll into view (like Kindora's stats). Years and ranges are left alone. */

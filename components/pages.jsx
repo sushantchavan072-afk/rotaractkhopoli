@@ -816,39 +816,64 @@ function StatCards({ stats, tone = 'kindora' }) {
 }
 
 /** A leader's photo, role, theme (with its logo) and message. Long messages fold behind "Read the full message". */
-function LeaderCard({ leader, eyebrow, tone = 'coral', preview = 3 }) {
+/**
+ * A leader's address, laid out like an official message: a band naming the office, a portrait column
+ * (photo, name, title, theme) that stays in view, and the message with a pull quote and a signature.
+ * Long messages fold behind "Read the full message".
+ */
+function LeaderCard({ leader, office, org, tone = 'rotary', preview = 3 }) {
   const shown = leader.message.slice(0, preview);
   const rest = leader.message.slice(preview);
+  const logo = leader.themeLogo;
   return (
-    <article className={`leader-card is-${tone}`}>
-      {leader.themeLogo && <Image src={leader.themeLogo.src} alt={leader.themeLogo.alt} width={leader.themeLogo.w} height={leader.themeLogo.h} sizes="220px" className={`leader-logo ${leader.themeLogo.w > leader.themeLogo.h ? 'is-wide' : ''}`} />}
-      <div className="leader-top">
-        <div className="leader-photo"><Photo src={leader.photo || undefined} alt={leader.name} label={initials(leader.name)} sizes="(max-width: 900px) 80vw, 400px" /></div>
-        <div className="leader-copy">
-          <Eyebrow>{eyebrow}</Eyebrow>
-          <h2>{leader.name}</h2>
-          <p className="leader-role">{leader.role} · {leader.year}</p>
-          {!leader.themeInLogo && <p className="leader-vision"><small>{leader.themeLabel} {leader.year}</small>{leader.theme}</p>}
-          {leader.highlight && <blockquote className="leader-highlight">“{leader.highlight}”</blockquote>}
+    <article className={`leader is-${tone}`}>
+      <header className="leader-band">
+        <span className="leader-band-office">{office}</span>
+        <span className="leader-band-meta">{org}<span aria-hidden="true"> · </span>{leader.year}</span>
+      </header>
+      <div className="leader-grid">
+        <aside className="leader-aside">
+          <div className="leader-portrait"><Photo src={leader.photo || undefined} alt={leader.name} label={initials(leader.name)} sizes="(max-width: 700px) 40vw, 360px" /></div>
+          <div className="leader-ident">
+            <h2>{leader.name}</h2>
+            <p>{leader.role}</p>
+          </div>
+          <div className="leader-theme">
+            {logo && <Image src={logo.src} alt={logo.alt} width={logo.w} height={logo.h} sizes="200px" className={logo.w > logo.h ? 'is-wide' : ''} />}
+            <div>
+              <small>{leader.themeLabel}</small>
+              {!leader.themeInLogo && <strong>{leader.theme}</strong>}
+            </div>
+          </div>
+        </aside>
+        <div className="leader-main">
+          <p className="leader-kicker">Message from the {leader.short}</p>
+          {leader.highlight && (
+            <blockquote className="leader-pull"><span aria-hidden="true" className="leader-pull-mark">“</span><p>{leader.highlight}</p></blockquote>
+          )}
+          {leader.message?.length > 0 && (
+            <LeaderLetter greeting={leader.greeting} preview={shown} rest={rest} signoff={<Signoff lines={leader.signoff} />} />
+          )}
         </div>
       </div>
-      {leader.message?.length > 0 && (
-        <LeaderLetter
-          title={`Message from the ${leader.short}`}
-          greeting={leader.greeting}
-          preview={shown}
-          rest={rest}
-          signoff={<Signoff lines={leader.signoff} />}
-        />
-      )}
     </article>
   );
 }
 
+/** Sign-off as a signature block: the closing line(s), then the name, then the title lines. */
 function Signoff({ lines = [] }) {
   if (!lines.length) return null;
   const nameAt = lines.findIndex((l) => !/yours|regards/i.test(l));
-  return <p className="leader-signoff">{lines.map((l, i) => <span key={l} className={i === nameAt ? 'is-name' : undefined}>{l}</span>)}</p>;
+  const closing = lines.slice(0, Math.max(0, nameAt));
+  const name = lines[nameAt];
+  const titles = lines.slice(nameAt + 1);
+  return (
+    <div className="leader-signoff">
+      {closing.length > 0 && <p className="leader-closing">{closing.join(' ')}</p>}
+      {name && <p className="leader-signature">{name}</p>}
+      {titles.length > 0 && <p className="leader-signoff-title">{titles.join(' · ')}</p>}
+    </div>
+  );
 }
 
 export function District() {
@@ -876,7 +901,7 @@ export function District() {
       </Section>
       <Section>
         <Intro center label="District leadership" title={`Leading Rotaract District 3131 in ${drr.year}`} description="The District Rotaract Representative leads the district's Rotaract clubs through the Rotary year." />
-        <LeaderCard leader={drr} eyebrow="District Rotaract Representative" tone="rotaract" />
+        <LeaderCard leader={drr} office="District Rotaract Representative" org="Rotaract District 3131" tone="rotaract" />
       </Section>
       <CommunityCTA />
     </>
@@ -923,8 +948,8 @@ export function RotaryInfo() {
       <Section>
         <Intro center label="Rotary leadership" title={`Leading Rotary in ${riPresident.year}`} description="The President of Rotary International and the Governor of Rotary District 3131, our sponsoring Rotary district." />
         <div className="leader-stack">
-          <LeaderCard leader={riPresident} eyebrow={`RI President ${riPresident.year}`} tone="rotary" preview={4} />
-          <LeaderCard leader={districtGovernor} eyebrow="Rotary District 3131 Governor" tone="gold" />
+          <LeaderCard leader={riPresident} office="President" org="Rotary International" tone="rotary" preview={4} />
+          <LeaderCard leader={districtGovernor} office="District Governor" org="Rotary District 3131" tone="gold" />
         </div>
       </Section>
       <CommunityCTA />
