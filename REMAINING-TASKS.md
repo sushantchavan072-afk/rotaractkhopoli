@@ -127,7 +127,6 @@ Several images are still **temporary stock photos** from Unsplash (listed in `pu
 
 | Where it appears | Current file | What would suit it |
 |---|---|---|
-| Home page hero (also in the intro animation and on link previews) | `hero.jpg` | A bright group photo of members at a project, landscape |
 | Home and About "Our story" photo | `volunteer.jpg` | A member at a project |
 | Gallery page and photos around the home page | `gallery/1.jpg` … `gallery/7.jpg` | Any 7 good project or fellowship photos |
 | Event: Maha Aarti | `events/maha-aarti.jpg` | Photo from that event |
@@ -140,7 +139,7 @@ Several images are still **temporary stock photos** from Unsplash (listed in `pu
 | Event: PD Session (Canva Hacks) | `events/pd-session.jpg` | A screenshot of the session is fine |
 | Blog post covers | reuse the gallery and event photos | Not needed separately |
 
-Already real: Cyber Crime Awareness, Road Safety Drive, the team photo in "Together, we can make a difference", leaders' photos and logos.
+Already real: the home page hero photo (also used in the intro animation and on link previews), the team photos on the home page, Cyber Crime Awareness, Road Safety Drive, leaders' photos and logos.
 
 **Needed:** photos labelled with the event name. Landscape photos work best for events and the hero. Extra photos from an event can also be added as a small gallery on that event's page.
 

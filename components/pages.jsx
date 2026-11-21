@@ -420,14 +420,13 @@ export function Home() {
             <FamilyLogos title="Proudly part of the Rotary family" />
           </div>
           <div className="home-hero-art">
-            <Photo src="/images/hero-team.jpg" alt="Members of Rotaract Club of Khopoli sitting together outdoors" label=" " priority sizes="(max-width: 900px) 100vw, 50vw" />
+            <Photo src="/images/hero-stage.jpg" alt="Members of Rotaract Club of Khopoli together on stage at an event organised with Rotary Club of Khopoli" label=" " priority sizes="(max-width: 900px) 100vw, 50vw" />
             <div className="hero-quote"><span className="hero-small-avatar" aria-hidden="true">♥</span><p>“Service above self, written in the voice of a small town with big plans.”</p></div>
             <Link href="/gallery" className="story-reel"><span><small>See our</small><strong>photo gallery</strong></span><span className="play-button" aria-hidden="true"><Play size={14} /></span></Link>
             <Link href={`/events/${latest.slug}`} className="hero-info-card">
               <small>Latest project</small>
               <strong>{latest.title}</strong>
               <span>{formatDate(latest.date)}</span>
-              <div><span className="avatar-stack" aria-hidden="true">{coreMembers.slice(2, 5).map((m, i) => <span key={m.name} className={`avatar tint-${TINTS[i]}`}>{initials(m.name)}</span>)}</span><span className="hero-info-count"><b>{events.length}</b> projects this year</span></div>
             </Link>
             <div className="hero-small-tag">Chartered<br />{club.charteredOn}</div>
           </div>
