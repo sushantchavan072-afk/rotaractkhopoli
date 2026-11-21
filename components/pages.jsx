@@ -22,8 +22,7 @@ import {
   Btn, Eyebrow, Intro, Section, PageHero, Photo, FaqList, FaqSearch, MailForm, NoteWall, LeaderLetter, SocialLinks,
   EventCard, EventsExplorer, EventStatus, EventActions, FamilyLogos, LogoMarquee,
 } from './ui';
-import Team from '@/components/ui/team-02';
-import { WorldMap } from '@/components/ui/map';
+import { Team, WorldMap } from '@/components/ui/lazy';
 import { placeOnMap, MAP_SIZE } from '../lib/world-map';
 
 const ICONS = { HandHeart, GraduationCap, Users, Globe2, Megaphone, HeartHandshake, Sparkles, ShieldCheck, UserPlus, Lightbulb, Package, Handshake };

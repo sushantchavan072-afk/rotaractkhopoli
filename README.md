@@ -55,9 +55,9 @@ Kindora's `/elements` page is a template style guide, so it is not included.
 
 ## Header, background, cursor and colours
 
-**Page changes:** every new page opens at the top (`useScrollToTopOnPageChange` in `components/ui.jsx`). Back/forward keeps your place, and links to a `#section` still scroll smoothly.
+**Page changes:** the new page fades and rises in (`app/template.jsx`, `.page-enter` in `app/globals.css`). Every new page opens at the top (`useScrollToTopOnPageChange` in `components/ui.jsx`). Back/forward keeps your place, and links to a `#section` still scroll smoothly.
 
-**Header:** the logo sits on its own with no box, and fades away once you scroll so it never covers text. The menu items float in one pill that stays while scrolling. On the home page the pill sits inside the hero photo with even space around it, and on phones the menu opens as a floating rounded card.
+**Header:** on first load the logo and the menu pill glide in and the menu items follow one by one. On phones, the menu icon turns as it switches, the menu slides open and closed with its items following, and tapping outside it (or Esc) closes it. The logo sits on its own with no box, and fades away once you scroll so it never covers text. The menu items float in one pill that stays while scrolling. On the home page the pill sits inside the hero photo with even space around it, and on phones the menu opens as a floating rounded card.
 
 **Team members** (`components/ui/team-02.tsx`, from 21st.dev, with shadcn's `Badge` in `components/ui/badge.tsx`):
 - Used on the home page, the Teams page and each avenue's leads.
@@ -92,7 +92,7 @@ It plays once per browser session, only on the home page. It never plays for vis
 
 **Background:** a drafting grid (`public/images/grid.svg`, a 120px tile: fine dots every 6px, a darker dot every 60px and a cross every 120px) shown at 20% through a white veil, with a soft wash of coral, Rotary blue, cranberry and green on top (`--page-gradient` on `body` in `app/globals.css`). It is static, with no warp.
 
-**Mouse trail** (`components/ui/background-dot-glow.tsx`):
+**Mouse trail** (`components/ui/mouse-trail.tsx`):
 - Moving the mouse leaves a short trail of characters in the Rotary family colours.
 - Nothing is redrawn while the mouse is still, and the animation stops while the tab is hidden.
 - Touch screens and visitors who prefer reduced motion get no trail.
@@ -164,16 +164,18 @@ A public wall that everyone can see would need a database. Ask if you want one.
 
 ## Forms
 
-The Join, Board application, Sponsorship, Contact and footer forms work in two ways:
+The Join, Board application, Sponsorship and Contact forms, the footer Subscribe box and "Send to the club" on notes all work in two ways:
 
-1. **With `NEXT_PUBLIC_FORM_ENDPOINT` set** (recommended): submissions are posted to a form service such as [Formspree](https://formspree.io), which emails them to the club inbox. The visitor sees a confirmation on the page.
+1. **With `NEXT_PUBLIC_FORM_ENDPOINT` set** (recommended), submissions are saved and the visitor sees a confirmation on the page. The address can point to:
+   - **Google Sheets:** every response becomes a row, with one tab per form. Follow **[GOOGLE-SHEETS-SETUP.md](GOOGLE-SHEETS-SETUP.md)**.
+   - a form service such as [Formspree](https://formspree.io).
 2. **Without it:** the form opens the visitor's email app with the message ready to send to the club email.
 
 ## Logos
 
 The official logos are in `public/images/logos/`:
 
-- `rotaract-khopoli.png`: the club logo, used in the header, the footer and on the share image. `rotaract-khopoli-white.png` is a white version for dark backgrounds.
+- `rotaract-khopoli.png`: the club logo, used in the header, the footer and on the share image.
 - `rotaract-district-3131.png`, `rotary-district-3131.png` and `interact-district-3131.png`: used in the "Rotary family" strip on the home page, on the About page, and on the District and Rotary pages.
 
 The browser-tab icon (`app/icon.png`) and the home-screen icon (`app/apple-icon.png`) are cut from the club logo's wheel. Use the logos unchanged, as Rotary's brand guidelines require.

@@ -393,7 +393,6 @@ section:nth-of-type(6n) .eyebrow-dot { background: var(--interact); }
 .post-featured .post-featured-meta { font-size: 14px; color: var(--muted); margin-bottom: 26px; }
 .post-featured .btn { position: relative; z-index: 0; }
 .post-featured:hover .btn .btn-arrow svg { transform: rotate(-45deg); }
-.post-meta { margin: 14px 0 0; font-size: 15px; }
 /* Article page */
 .post-hero { padding: 40px 0 0; }
 .back-link { display: inline-flex; align-items: center; gap: 8px; font-size: 14.5px; font-weight: 500; color: var(--text-2); padding: 8px 16px 8px 12px; border: 1px solid var(--line); border-radius: 30px; background: var(--surface); transition: border-color .2s, color .2s; }
@@ -567,13 +566,12 @@ section:nth-of-type(6n) .eyebrow-dot { background: var(--interact); }
 .impact-band > div { position: relative; z-index: 1; display: flex; flex-direction: column-reverse; gap: 8px; }
 .impact-band dd { margin: 0; font-size: clamp(2.2rem, 3.6vw, 3.2rem); font-weight: 500; letter-spacing: -0.03em; }
 .impact-band dt { font-size: 14px; color: var(--text-2); max-width: 200px; }
-.facts-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 0; }
+.facts-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin: 0; }
 .facts-grid > div { background: var(--panel); border-radius: 20px; padding: 24px 22px; display: flex; flex-direction: column; gap: 8px; }
 .facts-grid dt { font-size: 13px; color: var(--muted); }
-.facts-grid dd { margin: 0; font-size: 18px; font-weight: 600; line-height: 1.3; }
+.facts-grid dd { margin: 0; font-size: 18px; font-weight: 600; line-height: 1.3; overflow-wrap: anywhere; }
 
 /* ---------- Sponsorship (Kindora donation) ---------- */
-.donate-hero { padding: 56px 0 40px; }
 .donate-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: start; }
 .donate-grid h1 { margin: 20px 0 22px; font-size: clamp(2.4rem, 4.4vw, 3.8rem); }
 .package-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
@@ -644,7 +642,6 @@ section:nth-of-type(6n) .eyebrow-dot { background: var(--interact); }
 
 /* ---------- 404 ---------- */
 .error-page { padding: 80px 0 40px; text-align: center; }
-.error-code { font-size: clamp(7rem, 20vw, 13rem); font-weight: 600; letter-spacing: -0.06em; line-height: 1; margin: 0; background: linear-gradient(120deg, var(--coral), var(--yellow-strong) 55%, var(--green)); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .error-page p { max-width: 460px; margin: 0 auto 28px; }
 
 /* ---------- Motion ---------- */
@@ -688,7 +685,7 @@ section:nth-of-type(6n) .eyebrow-dot { background: var(--interact); }
   .way:nth-last-child(-n+2) { border-bottom: 0 !important; }
   .footer-top { grid-template-columns: 1fr 1fr 1fr; }
   .footer-brand { grid-column: 1 / -1; }
-  .facts-grid { grid-template-columns: repeat(2, 1fr); }
+  .facts-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .volunteer-band { grid-template-columns: 1fr; gap: 0; }
   .volunteer-copy { padding-bottom: 8px; }
   .volunteer-media { min-height: 460px; }
@@ -764,7 +761,7 @@ section:nth-of-type(6n) .eyebrow-dot { background: var(--interact); }
   .page-hero-wide, .detail-photo { height: 280px; }
 }
 @media (max-width: 430px) {
-  .facts-grid, .impact-band { grid-template-columns: 1fr 1fr; }
+  .facts-grid, .impact-band { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
   .btn { padding: 0 22px; }
   .footer-top { grid-template-columns: 1fr; }
 }
@@ -971,7 +968,7 @@ section:nth-of-type(6n) .eyebrow-dot { background: var(--interact); }
 
 
 /* ---------- Background ---------- */
-/* ASCII mouse trail (components/ui/background-dot-glow.tsx); it sits behind everything, over the paper texture on <body>. */
+/* ASCII mouse trail (components/ui/mouse-trail.tsx); it sits behind everything, over the grid on <body>. */
 .site-bg { position: fixed; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; pointer-events: none; }
 main, .footer { position: relative; z-index: 1; }
 .footer { background: transparent; }
@@ -980,8 +977,17 @@ main, .footer { position: relative; z-index: 1; }
 .numbered .way-icon, .ways-grid.is-four .way-icon, .pagination .is-active { color: #0c0c0c; }
 
 .footer-top > * { min-width: 0; }
-.subscribe input { width: 100%; }
+.subscribe input { width: 100%; min-height: 40px; }
 @media (max-width: 430px) { .subscribe button { padding: 12px 16px; } }
+/* Phones: comfortable tap areas for small links and controls */
+@media (max-width: 700px) {
+  .footer-col { gap: 2px; }
+  .footer-col a, .footer-mail { padding: 10px 0; }
+  .footer-heading { margin-bottom: 8px; }
+  .learn-more { padding-block: 10px; }
+  .note-swatches .note-swatch { width: 40px; height: 40px; }
+  .back-link { min-height: 42px; }
+}
 .footer-credit { display: inline-flex; align-items: center; gap: 6px; }
 .footer-heart { color: #e5484d; width: 13px; height: 13px; }
 
@@ -1156,6 +1162,53 @@ html:has(dialog[open]) { overflow: hidden; }
   .leader-pull-mark { font-size: 56px; }
 }
 
+/* ---------- Page changes (app/template.jsx): the new page fades and rises in instead of switching instantly.
+   Opacity on the wrapper and a short rise on its first section only, so nothing fixed inside a page
+   (the home intro, the badge dialog) is ever positioned against a moving box. ---------- */
+@keyframes page-in { from { opacity: 0; } }
+@keyframes page-rise { from { translate: 0 18px; } }
+.page-enter { animation: page-in .45s ease both; }
+.page-enter > :first-child { animation: page-rise .55s cubic-bezier(.2,.7,.2,1) both; }
+@media (prefers-reduced-motion: reduce) { .page-enter, .page-enter > :first-child { animation: none; } }
+
+/* ---------- Header animations ---------- */
+/* On first load the logo and the menu pill glide in and the menu items follow one by one
+   (the header stays mounted between pages, so this plays once per visit) */
+@keyframes hdr-in { from { opacity: 0; translate: 0 -14px; } }
+@keyframes hdr-item-in { from { opacity: 0; translate: 0 -6px; } }
+.site-header .logo, .header-mobile-actions { animation: hdr-in .7s cubic-bezier(.2,.7,.2,1) both; }
+@media (min-width: 1041px) {
+  .site-header .nav { animation: hdr-in .7s .08s cubic-bezier(.2,.7,.2,1) both; }
+  .site-header .nav > * { animation: hdr-item-in .5s cubic-bezier(.2,.7,.2,1) both; }
+  .site-header .nav > :nth-child(1) { animation-delay: .22s; } .site-header .nav > :nth-child(2) { animation-delay: .29s; }
+  .site-header .nav > :nth-child(3) { animation-delay: .36s; } .site-header .nav > :nth-child(4) { animation-delay: .43s; }
+  .site-header .nav > :nth-child(5) { animation-delay: .5s; }
+}
+.nav-pill { transition: background-color .25s ease, color .25s ease; }
+/* Menu icon turns as it switches between ☰ and ✕ */
+@keyframes icon-turn { from { opacity: 0; rotate: -90deg; scale: .6; } }
+.menu-toggle svg { animation: icon-turn .3s cubic-bezier(.2,.7,.2,1); }
+.menu-toggle { transition: transform .2s ease; }
+.menu-toggle:active { transform: scale(.94); }
+.menu-backdrop { display: none; }
+@media (max-width: 1040px) {
+  /* The phone menu slides open and closed (browsers without @starting-style simply show it) */
+  .nav { opacity: 0; translate: 0 -10px; scale: .98; transform-origin: top center;
+    transition: opacity .28s ease, translate .32s cubic-bezier(.2,.7,.2,1), scale .32s cubic-bezier(.2,.7,.2,1), display .32s allow-discrete; }
+  .nav.is-open { opacity: 1; translate: 0 0; scale: 1; }
+  @starting-style { .nav.is-open { opacity: 0; translate: 0 -10px; scale: .98; } }
+  .nav.is-open > * { animation: hdr-item-in .4s cubic-bezier(.2,.7,.2,1) both; }
+  .nav.is-open > :nth-child(1) { animation-delay: .04s; } .nav.is-open > :nth-child(2) { animation-delay: .08s; }
+  .nav.is-open > :nth-child(3) { animation-delay: .12s; } .nav.is-open > :nth-child(4) { animation-delay: .16s; }
+  .nav.is-open > :nth-child(5) { animation-delay: .2s; }
+  .menu-backdrop { display: block; position: fixed; inset: 0; z-index: -1; border: 0; padding: 0; background: rgba(12,12,12,.18); animation: fade-in .25s ease; }
+}
+@keyframes fade-in { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .site-header .logo, .header-mobile-actions, .site-header .nav, .site-header .nav > *, .menu-toggle svg, .nav.is-open > *, .menu-backdrop { animation: none !important; }
+  .nav { transition: none !important; }
+}
+
 /* ---------- Header: the logo and the menu float as two separate pills ---------- */
 .site-header .logo { padding: 0; background: none; border: 0; box-shadow: none; }
 /* No box behind the logo, so once the page scrolls it fades away instead of sitting on top of the text */
@@ -1257,6 +1310,6 @@ html.intro-on:not(.intro-copy) .home-hero-copy > * { opacity: 0; }
 @media (prefers-reduced-motion: reduce) { .note { animation: none; } }
 
 /* Large display figures use the heading font too */
-.metric-card > strong, .stat-cards dd, .counters strong, .impact-band dd, .green-counter strong, .mini-stats strong,
-.stat-boxes b, .outcome-grid dd, .hero-info-count b, .error-code, .timeline strong, .package strong, 
-.cta-stat b, .photo-badge strong { font-family: var(--font-head); }
+.metric-card > strong, .stat-cards dd, .counters strong, .impact-band dd, .green-counter strong,
+.stat-boxes b, .outcome-grid dd, .hero-info-count b, .timeline strong, .package strong, 
+.cta-stat b { font-family: var(--font-head); }

@@ -25,7 +25,7 @@ const RAMP = " .:-=+*#%@";
 const TRAIL_COLORS = ["#17458f", "#e89a00", "#d41367", "#00a2e0", "#f2774f", "#2fbf68"];
 const COLOR_STEP_MS = 90; // the trail moves on to the next colour every ~90 ms
 
-export function DotGlowBackground({ className = "" }: { className?: string }) {
+export function MouseTrail({ className = "" }: { className?: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pathname = usePathname();
   const pathRef = useRef(pathname);
@@ -237,4 +237,4 @@ export function DotGlowBackground({ className = "" }: { className?: string }) {
   return <canvas ref={canvasRef} aria-hidden="true" className={`site-bg ${className}`.trim()} />;
 }
 
-export default DotGlowBackground;
+export default MouseTrail;

@@ -7,8 +7,6 @@ Replace them with the club's own project photos by saving files with the same na
 |---|---|
 | hero.jpg (also used for the share image `public/og.jpg`) | https://unsplash.com/photos/photo-1517486808906-6ca8b3f04846 |
 | volunteer.jpg | https://unsplash.com/photos/photo-1559027615-cd4628902d4a |
-| cta.jpg | https://unsplash.com/photos/photo-1582213782179-e0d53f98f2ca |
-| support.jpg | https://unsplash.com/photos/photo-1532629345422-7515f3d16bb6 |
 | events/maha-aarti.jpg | https://unsplash.com/photos/photo-1605292356183-a77d0a9c9d1d |
 | events/paintscape.jpg | https://unsplash.com/photos/photo-1513364776144-60967b0f800f |
 | events/joint-meeting.jpg | https://unsplash.com/photos/photo-1588196749597-9ff075ee6b5b |

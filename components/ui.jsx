@@ -114,16 +114,16 @@ export function PageHero({ eyebrow, title, desc, children, layout = 'center', wi
   );
 }
 
-/** The official Rotaract Club of Khopoli logo (white version on dark backgrounds). */
-export function Logo({ light = false }) {
+/** The official Rotaract Club of Khopoli logo. */
+export function Logo() {
   return (
-    <Link href="/" className={`logo ${light ? 'logo-light' : ''}`}>
+    <Link href="/" className="logo">
       <Image
-        src={light ? '/images/logos/rotaract-khopoli-white.png' : '/images/logos/rotaract-khopoli.png'}
+        src="/images/logos/rotaract-khopoli.png"
         alt={`${club.name}, home`}
         width={867}
         height={296}
-        priority={!light}
+        priority
         sizes="200px"
         className="logo-img"
       />
@@ -196,11 +196,11 @@ export function Header() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
   useEffect(() => {
-    if (!pagesOpen) return undefined;
-    const onKey = (e) => { if (e.key === 'Escape') setPagesOpen(false); };
+    if (!pagesOpen && !open) return undefined;
+    const onKey = (e) => { if (e.key === 'Escape') { setPagesOpen(false); setOpen(false); } };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [pagesOpen]);
+  }, [pagesOpen, open]);
   const isCurrent = (href) => (href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`));
   return (
     <header className={`site-header ${isHome ? 'is-overlay' : ''} ${stuck ? 'is-stuck' : ''}`}>
@@ -209,9 +209,11 @@ export function Header() {
         <Logo />
         <div className="header-mobile-actions">
           <button className="menu-toggle" aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} aria-controls="main-nav" onClick={() => setOpen(!open)}>
-            {open ? <X size={22} /> : <Menu size={22} />}
+            {open ? <X key="x" size={22} /> : <Menu key="menu" size={22} />}
           </button>
         </div>
+        {/* Phone menu: tapping outside it closes it */}
+        {open && <button type="button" className="menu-backdrop" tabIndex={-1} aria-hidden="true" onClick={() => setOpen(false)} />}
         <nav id="main-nav" className={`nav ${open ? 'is-open' : ''}`} aria-label="Main">
           <div
             className="pages-wrap"
@@ -291,14 +293,25 @@ function FooterCol({ title, items }) {
 
 /* ---------------------------------------------------------------- Forms */
 
-async function deliver(subject, fields) {
+/**
+ * Sends a form. With NEXT_PUBLIC_FORM_ENDPOINT set it posts the answers there (Google Sheets via Apps
+ * Script, see GOOGLE-SHEETS-SETUP.md, or a form service such as Formspree); otherwise it opens the
+ * visitor's email app. `form` names the form, and becomes the sheet tab the answers are saved in.
+ */
+async function deliver(form, subject, fields) {
   if (FORM_ENDPOINT) {
+    // Google Apps Script only accepts "simple" requests from a browser, so for it the JSON goes as plain text.
+    const toSheets = /script\.google(usercontent)?\.com/.test(FORM_ENDPOINT);
     const res = await fetch(FORM_ENDPOINT, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify({ _subject: subject, ...fields }),
+      headers: toSheets ? { 'Content-Type': 'text/plain;charset=utf-8' } : { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ _form: form, _subject: subject, ...fields }),
     });
     if (!res.ok) throw new Error('send failed');
+    if (toSheets) {
+      const out = await res.json().catch(() => null);
+      if (!out?.ok) throw new Error('not saved');
+    }
     return 'sent';
   }
   const body = Object.entries(fields).map(([k, v]) => `${k}: ${v}`).join('\n\n');
@@ -311,7 +324,7 @@ function SubscribeForm() {
   async function onSubmit(e) {
     e.preventDefault();
     const email = String(new FormData(e.currentTarget).get('email') ?? '');
-    try { setState(await deliver('Please add me to club updates', { Email: email, Request: 'Keep me posted about upcoming projects and events.' })); }
+    try { setState(await deliver('Club updates', 'Please add me to club updates', { Email: email, Request: 'Keep me posted about upcoming projects and events.' })); }
     catch { setState('error'); }
   }
   return (
@@ -352,7 +365,7 @@ export function MailForm({ title, intro, subject, fields, submitLabel = 'Send Me
     const who = String(data.get('name') ?? '').trim();
     setState('sending');
     try {
-      setState(await deliver(`${subject}${who ? ` from ${who}` : ''}`, values));
+      setState(await deliver(subject, `${subject}${who ? ` from ${who}` : ''}`, values));
       if (FORM_ENDPOINT) e.target.reset();
     } catch { setState('error'); }
   }
@@ -438,7 +451,7 @@ export function NoteWall() {
   async function send(note) {
     setStatus((s) => ({ ...s, [note.id]: 'sending' }));
     try {
-      const result = await deliver(`A note for the club${note.name ? ` from ${note.name}` : ''}`, { Name: note.name || 'Not given', Note: note.text });
+      const result = await deliver('Notes', `A note for the club${note.name ? ` from ${note.name}` : ''}`, { Name: note.name || 'Not given', Note: note.text });
       setStatus((s) => ({ ...s, [note.id]: result }));
       if (result === 'sent') writeNotes(parseNotes(readNotes()).map((n) => (n.id === note.id ? { ...n, sent: true } : n)));
     } catch { setStatus((s) => ({ ...s, [note.id]: 'error' })); }
@@ -840,9 +853,14 @@ const REVEAL_RULES = [
   ['.section-intro, .split-intro, .team-head, .strip-title, .page-hero-inner, .faq-head, .cta-band, .detail-hero .container > *', 'fade-up', 150],
   ['.metric-grid, .story-block > *', 'fade-up', 100],
   ['.footer-top', 'fade-up', 150],
+  ['.home-hero-art > .photo, .home-hero-art > .photo-fallback', 'zoom-out', 0],
+  ['.volunteer-band, .wide-banner, .center-row, .small-note, .faq-group > h2', 'fade-up', 150],
+  ['.error-page .container > *', 'fade-up', 100, 100],
   ['.note-head, .note-layout > *', 'fade-up', 150],
   ['.post-featured, .post-hero-head, .post-cover, .post-prose, .leader, .about-text, .timeline, .four-way, .focus-grid, .ways-grid, .value-grid, .logo-strip, .impact-band, .facts-grid, .green-counter, .yellow-band, .featured-card, .page-hero-wide, .form-layout > *, .donate-grid > *, .prose.narrow, .filters, .notice-banner, .pill-links', 'fade-up', 200],
 ];
+
+const introPlaying = () => document.documentElement.classList.contains('intro-on') || Boolean(document.querySelector('.intro.is-playing'));
 
 /** Numbers that count up when they scroll into view (like Kindora's stats). Years and ranges are left alone. */
 const COUNT_SELECTOR = '.metric-card > strong, .stat-boxes b, .counters strong, .impact-band dd, .stat-cards dd, .green-counter strong, .hero-info-card b, .outcome-grid dd';
@@ -886,6 +904,8 @@ export function ScrollReveal() {
       for (const [selector, effect, base, step = 0, cycle = 0] of REVEAL_RULES) {
         document.querySelectorAll(selector).forEach((el) => {
           if (watched.has(el) || el.hasAttribute('data-aos-in') || el.closest('.marquee')) return;
+          // While the home intro plays it animates the hero photo itself; mark it as shown so it is never re-hidden.
+          if (introPlaying() && el.closest('.home-hero-art')) { el.setAttribute('data-aos-in', ''); return; }
           watched.add(el);
           let delay = base;
           if (step) {

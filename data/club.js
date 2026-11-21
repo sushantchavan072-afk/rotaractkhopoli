@@ -210,21 +210,10 @@ export function initials(name) {
 /* ---------------- Testimonials ---------------- */
 /**
  * Only real, consented quotes belong here. The testimonials section is hidden while this list is empty.
- * The quotes on the old site were marked illustrative, so they are kept below for reference only.
  * Format: { quote: '...', name: 'Full name', role: 'Role / organisation' }
  */
 export const testimonials = [];
 
-export const illustrativeTestimonialsDoNotPublish = [
-  { quote: 'I joined for the certificate and stayed for the work. Within a year I had run a plantation drive, handled a budget and spoken in front of 200 people.',
-    name: 'Rtr. Mihir Butala', role: 'President Elect' },
-  { quote: 'They asked what our school actually needed instead of arriving with a photo op. The library kits are still in daily use two terms later.',
-    name: 'Mrs. S. Kadam', role: 'Headmistress, ZP School, Vavoshi' },
-  { quote: 'A young club that documents its projects properly is rare. Khopoli reports every activity on time and the numbers hold up.',
-    name: 'Rtn. P. Deshpande', role: 'Sponsor Rotarian, District 3131' },
-  { quote: 'The career workshop was the first time anyone sat with me on a resume. I got my first interview call three weeks later.',
-    name: 'Omkar B.', role: 'Beneficiary, Career Compass workshop' },
-];
 
 /* ---------------- FAQs ---------------- */
 export const faqGroups = [
