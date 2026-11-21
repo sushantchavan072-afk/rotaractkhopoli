@@ -27,7 +27,7 @@ const INTRO_SCRIPT = `(function(){try{if(location.pathname!=='/')return;var d=do
 
 export default function RootLayout({ children }){
   return (
-    <html lang="en-IN" suppressHydrationWarning>
+    <html lang="en-IN" data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: INTRO_SCRIPT }} />
       </head>

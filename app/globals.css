@@ -1158,7 +1158,9 @@ html:has(dialog[open]) { overflow: hidden; }
   /* Breathing room: the bar sits a little lower, and on the home page the menu pill sits inside the
      photo with the same space above it and to its right */
   .site-header .nav-wrap { height: 128px; padding-top: 24px; }
-  .site-header.is-stuck .nav-wrap { height: 104px; padding-top: 0; }
+  /* The bar keeps the same height when scrolled (a change would shift the page and flip the state back and forth); the pills just slide up a little */
+  .site-header .nav-wrap { transition: transform .3s ease; }
+  .site-header.is-stuck .nav-wrap { transform: translateY(-18px); }
   .page-hero { padding-top: 36px; }
   .is-overlay:not(.is-stuck) .nav { margin-right: 14px; }
 }
