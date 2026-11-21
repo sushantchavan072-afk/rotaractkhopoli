@@ -1173,13 +1173,15 @@ html:has(dialog[open]) { overflow: hidden; }
 
 /* ---------- Header animations ---------- */
 /* On first load the logo and the menu pill glide in and the menu items follow one by one
-   (the header stays mounted between pages, so this plays once per visit) */
+   (the header stays mounted between pages, so this plays once per visit). `backwards` (not `both`):
+   a finished animation must not keep its transform, or the dropdown would size itself to its button. */
 @keyframes hdr-in { from { opacity: 0; translate: 0 -14px; } }
 @keyframes hdr-item-in { from { opacity: 0; translate: 0 -6px; } }
-.site-header .logo, .header-mobile-actions { animation: hdr-in .7s cubic-bezier(.2,.7,.2,1) both; }
+.site-header .logo, .header-mobile-actions { animation: hdr-in .7s cubic-bezier(.2,.7,.2,1) backwards; }
 @media (min-width: 1041px) {
-  .site-header .nav { animation: hdr-in .7s .08s cubic-bezier(.2,.7,.2,1) both; }
-  .site-header .nav > * { animation: hdr-item-in .5s cubic-bezier(.2,.7,.2,1) both; }
+  .site-header .nav { animation: hdr-in .7s .08s cubic-bezier(.2,.7,.2,1) backwards; }
+  .site-header .nav > * { animation: hdr-item-in .5s cubic-bezier(.2,.7,.2,1) backwards; }
+  .site-header .nav > .pages-wrap { animation-name: fade-in; } /* opacity only: a moving parent would resize the dropdown if opened early */
   .site-header .nav > :nth-child(1) { animation-delay: .22s; } .site-header .nav > :nth-child(2) { animation-delay: .29s; }
   .site-header .nav > :nth-child(3) { animation-delay: .36s; } .site-header .nav > :nth-child(4) { animation-delay: .43s; }
   .site-header .nav > :nth-child(5) { animation-delay: .5s; }
@@ -1197,7 +1199,7 @@ html:has(dialog[open]) { overflow: hidden; }
     transition: opacity .28s ease, translate .32s cubic-bezier(.2,.7,.2,1), scale .32s cubic-bezier(.2,.7,.2,1), display .32s allow-discrete; }
   .nav.is-open { opacity: 1; translate: 0 0; scale: 1; }
   @starting-style { .nav.is-open { opacity: 0; translate: 0 -10px; scale: .98; } }
-  .nav.is-open > * { animation: hdr-item-in .4s cubic-bezier(.2,.7,.2,1) both; }
+  .nav.is-open > * { animation: hdr-item-in .4s cubic-bezier(.2,.7,.2,1) backwards; }
   .nav.is-open > :nth-child(1) { animation-delay: .04s; } .nav.is-open > :nth-child(2) { animation-delay: .08s; }
   .nav.is-open > :nth-child(3) { animation-delay: .12s; } .nav.is-open > :nth-child(4) { animation-delay: .16s; }
   .nav.is-open > :nth-child(5) { animation-delay: .2s; }
@@ -1236,6 +1238,14 @@ html:has(dialog[open]) { overflow: hidden; }
   .site-header.is-stuck .nav-wrap { transform: translateY(-18px); }
   .page-hero { padding-top: 36px; }
   .is-overlay:not(.is-stuck) .nav { margin-right: 14px; }
+  /* "All Pages" opens directly below the menu pill, the same width as it, instead of hanging out to the left */
+  .site-header .nav { position: relative; }
+  .site-header .pages-wrap { position: static; }
+  .site-header .pages-menu { top: calc(100% + 8px); left: 0; right: 0; width: auto; }
+  .site-header .pages-wrap::after { content: none; }
+  /* hover bridge from the button down to the menu, only under the button itself */
+  .site-header .pages-toggle { position: relative; }
+  .site-header .pages-toggle::after { content: ''; position: absolute; left: 0; right: 0; top: 100%; height: 18px; }
 }
 @media (max-width: 700px) {
   .site-header .logo-img { height: 40px; }
