@@ -55,6 +55,8 @@ Kindora's `/elements` page is a template style guide, so it is not included.
 
 ## Header, background, cursor and colours
 
+**Page changes:** every new page opens at the top (`useScrollToTopOnPageChange` in `components/ui.jsx`). Back/forward keeps your place, and links to a `#section` still scroll smoothly.
+
 **Header:** the logo sits on its own with no box, and fades away once you scroll so it never covers text. The menu items float in one pill that stays while scrolling. On the home page the pill sits inside the hero photo with even space around it, and on phones the menu opens as a floating rounded card.
 
 **Team members** (`components/ui/team-02.tsx`, from 21st.dev, with shadcn's `Badge` in `components/ui/badge.tsx`):
@@ -88,14 +90,12 @@ It plays once per browser session, only on the home page. It never plays for vis
 - Add `?intro=1` to the home page URL to replay it.
 
 
-**Background:** a faint checkerboard (black squares at 10% opacity, 44px) with a soft wash of coral, Rotary blue, cranberry and green on top (`--checker` and `--page-gradient` on `body` in `app/globals.css`).
+**Background:** a drafting grid (`public/images/grid.svg`, a 120px tile: fine dots every 6px, a darker dot every 60px and a cross every 120px), with a soft wash of coral, Rotary blue, cranberry and green on top (`--page-gradient` on `body` in `app/globals.css`). It is static, with no warp.
 
-**Warp and mouse trail** (`components/ui/background-dot-glow.tsx`):
-- The checkerboard bulges and warps around the cursor. It swells while the mouse moves, settles to a gentle bulge when it rests, and goes flat when the mouse leaves. Strength and size are `WARP_PUSH`, `WARP_RADIUS` and `WARP_REST` at the top of the file.
-- CSS draws the same checkerboard until the canvas loads, so nothing pops in.
+**Mouse trail** (`components/ui/background-dot-glow.tsx`):
 - Moving the mouse leaves a short trail of characters in the Rotary family colours.
 - Nothing is redrawn while the mouse is still, and the animation stops while the tab is hidden.
-- Touch screens and visitors who prefer reduced motion get a flat checkerboard and no trail.
+- Touch screens and visitors who prefer reduced motion get no trail.
 
 **Cursor** (`components/ui/custom-cursor.tsx`), matched to rotaractscop.org:
 - On mouse and trackpad devices, the system pointer is replaced by a 14px arrow. Its colour depends on the page: navy on the home page, cranberry on Teams, Rotary blue on the Rotary page, and so on (`PAGES` in `lib/accent.js`).

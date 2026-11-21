@@ -1,5 +1,5 @@
 'use client';
-import React, { useCallback, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import React, { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
@@ -157,6 +157,27 @@ export function FamilyLogos({ title = 'Proudly part of the Rotary family in Dist
 
 /* ---------------------------------------------------------------- Header / footer */
 
+/**
+ * Every new page opens at the top. Next.js only scrolls when the new page's top is off screen, so after
+ * scrolling a little the next page would open part-way down with the header over its title. Back/forward
+ * keeps the browser's restored position, and links to a #section keep their target.
+ */
+let historyNav = false;
+function useScrollToTopOnPageChange(pathname) {
+  const first = useRef(true);
+  useEffect(() => {
+    const onPop = () => { historyNav = true; };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
+  useLayoutEffect(() => {
+    if (first.current) { first.current = false; return; }
+    if (historyNav) { historyNav = false; return; }
+    if (window.location.hash) return;
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [pathname]);
+}
+
 export function Header() {
   const pathname = usePathname();
   const isHome = pathname === '/';
@@ -164,6 +185,7 @@ export function Header() {
   const [pagesOpen, setPagesOpen] = useState(false);
   const [pagesByHover, setPagesByHover] = useState(false); // opened by hovering (desktop) rather than a click
   const [stuck, setStuck] = useState(false);
+  useScrollToTopOnPageChange(pathname);
   // Close menus whenever the page changes (adjusting state during render, as React recommends).
   const [lastPath, setLastPath] = useState(pathname);
   if (lastPath !== pathname) { setLastPath(pathname); setOpen(false); setPagesOpen(false); }
