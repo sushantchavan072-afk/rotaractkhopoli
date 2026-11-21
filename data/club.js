@@ -166,6 +166,15 @@ export function isPast(event, now = Date.now()) {
 }
 export const eventsNewestFirst = [...events].sort((a, b) => b.date.localeCompare(a.date));
 
+/** Days the Rotary family marks every year (month-day). Shown on the club calendar. */
+export const rotaryDays = [
+  { date: '02-23', title: "Rotary's anniversary", note: 'Rotary was founded in Chicago on 23 February 1905. The day is observed as World Understanding and Peace Day.' },
+  { date: '03-13', title: "Rotaract's anniversary", note: 'The first Rotaract club was chartered on 13 March 1968. World Rotaract Week is held in the week of this date.' },
+  { date: '07-01', title: 'A new Rotary year begins', note: 'Rotary, Rotaract and Interact years run from 1 July to 30 June, and new boards take office.' },
+  { date: '10-24', title: 'World Polio Day', note: 'Rotary has worked to end polio since launching its PolioPlus programme in 1985.' },
+  { date: '11-05', title: "Interact's anniversary", note: 'The first Interact club was chartered on 5 November 1962. World Interact Week is held in the week of this date.' },
+];
+
 /* ---------------- Members ---------------- */
 
 export const coreMembers = [

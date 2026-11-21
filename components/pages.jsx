@@ -23,6 +23,7 @@ import {
   EventCard, EventsExplorer, EventStatus, EventActions, FamilyLogos, LogoMarquee,
 } from './ui';
 import { Team, WorldMap } from '@/components/ui/lazy';
+import ClubCalendar from '@/components/ui/club-calendar';
 import { placeOnMap, MAP_SIZE } from '../lib/world-map';
 
 const ICONS = { HandHeart, GraduationCap, Users, Globe2, Megaphone, HeartHandshake, Sparkles, ShieldCheck, UserPlus, Lightbulb, Package, Handshake };
@@ -624,6 +625,10 @@ export function Events() {
             <dl className="event-card-facts"><div><dt>Date</dt><dd>{formatDate(featured.date)}</dd></div><div><dt>Venue</dt><dd>{featured.venue}</dd></div></dl>
           </div>
         </div>
+      </Section>
+      <Section id="calendar">
+        <Intro center label="Club calendar" title="What&apos;s on, day by day" description="Pick a day to see what is planned. Upcoming projects can go straight into your own calendar." />
+        <ClubCalendar events={events.map(({ slug, date, endDate, time, title, venue, avenue, summary }) => ({ slug, date, endDate, time, title, venue, avenue, summary }))} />
       </Section>
       <Section>
         <Intro center label="All projects" title="Each project is a chance to serve" description="Filter by status or avenue." />

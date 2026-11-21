@@ -180,7 +180,7 @@ The event list came from the old website, and its dates, times and venues were m
 ### 12. The new Rotaract year's event calendar
 - [ ] Received
 
-**Why:** every event on the site is now in the past, so the "Upcoming" filter on the Events page is empty. Upcoming events also get an **Add to calendar** button.
+**Why:** every event on the site is now in the past, so the "Upcoming" filter on the Events page is empty. Once the new dates are added, they appear straight away in the **club calendar** on the Events page (with "Next up", a countdown and Google Calendar / .ics buttons), and each upcoming event page gets an **Add to calendar** button.
 
 **Needed for each planned event:**
 - name;

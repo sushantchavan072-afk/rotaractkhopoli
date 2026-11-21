@@ -4,6 +4,7 @@ import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { downloadIcs } from '../lib/calendar';
 // Icons: react-icons (Font Awesome 6), the same icon library Kindora uses.
 import {
   FaArrowRight as ArrowRight, FaArrowRight as ArrowUpRight, FaChevronDown as ChevronDown, FaBars as Menu,
@@ -775,31 +776,9 @@ export function EventsExplorer({ events, perPage = 6 }) {
   );
 }
 
-function icsDate(iso, hhmm) {
-  return `${iso.replace(/-/g, '')}T${hhmm.replace(':', '')}00`;
-}
-function to24(t) {
-  const m = t.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
-  if (!m) return null;
-  let h = Number(m[1]) % 12;
-  if (m[3].toUpperCase() === 'PM') h += 12;
-  return `${String(h).padStart(2, '0')}:${m[2]}`;
-}
-
 export function EventActions({ event }) {
   const [copied, setCopied] = useState(false);
-  function addToCalendar() {
-    const [startT, endT] = (event.time ?? '').split(/\s*-\s*/).map(to24);
-    const start = startT ? `DTSTART;TZID=Asia/Kolkata:${icsDate(event.date, startT)}` : `DTSTART;VALUE=DATE:${event.date.replace(/-/g, '')}`;
-    const end = endT ? `DTEND;TZID=Asia/Kolkata:${icsDate(event.endDate ?? event.date, endT)}` : '';
-    const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Rotaract Khopoli//EN', 'BEGIN:VEVENT',
-      `UID:${event.slug}@rotaractkhopoli`, `SUMMARY:${event.title}`, start, end, `LOCATION:${event.venue}`,
-      `DESCRIPTION:${event.summary}`, 'END:VEVENT', 'END:VCALENDAR'].filter(Boolean).join('\r\n');
-    const url = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }));
-    const a = Object.assign(document.createElement('a'), { href: url, download: `${event.slug}.ics` });
-    a.click();
-    URL.revokeObjectURL(url);
-  }
+  const addToCalendar = () => downloadIcs([event], `${event.slug}.ics`);
   async function share() {
     const data = { title: event.title, text: event.summary, url: window.location.href };
     try {
