@@ -727,7 +727,9 @@ section:nth-of-type(6n) .eyebrow-dot { background: var(--interact); }
   .hero-quote { top: 6%; left: 5%; right: 5%; }
   .hero-quote p { font-size: 13.5px; }
   .home-hero-art .story-reel { top: 30%; left: 8%; }
-  .hero-info-card { width: 200px; padding: 18px; }
+  .hero-info-card { width: auto; max-width: 62%; padding: 12px 16px; gap: 2px; bottom: 4%; right: 4%; border-radius: 18px; }
+  .hero-info-card strong { font-size: 15px; }
+  .hero-info-card > div { display: none; } /* compact on phones so the card sits below the faces in the photo */
   .hero-small-tag { display: none; }
   .metric-grid, .card-grid, .quote-grid, .package-grid, .avenue-grid, .ways-grid, .post-grid.is-three { grid-template-columns: 1fr; }
   .way { border-right: 0 !important; border-bottom: 1px solid var(--line) !important; }

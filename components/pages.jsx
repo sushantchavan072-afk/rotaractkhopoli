@@ -175,7 +175,7 @@ function MetricCards() {
           <strong>{uniqueMemberCount}+</strong>
           <span className="metric-label">Rotaractors leading the club</span>
           <Pills>Office bearers, directors and chairs keeping the calendar moving.</Pills>
-          <div className="metric-photo is-wide"><Photo src="/images/hero.jpg" alt="" label=" " sizes="420px" /></div>
+          <div className="metric-photo is-wide"><Photo src="/images/hero-team.jpg" alt="" label=" " sizes="420px" /></div>
         </div>
         <div className="metric-card is-yellow">
           <strong>{avenues.length}</strong>
@@ -420,7 +420,7 @@ export function Home() {
             <FamilyLogos title="Proudly part of the Rotary family" />
           </div>
           <div className="home-hero-art">
-            <Photo src="/images/hero.jpg" alt="Young volunteers of Rotaract Club of Khopoli" label=" " priority sizes="(max-width: 900px) 100vw, 50vw" />
+            <Photo src="/images/hero-team.jpg" alt="Members of Rotaract Club of Khopoli sitting together outdoors" label=" " priority sizes="(max-width: 900px) 100vw, 50vw" />
             <div className="hero-quote"><span className="hero-small-avatar" aria-hidden="true">♥</span><p>“Service above self, written in the voice of a small town with big plans.”</p></div>
             <Link href="/gallery" className="story-reel"><span><small>See our</small><strong>photo gallery</strong></span><span className="play-button" aria-hidden="true"><Play size={14} /></span></Link>
             <Link href={`/events/${latest.slug}`} className="hero-info-card">

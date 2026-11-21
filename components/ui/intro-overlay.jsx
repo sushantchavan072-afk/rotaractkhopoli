@@ -32,7 +32,7 @@ const EASE_OUT = 'cubic-bezier(.2, .7, .2, 1)';
 
 // The full-screen copy of the hero photo. Its URLs are worked out here but only attached when the
 // intro actually plays, so repeat visits never download it.
-const { props: FRAME_IMG } = getImageProps({ src: '/images/hero.jpg', alt: '', width: 1920, height: 1280, sizes: '100vw', quality: 75 });
+const { props: FRAME_IMG } = getImageProps({ src: '/images/hero-team.jpg', alt: '', width: 1920, height: 1280, sizes: '100vw', quality: 75 });
 
 /** True when the browser can create a WebGL2 context, which the dust preset needs. */
 function hasWebGL2() {
