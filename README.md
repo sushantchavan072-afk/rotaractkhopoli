@@ -188,6 +188,8 @@ Until a photo is added, its slot shows a soft coloured tile with a label, so not
 
 ## Still needed from the club
 
+The full, detailed list (with what is needed, why and where it goes) is in **[REMAINING-TASKS.md](REMAINING-TASKS.md)**.
+
 - [ ] A shared club email (`contact.email`) and social media links
 - [ ] Real photos of projects and members
 - [ ] Full names for Rtr. Harsh, Rtr. Sarvesh and Rtr. Gaurav
