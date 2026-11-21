@@ -427,6 +427,7 @@ export function Home() {
               <small>Latest project</small>
               <strong>{latest.title}</strong>
               <span>{formatDate(latest.date)}</span>
+              <div><span className="avatar-stack" aria-hidden="true">{coreMembers.slice(2, 5).map((m, i) => <span key={m.name} className={`avatar tint-${TINTS[i]}`}>{initials(m.name)}</span>)}</span><span className="hero-info-count"><b>{events.length}</b> projects this year</span></div>
             </Link>
             <div className="hero-small-tag">Chartered<br />{club.charteredOn}</div>
           </div>

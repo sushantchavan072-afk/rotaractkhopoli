@@ -199,7 +199,7 @@ section:nth-of-type(6n) .eyebrow-dot { background: var(--interact); }
 
 /* ---------- Home hero ---------- */
 .home-hero { padding: 0 0 20px; }
-.home-hero-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.12fr); gap: 40px; align-items: center; }
+.home-hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: stretch; }
 .home-hero-copy { padding: 150px 0 20px; display: flex; flex-direction: column; }
 .donorline { display: flex; align-items: center; gap: 12px; font-size: 15px; color: var(--muted); margin-bottom: 22px; }
 .avatar-stack { display: inline-flex; padding-left: 8px; }
@@ -207,13 +207,11 @@ section:nth-of-type(6n) .eyebrow-dot { background: var(--interact); }
 .avatar { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 14px; color: var(--accent); flex: none; }
 .home-hero h1 { font-size: clamp(3rem, 5.6vw, 5rem); line-height: 1.12; font-weight: 600; letter-spacing: -0.015em; margin: 0 0 26px; max-width: 600px; }
 .home-hero .lead { max-width: 500px; margin-bottom: 34px; }
-/* A wide group photo, so the panel keeps the photo's 4:3 shape and every member stays in frame.
-   The cards sit on the banner at the top and over legs at the bottom, never over faces. */
-.home-hero-art { position: relative; margin-top: 40px; aspect-ratio: 4 / 3; border-radius: 36px; overflow: hidden; background: #dfe9e3; /* ends 12px past the Join the Club button */ margin-right: -12px; }
+.home-hero-art { position: relative; margin-top: 20px; min-height: 860px; border-radius: 36px; overflow: hidden; background: #dfe9e3; /* ends 12px past the Join the Club button */ margin-right: -12px; }
 .home-hero-art > .photo, .home-hero-art > .photo-fallback { position: absolute; inset: 0; }
 .hero-quote, .story-reel, .hero-info-card, .hero-small-tag { position: absolute; z-index: 2; }
-.hero-quote { top: 5%; left: 4%; max-width: 300px; border-radius: 40px; background: var(--surface); padding: 10px 22px 10px 10px; display: flex; gap: 12px; align-items: center; }
-.hero-quote p { margin: 0; font-size: 14.5px; font-style: italic; color: var(--ink); line-height: 1.45; }
+.hero-quote { top: 24%; left: 15%; max-width: 380px; border-radius: 40px; background: var(--surface); padding: 10px 22px 10px 10px; display: flex; gap: 12px; align-items: center; }
+.hero-quote p { margin: 0; font-size: 15px; font-style: italic; color: var(--ink); line-height: 1.45; }
 .hero-small-avatar { background: var(--coral); color: #fff; width: 44px; height: 44px; flex: none; border-radius: 50%; display: grid; place-items: center; }
 .story-reel { display: flex; gap: 10px; align-items: center; transition: transform .2s; }
 .story-reel > span:first-child { background: var(--surface); border-radius: 40px; padding: 10px 22px; line-height: 1.3; }
@@ -221,12 +219,15 @@ section:nth-of-type(6n) .eyebrow-dot { background: var(--interact); }
 .story-reel strong { display: block; font-size: 15px; font-weight: 500; }
 .story-reel:hover { transform: translateY(-3px); }
 .play-button { background: var(--surface); color: var(--ink); border-radius: 50%; width: 56px; height: 56px; display: grid; place-items: center; }
-.home-hero-art .story-reel { bottom: 5%; left: 4%; }
-.hero-info-card { width: 230px; padding: 16px 20px; top: 4%; right: 4%; background: var(--surface); border-radius: 22px; display: flex; flex-direction: column; gap: 4px; transition: transform .2s; }
+.home-hero-art .story-reel { top: 41%; left: 35%; }
+.hero-info-card { width: 240px; padding: 24px; bottom: 5%; right: 5%; background: var(--surface); border-radius: 26px; display: flex; flex-direction: column; gap: 8px; transition: transform .2s; }
 .hero-info-card:hover { transform: translateY(-3px); }
-.hero-info-card strong { font-size: 17px; font-weight: 600; line-height: 1.3; }
+.hero-info-card strong { font-size: 18px; font-weight: 600; line-height: 1.3; }
 .hero-info-card > span { font-size: 13.5px; color: var(--muted); line-height: 1.45; }
-.hero-small-tag { bottom: 5%; right: 4%; background: var(--surface); border-radius: 12px; padding: 4px 16px; font-size: 15px; line-height: 1.4; }
+.hero-info-card > div { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 10px; padding-top: 12px; border-top: 1px solid var(--line); }
+.hero-info-count { font-size: 12.5px; color: var(--muted); text-align: right; line-height: 1.2; }
+.hero-info-count b { display: block; font-size: 26px; font-weight: 600; color: var(--ink); }
+.hero-small-tag { bottom: 4%; left: 7%; background: var(--surface); border-radius: 12px; padding: 4px 16px; font-size: 15px; line-height: 1.4; }
 .family-logos { margin-top: auto; padding-top: 60px; }
 .family-logos > span { display: block; font-size: 18px; color: var(--muted); margin-bottom: 20px; }
 
@@ -654,9 +655,10 @@ section:nth-of-type(6n) .eyebrow-dot { background: var(--interact); }
 }
 
 /* ---------- Responsive ---------- */
-/* Beside the text the photo is too narrow for both the quote and the project card */
-@media (min-width: 1041px) and (max-width: 1240px) { .hero-quote { display: none; } }
 @media (max-width: 1180px) {
+  .home-hero-art { min-height: 760px; }
+  .hero-quote { left: 6%; }
+  .home-hero-art .story-reel { left: 22%; }
   .metric-card { --mx: 28px; --my: 34px; }
   .volunteer-band { padding: 48px 48px 0; }
   .volunteer-copy { padding-bottom: 48px; }
@@ -674,7 +676,7 @@ section:nth-of-type(6n) .eyebrow-dot { background: var(--interact); }
   .site-header.is-overlay { position: absolute; }
   .home-hero-grid { grid-template-columns: 1fr; gap: 0; }
   .home-hero-copy { padding: 130px 0 30px; }
-  .home-hero-art { margin-top: 0; margin-right: 0; }
+  .home-hero-art { min-height: 640px; margin-top: 0; margin-right: 0; }
   .metric-grid, .card-grid, .quote-grid, .package-grid, .post-grid.is-three { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .avenue-grid { grid-template-columns: repeat(2, 1fr); }
   .ways-grid { grid-template-columns: repeat(2, 1fr); }
@@ -721,13 +723,14 @@ section:nth-of-type(6n) .eyebrow-dot { background: var(--interact); }
   .logo-img { height: 48px; }
   .home-hero-copy { padding-top: 110px; }
   .home-hero h1 { font-size: clamp(2.6rem, 11vw, 3.6rem); }
-  .home-hero-art { border-radius: 24px; }
-  /* Small photo: only the project card stays, on the banner above the faces */
-  .hero-quote, .home-hero-art .story-reel, .hero-small-tag { display: none; }
-  .hero-info-card { width: auto; max-width: 78%; padding: 8px 14px; gap: 0; top: 4%; right: auto; left: 4%; border-radius: 14px; }
-  .hero-info-card small { font-size: 11.5px; }
-  .hero-info-card strong { font-size: 14px; }
-  .hero-info-card > span { display: none; }
+  .home-hero-art { min-height: 520px; border-radius: 28px; }
+  .hero-quote { top: 6%; left: 5%; right: 5%; }
+  .hero-quote p { font-size: 13.5px; }
+  .home-hero-art .story-reel { top: 30%; left: 8%; }
+  .hero-info-card { width: auto; max-width: 62%; padding: 12px 16px; gap: 2px; bottom: 4%; right: 4%; border-radius: 18px; }
+  .hero-info-card strong { font-size: 15px; }
+  .hero-info-card > div { display: none; } /* compact on phones so the card sits below the faces in the photo */
+  .hero-small-tag { display: none; }
   .metric-grid, .card-grid, .quote-grid, .package-grid, .avenue-grid, .ways-grid, .post-grid.is-three { grid-template-columns: 1fr; }
   .way { border-right: 0 !important; border-bottom: 1px solid var(--line) !important; }
   .way:last-child { border-bottom: 0 !important; }
@@ -1320,5 +1323,5 @@ html.intro-on:not(.intro-copy) .home-hero-copy > * { opacity: 0; }
 
 /* Large display figures use the heading font too */
 .metric-card > strong, .stat-cards dd, .counters strong, .impact-band dd, .green-counter strong,
-.stat-boxes b, .outcome-grid dd, .timeline strong, .package strong, 
+.stat-boxes b, .outcome-grid dd, .hero-info-count b, .timeline strong, .package strong, 
 .cta-stat b { font-family: var(--font-head); }
