@@ -8,7 +8,7 @@ The website is built and live. The design, pages, animations, forms, mobile layo
 
 Each item below says what is needed, why it matters and where it goes. Send anything in the "content" sections to your developer (or to Claude in this project) and it can be added in minutes.
 
-Tick items off as you go: `- [ ]` → `- [x]`.
+Tick items off as you go by changing `[ ]` to `[x]`.
 
 ---
 
@@ -27,7 +27,7 @@ Tick items off as you go: `- [ ]` → `- [x]`.
 5. Redeploy.
 6. Submit each form once to test it.
 
-**Tip:** do this after item 3 below (the club email), so the sheet and the optional email alerts belong to the club account rather than a personal one.
+**Tip:** do this after item 4 below (the club email), so the sheet and the optional email alerts belong to the club account rather than a personal one.
 
 ### 2. Set the website's real address
 - [ ] Done
