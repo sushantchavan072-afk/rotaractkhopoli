@@ -55,7 +55,22 @@ Kindora's `/elements` page is a template style guide, so it is not included.
 
 ## Header, background, cursor and colours
 
-**Header:** the logo and the menu float as two separate pills, on every page and while scrolling. On phones the menu opens as a floating rounded card.
+**Header:** the logo sits on its own with no box, and fades away once you scroll so it never covers text. The menu items float in one pill that stays while scrolling. On the home page the pill sits inside the hero photo with even space around it, and on phones the menu opens as a floating rounded card.
+
+**Team members** (`components/ui/team-02.tsx`, from 21st.dev, with shadcn's `Badge` in `components/ui/badge.tsx`):
+- Used on the home page, the Teams page and each avenue's leads.
+- Each member shows a large photo (or initials), their name and roles.
+- On hover, the photo darkens and shows "View badge" and any social links, which come from an optional `socials: { instagram, linkedin }` on the member in `data/club.js`.
+- Clicking opens the member's lanyard badge.
+- The header and cards animate in with `motion`.
+
+**World map** (`components/ui/map.tsx`, from Aceternity) on the International Service avenue page:
+- Arcs run from Khopoli to RAC Saanjh (Delhi), RAC Bicholim (Goa) and Rotary International (Evanston).
+- The dotted map is a pre-built static file, `public/images/world-dots.svg` (rebuild it with `node scripts/build-world-map.mjs`).
+- Points are placed at build time by `lib/world-map.js`, so visitors never download `dotted-map`.
+- To add a place, add it to `INTERNATIONAL_ARCS` in `components/pages.jsx`.
+
+**Why no Tailwind:** both components were written for Tailwind and shadcn. Their classes are translated into plain CSS in `app/globals.css` (`.team02-*`, `.badge*`, `.world-map*`). The site has no Tailwind, and adding it would reset the existing styles. `next-themes`, `lucide-react`, `class-variance-authority` and `framer-motion` were not needed: the site is light only, the icons are inline SVG, the badge variants are plain classes, and `motion` is the current name of framer-motion.
 
 
 The site is **light mode only**.

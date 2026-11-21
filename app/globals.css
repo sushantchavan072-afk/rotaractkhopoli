@@ -475,13 +475,6 @@ section:nth-of-type(6n) .eyebrow-dot { background: var(--interact); }
 .team-head { margin-bottom: 30px; }
 .team-head h2 { font-size: clamp(1.6rem, 2.4vw, 2rem); font-weight: 500; margin-bottom: 6px; }
 .team-head p { margin: 0; }
-.member-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 28px 24px; }
-.member-grid.is-lead { grid-template-columns: repeat(3, minmax(0, 1fr)); margin-bottom: 30px; }
-.member-photo { border-radius: 24px; overflow: hidden; aspect-ratio: 1 / 0.86; background: var(--surface-2); }
-.is-lg .member-photo { aspect-ratio: 1 / 0.84; }
-.member-card h3 { font-size: 19px; font-weight: 500; margin: 18px 0 2px; }
-.member-roles { list-style: none; display: flex; flex-direction: column; gap: 1px; }
-.member-roles li { font-size: 14px; color: var(--muted); }
 
 /* ---------- Testimonials ---------- */
 .quote-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
@@ -695,7 +688,6 @@ section:nth-of-type(6n) .eyebrow-dot { background: var(--interact); }
   .way:nth-last-child(-n+2) { border-bottom: 0 !important; }
   .footer-top { grid-template-columns: 1fr 1fr 1fr; }
   .footer-brand { grid-column: 1 / -1; }
-  .member-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .facts-grid { grid-template-columns: repeat(2, 1fr); }
   .volunteer-band { grid-template-columns: 1fr; gap: 0; }
   .volunteer-copy { padding-bottom: 8px; }
@@ -727,7 +719,6 @@ section:nth-of-type(6n) .eyebrow-dot { background: var(--interact); }
   .post-grid { grid-template-columns: 1fr; }
   .gallery-grid { grid-template-columns: repeat(3, 1fr); }
   .gallery-grid.is-featured .gallery-item:nth-child(6n+4) { grid-column: auto; }
-  .member-grid.is-lead { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 700px) {
   .container { width: calc(100% - 32px); }
@@ -756,8 +747,6 @@ section:nth-of-type(6n) .eyebrow-dot { background: var(--interact); }
   .stat-boxes > div + div { border-left: 0; border-top: 1px solid var(--line); }
   .chart-card { left: 50%; transform: translateX(-50%); bottom: 20px; width: 240px; }
   .story-photo { height: 380px; }
-  .member-grid, .member-grid.is-lead { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 14px; }
-  .member-card h3 { font-size: 16px; }
   .gallery-grid { grid-template-columns: 1fr 1fr; grid-auto-rows: 170px; }
   .gallery-grid.is-featured .gallery-item:nth-child(6n+1) { grid-row: auto; }
   .impact-band { padding: 36px 26px 50px; }
@@ -1051,11 +1040,62 @@ a, button, summary, label, [role='button'], .btn, .nav-pill, .nav-cta, .card-btn
 .footer-bottom::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; border-radius: 2px; background: linear-gradient(90deg, var(--rotary-blue), var(--rotary-gold), var(--rotaract), var(--interact)); opacity: .85; }
 
 
+/* ---------- Team members (components/ui/team-02.tsx) ---------- */
+.badge { display: inline-flex; align-items: center; border-radius: 999px; border: 1px solid transparent; padding: 4px 14px; font-size: 14px; font-weight: 500; line-height: 1.4; }
+.badge-default { background: var(--ink); color: var(--on-ink); }
+.badge-secondary { background: var(--surface-2); color: var(--ink); }
+.badge-destructive { background: #d92d20; color: #fff; }
+.badge-outline { border-color: var(--line-strong); background: var(--surface); color: var(--ink); }
+.team02 { display: flex; flex-direction: column; align-items: center; gap: 56px; }
+.team02-head { max-width: 620px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; }
+.team02-head-text { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.team02-head h1, .team02-head h2 { margin: 0; font-size: clamp(2rem, 4vw, 3rem); font-weight: 600; letter-spacing: -0.02em; }
+.team02-head p { margin: 0; font-size: 16.5px; color: var(--muted); }
+.team02-grid { display: grid; width: 100%; gap: 32px 24px; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.team02-grid.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.team02-grid.cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 28px 18px; }
+.team02-card { position: relative; display: flex; flex-direction: column; gap: 18px; }
+.team02-photo { position: relative; height: 320px; border-radius: 22px; overflow: hidden; background: var(--surface-2); }
+.cols-5 .team02-photo { height: 280px; }
+.team02-photo img { object-fit: cover; object-position: center top; transition: transform .6s ease; }
+.team02-initials { position: absolute; inset: 0; display: grid; place-items: center; font: 600 44px/1 var(--font-head); color: rgba(0,0,0,.28); }
+.team02-initials.tone-0 { background: var(--coral-50); } .team02-initials.tone-1 { background: var(--mint-50); }
+.team02-initials.tone-2 { background: var(--sun-50); } .team02-initials.tone-3 { background: var(--rotary-50); }
+.team02-overlay { position: absolute; inset: 0; display: flex; align-items: flex-end; justify-content: flex-end; gap: 8px; padding: 18px; background: rgba(3, 7, 18, .5); opacity: 0; transition: opacity .3s ease; }
+.team02-card:hover .team02-overlay, .team02-card:focus-within .team02-overlay { opacity: 1; }
+.team02-card:hover .team02-photo img { transform: scale(1.04); }
+.team02-chip { display: inline-flex; align-items: center; padding: 10px 16px; border-radius: 999px; background: var(--surface); color: var(--ink); font-size: 13.5px; font-weight: 600; }
+.team02-social { position: relative; z-index: 3; display: flex; padding: 12px; border-radius: 999px; background: var(--surface); color: var(--ink); transition: opacity .3s ease; }
+.team02-social:hover { opacity: .8; }
+.team02-meta { display: flex; flex-direction: column; gap: 4px; }
+.team02-meta h2, .team02-meta h3 { margin: 0; font-size: 20px; font-weight: 500; }
+.team02-meta p { margin: 0; font-size: 14px; color: var(--muted); }
+.team-section + .team-section { padding-top: 0; }
+@media (max-width: 1100px) { .team02-grid, .team02-grid.cols-5 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 760px) {
+  .team02 { gap: 36px; }
+  .team02-grid, .team02-grid.cols-3, .team02-grid.cols-5 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 14px; }
+  .team02-photo, .cols-5 .team02-photo { height: auto; aspect-ratio: 4 / 5; }
+  .team02-meta h2, .team02-meta h3 { font-size: 16px; }
+  .team02-chip { padding: 8px 12px; font-size: 12.5px; }
+}
+
+/* ---------- World map (components/ui/map.tsx) on the International Service page ---------- */
+.world-map { position: relative; width: 100%; margin-top: 8px; }
+.world-map-dots { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; user-select: none;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 10%, #000 90%, transparent); mask-image: linear-gradient(to bottom, transparent, #000 10%, #000 90%, transparent); }
+.world-map-arcs { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.world-map-label { position: absolute; z-index: 1; pointer-events: none; }
+.world-map-label > span { display: block; white-space: nowrap; padding: 3px 10px; border-radius: 8px; background: rgba(255,255,255,.95); border: 1px solid var(--line-strong); box-shadow: 0 2px 6px rgba(0,0,0,.06); font-size: 13px; font-weight: 500; color: var(--ink); }
+.world-map-label.is-top { transform: translate(-50%, calc(-100% - 10px)); }
+.world-map-label.is-bottom { transform: translate(-50%, 10px); }
+.world-map-label.is-left { transform: translate(calc(-100% - 10px), -50%); }
+.world-map-label.is-right { transform: translate(10px, -50%); }
+@media (max-width: 700px) { .world-map-label > span { font-size: 11px; padding: 2px 7px; } }
+
 /* ---------- Member badge: clicking a member opens their lanyard (components/ui/lanyard-badge.tsx) ---------- */
-.member-card { position: relative; }
-.member-open { position: absolute; inset: 0; z-index: 2; width: 100%; border: 0; padding: 0; background: transparent; border-radius: 24px; }
+.member-open { position: absolute; inset: 0; z-index: 2; width: 100%; border: 0; padding: 0; background: transparent; border-radius: 22px; }
 .member-open:focus-visible { outline: 2px solid var(--rotary-blue); outline-offset: 4px; }
-@media (hover: hover) { .member-card:hover .member-photo img { transform: scale(1.04); } .member-photo img { transition: transform .5s ease; } }
 html:has(dialog[open]) { overflow: hidden; }
 .badge-dialog { width: min(94vw, 32rem); max-width: none; max-height: 94svh; padding: 0; border: 0; border-radius: 24px; background: #fff; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,.35); }
 .badge-dialog[open] { animation: badge-in .35s cubic-bezier(.2,.8,.2,1); }
@@ -1094,7 +1134,10 @@ html:has(dialog[open]) { overflow: hidden; }
 }
 
 /* ---------- Header: the logo and the menu float as two separate pills ---------- */
-.site-header .logo { padding: 8px 16px 8px 14px; border-radius: 20px; background: rgba(255,255,255,.86); border: 1px solid rgba(0,0,0,.06); box-shadow: 0 10px 28px -14px rgba(0,0,0,.22); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+.site-header .logo { padding: 0; background: none; border: 0; box-shadow: none; }
+/* No box behind the logo, so once the page scrolls it fades away instead of sitting on top of the text */
+.site-header .logo { transition: opacity .3s ease, transform .3s ease, visibility .3s; }
+.site-header.is-stuck .logo { opacity: 0; transform: translateY(-8px); visibility: hidden; pointer-events: none; }
 .site-header .logo-img { height: 46px; }
 /* While scrolling, the bar itself disappears and only the two pills float over the page */
 .site-header, .site-header.is-stuck, .site-header.is-overlay.is-stuck { background: transparent; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
@@ -1108,9 +1151,16 @@ html:has(dialog[open]) { overflow: hidden; }
   .nav-pill:hover, .nav-pill.is-current { background: #efefef; }
   .nav-cta { margin-left: 4px; padding: 13px 28px; }
 }
+@media (min-width: 1041px) {
+  /* Breathing room: the bar sits a little lower, and on the home page the menu pill sits inside the
+     photo with the same space above it and to its right */
+  .site-header .nav-wrap { height: 128px; padding-top: 24px; }
+  .site-header.is-stuck .nav-wrap { height: 104px; padding-top: 0; }
+  .page-hero { padding-top: 36px; }
+  .is-overlay:not(.is-stuck) .nav { margin-right: 14px; }
+}
 @media (max-width: 700px) {
-  .site-header .logo { padding: 6px 12px 6px 10px; border-radius: 16px; }
-  .site-header .logo-img { height: 38px; }
+  .site-header .logo-img { height: 40px; }
 }
 
 /* ---------- Home page intro (components/ui/intro-overlay.jsx; switched on by INTRO_SCRIPT in app/layout.jsx) ---------- */

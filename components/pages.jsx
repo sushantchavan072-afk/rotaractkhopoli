@@ -19,9 +19,12 @@ import {
   postsNewestFirst, PAGE_SIZE, riPresident, drr, districtGovernor,
 } from '../data/club';
 import {
-  Btn, Eyebrow, Intro, Section, PageHero, Photo, FaqList, FaqSearch, MailForm, NoteWall, LeaderLetter, MemberBadgeCard, SocialLinks,
+  Btn, Eyebrow, Intro, Section, PageHero, Photo, FaqList, FaqSearch, MailForm, NoteWall, LeaderLetter, SocialLinks,
   EventCard, EventsExplorer, EventStatus, EventActions, FamilyLogos, LogoMarquee,
 } from './ui';
+import Team from '@/components/ui/team-02';
+import { WorldMap } from '@/components/ui/map';
+import { placeOnMap, MAP_SIZE } from '../lib/world-map';
 
 const ICONS = { HandHeart, GraduationCap, Users, Globe2, Megaphone, HeartHandshake, Sparkles, ShieldCheck, UserPlus, Lightbulb, Package, Handshake };
 const eventImage = (e) => `/images/events/${e.slug}.jpg`;
@@ -67,16 +70,8 @@ function Pills({ children }) {
 /** Every role a member holds this year, across the core team, board and chairs (for the back of their badge). */
 const allRoles = (name) => [...new Set([...coreMembers, ...boardOfDirectors, ...chairpersons].filter((x) => x.name === name).flatMap((x) => x.roles))];
 
-function MemberCard({ m, i = 0, size = 'md' }) {
-  const src = memberImage(m);
-  return (
-    <MemberBadgeCard className={`member-card is-${size}`} member={{ name: m.name, roles: allRoles(m.name) }} portrait={src}>
-      <div className="member-photo"><Photo src={src} alt={m.name} tone={i} sizes="(max-width: 700px) 50vw, 300px" /></div>
-      <h3>{m.name}</h3>
-      <ul className="member-roles">{m.roles.map((r) => <li key={r}>{r}</li>)}</ul>
-    </MemberBadgeCard>
-  );
-}
+/** Members as the team component expects them: card roles, every role (for the badge) and the portrait. */
+const toTeam = (list) => list.map((m) => ({ name: m.name, roles: m.roles, allRoles: allRoles(m.name), image: memberImage(m), socials: m.socials }));
 
 function Testimonials({ tone = 'plain', intro = true }) {
   if (!testimonials.length) return null;
@@ -506,8 +501,7 @@ export function About() {
       </Section>
 
       <Section>
-        <Intro center label="Our team" title="Meet our incredible team" description={`The core team for the ${rotaractYear} Rotaract year.`} />
-        <div className="member-grid">{coreMembers.slice(0, 4).map((m, i) => <MemberCard m={m} i={i} key={m.name} />)}</div>
+        <Team label="Our team" title="Meet our incredible team" description={`The core team for the ${rotaractYear} Rotaract year.`} members={toTeam(coreMembers.slice(0, 4))} />
         <div className="center-row"><Btn href="/teams" kind="outline">Meet Everyone</Btn></div>
       </Section>
 
@@ -540,17 +534,13 @@ export function Teams() {
     <>
       <PageHero eyebrow={`Board ${rotaractYear}`} title="Meet our incredible team" desc={`${uniqueMemberCount} Rotaractors hold the club's portfolios for ${rotaractYear}. Where one person holds several, their roles are listed together.`} />
       <Section className="team-section">
-        <div className="team-head"><h2>Our leadership team</h2><p>The office bearers who lead the club&apos;s service year.</p></div>
-        <div className="member-grid is-lead">{coreMembers.slice(0, 3).map((m, i) => <MemberCard m={m} i={i} key={m.name} size="lg" />)}</div>
-        <div className="member-grid">{coreMembers.slice(3).map((m, i) => <MemberCard m={m} i={i + 3} key={m.name} />)}</div>
+        <Team label="Office bearers" title="Our leadership team" description="The office bearers who lead the club's service year." members={toTeam(coreMembers)} columns={5} />
       </Section>
       <Section className="team-section">
-        <div className="team-head"><h2>Board of directors</h2><p>Avenue directors and officers who own budgets, reporting and district coordination.</p></div>
-        <div className="member-grid">{boardOfDirectors.map((m, i) => <MemberCard m={m} i={i + 1} key={m.name} />)}</div>
+        <Team label="Board" title="Board of directors" description="Avenue directors and officers who own budgets, reporting and district coordination." members={toTeam(boardOfDirectors)} />
       </Section>
       <Section className="team-section">
-        <div className="team-head"><h2>Chairpersons</h2><p>Chairs and additional portfolios.</p></div>
-        <div className="member-grid">{chairpersons.map((m, i) => <MemberCard m={m} i={i + 2} key={m.name + m.roles[0]} />)}</div>
+        <Team label="Chairs" title="Chairpersons" description="Chairs and additional portfolios." members={toTeam(chairpersons)} />
       </Section>
       <WaysGrid />
       <VolunteerBlock />
@@ -573,6 +563,14 @@ export function Avenues() {
   );
 }
 
+/** Arcs on the International Service map: Khopoli to the clubs and places this avenue connects with. */
+const KHOPOLI = { lat: 18.7876, lng: 73.3442, label: 'Khopoli', side: 'left' };
+const INTERNATIONAL_ARCS = [
+  { lat: 28.6139, lng: 77.209, label: 'RAC Saanjh, Delhi', side: 'top' },
+  { lat: 15.5833, lng: 73.95, label: 'RAC Bicholim, Goa', side: 'bottom' },
+  { lat: 42.0451, lng: -87.6877, label: 'Rotary International, Evanston', side: 'top' },
+].map((end) => ({ start: placeOnMap(KHOPOLI), end: placeOnMap(end) }));
+
 export function AvenueDetail({ slug }) {
   const a = avenues.find((x) => x.slug === slug);
   const leads = membersWithRoles(a.leadRoles);
@@ -588,10 +586,15 @@ export function AvenueDetail({ slug }) {
         {projects.length ? <div className="card-grid">{projects.map((e, i) => <EventCard e={e} i={i} key={e.slug} />)}</div>
           : <p className="empty-note">No projects logged yet. Have an idea? <Link href="/contact">Tell us</Link> and we will help you run it.</p>}
       </Section>
+      {slug === 'international-service' && (
+        <Section className="world-section">
+          <Intro center label="Beyond Khopoli" title="Our connections across the map" description="International service links us with clubs beyond our district and with the wider Rotary world: joint meetings with RAC Saanjh in Delhi and RAC Bicholim in Goa, and Rotary International, headquartered in Evanston, USA." />
+          <WorldMap dots={INTERNATIONAL_ARCS} width={MAP_SIZE.width} height={MAP_SIZE.height} />
+        </Section>
+      )}
       {leads.length > 0 && (
         <Section>
-          <Intro center label="Who leads it" title="Avenue leads" />
-          <div className="member-grid">{leads.map((m, i) => <MemberCard m={m} i={i} key={m.name} />)}</div>
+          <Team label="Who leads it" title="Avenue leads" members={toTeam(leads)} />
         </Section>
       )}
       <Section>

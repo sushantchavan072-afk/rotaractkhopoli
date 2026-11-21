@@ -810,7 +810,6 @@ const REVEAL_RULES = [
   ['.donorline .avatar, .cta-stat .avatar', 'fade-right', 100, 200],
   ['.volunteer-copy li', 'zoom-in', 50, 150],
   ['.quote-card', 'zoom-out', 50, 100],
-  ['.member-card', 'zoom-right', 50, 150, 4],
   ['.gallery-item', 'zoom-in', 0, 80, 4],
   ['.faq-item', 'fade-up', 50, 100],
   ['.card-grid > *, .post-grid > *, .package-grid > *, .contact-cards > *, .avenue-grid > *', 'fade-up', 0, 100, 3],
