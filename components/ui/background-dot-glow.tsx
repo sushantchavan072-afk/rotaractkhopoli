@@ -5,26 +5,19 @@ import { usePathname } from "next/navigation";
 import { accent, pageAccent, paletteAt, SCROLL_STEP } from "@/lib/accent";
 
 // ---------------------------------------------------------------------------
-// Site background: a quiet dot grid that glows around the mouse, merged with
-// the ASCII "wake" trail.
+// Site background layer: the ASCII "wake" mouse trail. (The page itself sits on
+// the paper texture and colour wash set on <body> in app/globals.css.)
 //
-// - Dots sit on a 32px grid at very low opacity.
-// - Dots within ~150px of the (eased) pointer swell slightly and glow,
-//   fading out with distance.
-// - The dots, the glow and the click sparks drift through the Rotary family
-//   colours as the page scrolls (lib/accent.js); each page starts elsewhere.
-// - Moving the mouse also stamps a short-lived trail of monospace characters
-//   in the Rotary family colours; fast passes leave thin, quick trails, slow
-//   passes leave fatter ones that linger.
+// - Moving the mouse stamps a short-lived trail of monospace characters in the
+//   Rotary family colours; fast passes leave thin, quick trails, slow passes
+//   leave fatter ones that linger.
+// - It also keeps the shared scroll colour (lib/accent.js) up to date for the
+//   click sparks: it drifts through the Rotary family colours as the page
+//   scrolls, and each page starts elsewhere.
 // - Nothing is redrawn while the pointer is still: an idle page costs no CPU.
 //   The loop also stops while the tab is hidden.
-// - Touch screens and reduced-motion visitors get the plain dot grid only.
+// - Touch screens and reduced-motion visitors get no trail.
 // ---------------------------------------------------------------------------
-
-const DOT_GAP = 32; // px between dots (must match background-size of .site-bg)
-const DOT_R = 1.05; // resting dot radius (the grid itself is drawn by CSS)
-const GLOW_RADIUS = 150; // px around the pointer that glows
-const EASE = 0.14; // how quickly the glow follows the pointer
 
 const CELL = 12; // ASCII trail cell size
 const RAMP = " .:-=+*#%@";
@@ -64,8 +57,6 @@ export function DotGlowBackground({ className = "" }: { className?: string }) {
     let hue = new Uint8Array(0);
     let raf = 0;
     let last = 0;
-    const target = { x: -1e4, y: -1e4, active: false };
-    const glow = { x: -1e4, y: -1e4 };
     const trail = { x: 0, y: 0, t: 0, has: false };
     let trailColor = 0;
 
@@ -92,40 +83,6 @@ export function DotGlowBackground({ className = "" }: { className?: string }) {
     const draw = (dt: number): boolean => {
       ctx.clearRect(0, 0, width, height);
 
-      // The glow eases toward the pointer.
-      if (target.active) {
-        glow.x += (target.x - glow.x) * EASE;
-        glow.y += (target.y - glow.y) * EASE;
-      }
-      const glowing = interactive && target.active;
-      const r2 = GLOW_RADIUS * GLOW_RADIUS;
-
-      // The resting dot grid is a static CSS background on the canvas (see .site-bg in globals.css),
-      // so each frame only paints the few glowing dots inside the glow radius.
-      if (glowing) {
-        ctx.fillStyle = `rgba(${accent.rgb.join(", ")}, 0.32)`;
-        const x0 = Math.max(0, Math.floor((glow.x - GLOW_RADIUS) / DOT_GAP));
-        const x1 = Math.ceil((glow.x + GLOW_RADIUS) / DOT_GAP);
-        const y0 = Math.max(0, Math.floor((glow.y - GLOW_RADIUS) / DOT_GAP));
-        const y1 = Math.ceil((glow.y + GLOW_RADIUS) / DOT_GAP);
-        for (let gy = y0; gy <= y1; gy++) {
-          const y = gy * DOT_GAP + DOT_GAP / 2;
-          for (let gx = x0; gx <= x1; gx++) {
-            const x = gx * DOT_GAP + DOT_GAP / 2;
-            const dx = x - glow.x;
-            const dy = y - glow.y;
-            const d2 = dx * dx + dy * dy;
-            if (d2 >= r2) continue;
-            const a = 1 - Math.sqrt(d2) / GLOW_RADIUS;
-            if (a <= 0.01) continue;
-            ctx.globalAlpha = 0.45 + a * 0.55;
-            ctx.beginPath();
-            ctx.arc(x, y, DOT_R + a * 0.7, 0, Math.PI * 2);
-            ctx.fill();
-          }
-        }
-        ctx.globalAlpha = 1;
-      }
 
       // ASCII trail: decay heat and draw, one pass per colour.
       let hot = false;
@@ -153,8 +110,7 @@ export function DotGlowBackground({ className = "" }: { className?: string }) {
         ctx.globalAlpha = 1;
       }
 
-      const easing = glowing && (Math.abs(target.x - glow.x) > 0.5 || Math.abs(target.y - glow.y) > 0.5);
-      return hot || easing;
+      return hot;
     };
 
     const loop = (now: number) => {
@@ -197,13 +153,6 @@ export function DotGlowBackground({ className = "" }: { className?: string }) {
       const x = e.clientX;
       const y = e.clientY;
       const now = performance.now();
-      if (!target.active) {
-        glow.x = x;
-        glow.y = y;
-      }
-      target.x = x;
-      target.y = y;
-      target.active = true;
       trailColor = Math.floor(now / COLOR_STEP_MS) % TRAIL_COLORS.length;
       if (trail.has) {
         const dx = x - trail.x;
@@ -224,7 +173,6 @@ export function DotGlowBackground({ className = "" }: { className?: string }) {
       wake();
     };
     const onLeave = () => {
-      target.active = false;
       trail.has = false;
       wake();
     };
@@ -242,8 +190,6 @@ export function DotGlowBackground({ className = "" }: { className?: string }) {
       if (key === lastRgb) return;
       lastRgb = key;
       accent.rgb = rgb;
-      canvas.style.setProperty("--dot-rgb", key);
-      if (target.active) wake();
     };
     recolorRef.current = recolor;
     const onScroll = () => {

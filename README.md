@@ -67,21 +67,20 @@ It plays once per browser session, only on the home page. It never plays for vis
 - A small script in `app/layout.jsx` decides before the first paint, so nothing flashes, and it always uncovers the page after 8 seconds.
 - Add `?intro=1` to the home page URL to replay it.
 
-**Page gradient:** a very light wash of coral, Rotary blue, cranberry and green sits behind the whole site (`--page-gradient` in `app/globals.css`).
 
-**Background** (`components/ui/background-dot-glow.tsx`):
-- A faint dot grid sits 32px apart behind the page. It is a static CSS background on `.site-bg`, so it costs nothing to show.
-- Dots within about 150px of the mouse glow in Rotaract cranberry.
+**Background:** the site sits on a light paper texture (`public/images/paper.webp`, a mirrored tile so it repeats without seams), with a soft wash of coral, Rotary blue, cranberry and green on top (`--page-gradient` on `body` in `app/globals.css`).
+
+**Mouse trail** (`components/ui/background-dot-glow.tsx`):
 - Moving the mouse leaves a short trail of characters in the Rotary family colours.
 - Nothing is redrawn while the mouse is still, and the animation stops while the tab is hidden.
-- Touch screens and visitors who prefer reduced motion see only the plain dots.
+- Touch screens and visitors who prefer reduced motion get no trail.
 
 **Cursor** (`components/ui/custom-cursor.tsx`), matched to rotaractscop.org:
 - On mouse and trackpad devices, the system pointer is replaced by a 14px arrow. Its colour depends on the page: navy on the home page, cranberry on Teams, Rotary blue on the Rotary page, and so on (`PAGES` in `lib/accent.js`).
 - Every click gives a small spark burst.
 - Phones and tablets keep their normal behaviour. Tapping no longer flashes a blue box or selects text.
 
-**Colours that follow the scroll** (`lib/accent.js`): the dot grid, the glow around the mouse and the click sparks blend through Rotaract cranberry, Rotary blue, Rotary gold, Interact blue, green and coral as you scroll, one colour every 700px. Each page starts at a different colour.
+**Colours that follow the scroll** (`lib/accent.js`): the click sparks blend through Rotaract cranberry, Rotary blue, Rotary gold, Interact blue, green and coral as you scroll, one colour every 700px. Each page starts at a different colour.
 
 **Member badges** (`components/ui/lanyard-badge.tsx`, from the club's original site): clicking any member on the Teams page or the home page opens their badge on a swinging lanyard.
 - You can drag it and flick it to spin.
@@ -106,7 +105,7 @@ It plays once per browser session, only on the home page. It never plays for vis
 - section label dots, and the blue card tint;
 - the leader cards: Rotary blue for the RI President, Rotary gold for the District Governor, Rotaract cranberry for the DRR;
 - the number cards: Rotary gold and blue on the Rotary page, cranberry on the District page;
-- the event partner badge, the line above the footer's bottom row, text selection, the glow and the trail.
+- the event partner badge, the line above the footer's bottom row, text selection, the sparks and the trail.
 
 ### Why there is TypeScript but no Tailwind or shadcn
 
