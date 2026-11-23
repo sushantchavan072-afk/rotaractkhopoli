@@ -1185,6 +1185,7 @@ export function Privacy() {
         ['How we use it', <p key="b">Your details are used only to reply to you and to process your application or enquiry. We do not sell or share them with anyone outside the club, except where a project partner needs them to arrange something you asked for, and only with your agreement.</p>],
         ['How it is sent and stored', <p key="c">Depending on how the site is set up, a form either opens your own email app with the message ready to send, or delivers it through a form service to the club inbox. Messages are kept for as long as they are needed, and applications for the current Rotaract year.</p>],
         ['Visitor statistics', <p key="d">The site may count page views with privacy-friendly analytics that do not use cookies or build personal profiles.</p>],
+        ['The Ask AI assistant', <p key="ai">Questions typed into the assistant are sent, together with matching passages from this website, to an AI service (Google Gemini or Anthropic Claude) so that it can write the answer. The club does not keep the questions. Please do not type personal details such as phone numbers or addresses into it.</p>],
         ['Your choices', <p key="e">You can ask us to show, correct or delete the details you sent at any time by writing to <a href={`mailto:${clubEmail}`}>{clubEmail}</a>.</p>],
       ]}
     />

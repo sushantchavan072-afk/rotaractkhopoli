@@ -136,9 +136,13 @@ section:nth-of-type(6n) .eyebrow-dot { background: var(--interact); }
 /* ---------- Header ---------- */
 .site-header { position: sticky; top: 0; z-index: 60; background: var(--surface); transition: box-shadow .25s, background .25s; }
 .site-header.is-stuck { box-shadow: 0 1px 3px rgba(0,0,0,.1), 0 1px 2px -1px rgba(0,0,0,.1); background: var(--header-bg); backdrop-filter: blur(8px); }
-.site-header.is-overlay { position: absolute; left: 0; right: 0; top: 0; background: transparent; }
-.site-header.is-overlay.is-stuck { position: fixed; background: var(--header-bg); backdrop-filter: blur(8px); animation: drop .5s ease; }
-@keyframes drop { from { transform: translateY(-100%); } to { transform: none; } }
+/* Home page: the header floats over the hero and stays pinned from the very top, so the logo and menu
+   never scroll away (they used to vanish for the first 120px and then drop back in). */
+.site-header.is-overlay { position: fixed; left: 0; right: 0; top: 0; background: transparent; }
+.site-header.is-overlay.is-stuck { position: fixed; background: var(--header-bg); backdrop-filter: blur(8px); }
+/* The header box itself lets clicks through to the page; only its logo, buttons and menus take them */
+.site-header { pointer-events: none; }
+.site-header :is(a, button, nav, .pages-menu, .menu-backdrop) { pointer-events: auto; }
 .nav-wrap { height: 104px; display: flex; justify-content: space-between; align-items: center; gap: 24px; }
 .logo { display: inline-flex; align-items: center; flex: none; }
 .logo-img { height: 58px; width: auto; }
@@ -709,7 +713,7 @@ section:nth-of-type(6n) .eyebrow-dot { background: var(--interact); }
   .pages-menu { position: relative; top: 4px; width: 100%; box-shadow: none; }
   .dropdown-backdrop { display: none; }
   .nav-cta { margin: 6px 0 0; text-align: center; }
-  .site-header.is-overlay { position: absolute; }
+  .site-header.is-overlay { position: fixed; }
   .home-hero-grid { grid-template-columns: 1fr; gap: 0; }
   .home-hero-copy { padding: 130px 0 30px; }
   .home-hero-art { min-height: 640px; margin-top: 0; margin-right: 0; }

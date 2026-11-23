@@ -1,27 +1,34 @@
-import Anthropic from '@anthropic-ai/sdk';
 import { search } from '../../../lib/knowledge';
 import { club } from '../../../data/club';
+import { claudeConfigured, streamClaude, claudeBusy } from '../../../lib/ai/claude';
+import { geminiConfigured, streamGemini, geminiBusy, geminiOverLimit } from '../../../lib/ai/gemini';
 
 /**
  * POST /api/ask: the site assistant. Body: { question, history?: [{ role: 'user' | 'assistant', content }] }.
  *
  * 1. Finds the passages of the website that best match the question (lib/knowledge.js).
- * 2. Asks Claude to answer from those passages only, citing them as [1], [2]...
+ * 2. Asks an AI model to answer from those passages only, citing them as [1], [2]...
  * 3. Streams the reply back as newline-separated JSON: {type:'sources'}, then {type:'text'} pieces,
  *    then {type:'done'} (or {type:'error'}).
  *
- * Without ANTHROPIC_API_KEY (Vercel → Settings → Environment Variables) it still works in search-only
- * mode and lists the most relevant pages. ANTHROPIC_MODEL can name a different Claude model.
+ * Which AI writes the answer (environment variables in Vercel):
+ * - GEMINI_API_KEY: Google Gemini, free tier from Google AI Studio (GEMINI_MODEL to change the model);
+ * - ANTHROPIC_API_KEY: Anthropic Claude (ANTHROPIC_MODEL to change the model);
+ * - AI_PROVIDER ('gemini' | 'claude') picks one when both keys are set (default: Claude).
+ * With neither, or when Gemini's free daily limit is used up, it lists the best-matching pages instead.
  */
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
-const MODEL = process.env.ANTHROPIC_MODEL || 'claude-opus-5-5';
-const HAS_KEY = Boolean(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN);
-const client = HAS_KEY ? new Anthropic() : null;
-// Server-side refusal fallback: if the model declines, the API retries on a suitable model in the same call.
-const SUPPORTS_FALLBACK = /^claude-(fable-5|mythos-5|opus-5|sonnet-5-5)/.test(MODEL);
+function provider() {
+  const want = process.env.AI_PROVIDER;
+  if (want === 'gemini' && geminiConfigured()) return 'gemini';
+  if (want === 'claude' && claudeConfigured()) return 'claude';
+  if (claudeConfigured()) return 'claude';
+  if (geminiConfigured()) return 'gemini';
+  return 'search';
+}
 
 const SYSTEM = `You are the website assistant for ${club.name}, a community based Rotaract club in Khopoli, Maharashtra, India (Rotaract District 3131). Visitors ask you about the club: who runs it, how to join or volunteer, its projects and events, its avenues of service, sponsorship, and how Rotaract fits into the Rotary family.
 
@@ -77,51 +84,46 @@ export async function POST(request) {
   const stream = new ReadableStream({
     async start(controller) {
       const send = (obj) => controller.enqueue(encoder.encode(`${JSON.stringify(obj)}\n`));
-      send({ type: 'sources', sources, mode: client ? 'ai' : 'search' });
+      const ai = provider();
+      send({ type: 'sources', sources, mode: ai === 'search' ? 'search' : 'ai' });
+      const listPages = (lead) => send({ type: 'text', text: passages.length
+        ? `${lead}\n\n${sources.slice(0, 4).map((src, i) => `- **${src.title}** [${i + 1}]`).join('\n')}`
+        : `${lead.replace(/,? so here are.*$/, '.')} Nothing on the site matched that question; try the Contact page to ask the club directly.` });
 
-      if (!client) {
-        send({ type: 'text', text: passages.length
-          ? `The AI assistant isn’t switched on yet, so here are the pages on this site that best match your question:\n\n${sources.slice(0, 4).map((s, i) => `- **${s.title}** [${i + 1}]`).join('\n')}`
-          : 'The AI assistant isn’t switched on yet, and nothing on the site matched that question. Try the Contact page to ask the club directly.' });
+      if (ai === 'search') {
+        listPages('The AI assistant isn\u2019t switched on yet, so here are the pages on this site that best match your question:');
         send({ type: 'done' });
         controller.close();
         return;
       }
 
-      const context = passages.map((p, i) => {
-        const n = sources.findIndex((s) => s.url === p.url && s.title === p.title.replace(/^(FAQ|Blog): /, '')) + 1;
+      const context = passages.map((p) => {
+        const n = sources.findIndex((src) => src.url === p.url && src.title === p.title.replace(/^(FAQ|Blog): /, '')) + 1;
         return `[${n}] ${p.title} (${p.url})\n${p.text}`;
       }).join('\n\n');
       const userTurn = `Today is ${todayIST()} (India time).\n\nSources from the website:\n${context || '(nothing on the site matched this question)'}\n\nVisitor's question: ${question}`;
-
-      const params = {
-        model: MODEL,
-        max_tokens: 8000, // a cap on cost per answer; answers are asked to be short
-        system: [{ type: 'text', text: SYSTEM, cache_control: { type: 'ephemeral' } }],
-        output_config: { effort: 'low' }, // chat: quick, short answers
-        messages: [...history, { role: 'user', content: userTurn }],
-      };
-      const run = SUPPORTS_FALLBACK
-        ? client.beta.messages.stream({ ...params, betas: ['server-side-fallback-2026-07-01'], fallbacks: 'default' })
-        : client.messages.stream(params);
-      const abort = () => run.abort();
-      request.signal.addEventListener('abort', abort);
+      const messages = [...history, { role: 'user', content: userTurn }];
+      const run = ai === 'claude' ? streamClaude : streamGemini;
+      let wrote = false;
       try {
-        for await (const event of run) {
-          if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') send({ type: 'text', text: event.delta.text });
+        for await (const piece of run({ system: SYSTEM, messages, signal: request.signal })) {
+          if (piece.type === 'text') wrote = true;
+          send(piece);
         }
-        const final = await run.finalMessage();
-        if (final.stop_reason === 'refusal') send({ type: 'notice', text: 'Sorry, I can’t help with that one. Try asking about the club, its projects or how to join.' });
-        else if (final.stop_reason === 'max_tokens') send({ type: 'notice', text: 'That answer was cut short. Try a more specific question.' });
         send({ type: 'done' });
       } catch (err) {
         if (!request.signal.aborted) {
-          const busy = err instanceof Anthropic.RateLimitError || err instanceof Anthropic.InternalServerError;
-          console.error('ask: Claude request failed', err?.status ?? '', err?.message ?? err);
-          send({ type: 'error', message: busy ? 'The assistant is busy right now. Please try again in a moment.' : 'Something went wrong. Please try again, or use the Contact page.' });
+          console.error(`ask: ${ai} request failed`, err?.status ?? '', err?.message ?? err);
+          if (ai === 'gemini' && geminiOverLimit(err) && !wrote) {
+            // Free tier used up for now: still help, with the best-matching pages.
+            listPages('The assistant has answered a lot of questions today and is resting, so here are the pages on this site that best match yours:');
+            send({ type: 'done' });
+          } else {
+            const busy = ai === 'claude' ? claudeBusy(err) : geminiBusy(err);
+            send({ type: 'error', message: busy ? 'The assistant is busy right now. Please try again in a moment.' : 'Something went wrong. Please try again, or use the Contact page.' });
+          }
         }
       } finally {
-        request.signal.removeEventListener('abort', abort);
         try { controller.close(); } catch { /* already closed */ }
       }
     },

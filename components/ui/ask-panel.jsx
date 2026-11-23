@@ -175,7 +175,7 @@ export default function AskPanel({ open, onClose }) {
           <button type="submit" className="ask-send" disabled={!input.trim()} aria-label="Send"><FaArrowUp size={14} /></button>
         )}
       </form>
-      <p className="ask-foot">AI answers can be wrong. Check the linked pages.</p>
+      <p className="ask-foot">AI answers can be wrong; check the linked pages. Please don’t share personal details.</p>
     </div>
   );
 }
