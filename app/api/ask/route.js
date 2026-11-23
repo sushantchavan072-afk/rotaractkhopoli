@@ -65,7 +65,7 @@ function errorDetail(ai, err) {
     reason = [parsed?.error?.status, parsed?.error?.message].filter(Boolean).join(': ') || raw;
   } catch { /* not JSON */ }
   reason = reason.replace(/(AIza|AQ\.|sk-ant-)[\w.-]{10,}/g, '[key]').slice(0, 220);
-  return { provider: ai, status: err?.status ?? null, reason };
+  return { provider: ai, status: err?.status ?? null, reason, tried: err?.triedModels };
 }
 
 const todayIST = () => new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
