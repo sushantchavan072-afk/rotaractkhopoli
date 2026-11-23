@@ -53,6 +53,21 @@ function limited(ip) {
   return recent.length > 20;
 }
 
+/**
+ * A short, safe description of a failed AI request for troubleshooting (not shown to visitors): the HTTP
+ * status and the provider's own reason, with anything that looks like a key removed.
+ */
+function errorDetail(ai, err) {
+  const raw = String(err?.message ?? err ?? '');
+  let reason = raw;
+  try {
+    const parsed = JSON.parse(raw.slice(raw.indexOf('{')));
+    reason = [parsed?.error?.status, parsed?.error?.message].filter(Boolean).join(': ') || raw;
+  } catch { /* not JSON */ }
+  reason = reason.replace(/(AIza|AQ\.|sk-ant-)[\w.-]{10,}/g, '[key]').slice(0, 220);
+  return { provider: ai, status: err?.status ?? null, reason };
+}
+
 const todayIST = () => new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
 const json = (body, status) => Response.json(body, { status });
 
@@ -120,7 +135,7 @@ export async function POST(request) {
             send({ type: 'done' });
           } else {
             const busy = ai === 'claude' ? claudeBusy(err) : geminiBusy(err);
-            send({ type: 'error', message: busy ? 'The assistant is busy right now. Please try again in a moment.' : 'Something went wrong. Please try again, or use the Contact page.' });
+            send({ type: 'error', message: busy ? 'The assistant is busy right now. Please try again in a moment.' : 'Something went wrong. Please try again, or use the Contact page.', detail: errorDetail(ai, err) });
           }
         }
       } finally {
