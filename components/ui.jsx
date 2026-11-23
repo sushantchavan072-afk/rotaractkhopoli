@@ -181,6 +181,11 @@ function useScrollToTopOnPageChange(pathname) {
   }, [pathname]);
 }
 
+/** Soft tints of coral, mint, sun, Rotary blue, Rotaract cranberry, Interact blue and Rotary gold for the menu highlight. */
+const GLOW_HUES = ['#ffdccf', '#cdf3da', '#ffeca8', '#d6e2f6', '#fad3e3', '#d1effb', '#fde4b6'];
+/** Strong club and Rotary colours the robot icon itself turns when hovered, a different one each time. */
+const ROBOT_HUES = ['#d41367', '#17458f', '#00a2e0', '#e8603c', '#1f9d55', '#f2a10f', '#7a3db8'];
+
 export function Header() {
   const pathname = usePathname();
   const isHome = pathname === '/';
@@ -208,13 +213,25 @@ export function Header() {
 
   // Desktop: one soft highlight glides to whichever item is hovered or focused, and rests on the
   // current page (or the open "All Pages" button) otherwise.
+  // Each time it moves to a new item it takes the next colour from the club and Rotary palette.
   const navRef = useRef(null);
   const glowRef = useRef(null);
+  const glowAt = useRef({ el: null, hue: -1 });
+  const robotHue = useRef(-1);
+  const tintRobot = (e) => {
+    robotHue.current = (robotHue.current + 1) % ROBOT_HUES.length;
+    e.currentTarget.style.setProperty('--robot', ROBOT_HUES[robotHue.current]);
+  };
   const moveGlow = useCallback((el) => {
     const nav = navRef.current;
     const glow = glowRef.current;
     if (!nav || !glow) return;
-    if (!el || !window.matchMedia('(min-width: 1041px)').matches) { glow.classList.remove('is-on'); return; }
+    if (!el || !window.matchMedia('(min-width: 1041px)').matches) { glow.classList.remove('is-on'); glowAt.current.el = null; return; }
+    if (glowAt.current.el !== el) {
+      const hue = (glowAt.current.hue + 1) % GLOW_HUES.length;
+      glowAt.current = { el, hue };
+      glow.style.backgroundColor = GLOW_HUES[hue];
+    }
     glow.style.width = `${el.offsetWidth}px`;
     glow.style.transform = `translateX(${el.offsetLeft}px)`;
     glow.classList.add('is-on');
@@ -234,7 +251,8 @@ export function Header() {
   const onNavPointer = (e) => {
     const item = e.target.closest('.nav-pill, .nav-cta');
     if (!item || !navRef.current?.contains(item)) return;
-    if (item.classList.contains('nav-cta')) restGlow(); else moveGlow(item);
+    // The robot gets no highlight behind it; its icon changes colour instead (see tintRobot).
+    if (item.classList.contains('nav-cta') || item.classList.contains('nav-ask')) restGlow(); else moveGlow(item);
   };
 
   return (
@@ -252,7 +270,7 @@ export function Header() {
         <nav
           id="main-nav" ref={navRef} className={`nav ${open ? 'is-open' : ''}`} aria-label="Main"
           onPointerOver={onNavPointer} onPointerLeave={restGlow}
-          onFocus={(e) => { const item = e.target.closest('.nav-pill'); if (item) moveGlow(item); }} onBlur={restGlow}
+          onFocus={(e) => { const item = e.target.closest('.nav-pill:not(.nav-ask)'); if (item) moveGlow(item); else restGlow(); }} onBlur={restGlow}
         >
           <div
             className="pages-wrap"
@@ -276,8 +294,8 @@ export function Header() {
               {item.label}
             </Link>
           ))}
-          <button type="button" className="nav-pill nav-ask" onClick={() => { setOpen(false); window.dispatchEvent(new Event('rck:ask')); }}>
-            <RobotIcon size={19} /> Ask AI
+          <button type="button" className="nav-pill nav-ask" aria-label="Ask AI" title="Ask AI" onPointerEnter={tintRobot} onFocus={tintRobot} onClick={() => { setOpen(false); window.dispatchEvent(new Event('rck:ask')); }}>
+            <RobotIcon size={24} />
           </button>
           <Link href="/join" className="nav-cta">Join the Club <span className="nav-cta-arrow" aria-hidden="true"><ArrowRight size={13} /></span></Link>
           <span className="nav-glow" ref={glowRef} aria-hidden="true" />

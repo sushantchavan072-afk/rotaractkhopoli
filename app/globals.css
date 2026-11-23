@@ -1480,8 +1480,9 @@ html.intro-on:not(.intro-copy) .home-hero-copy > * { opacity: 0; }
 
 /* ---------- Menu pill, redesigned: frosted glass, a gliding highlight, and livelier actions ---------- */
 .nav-glow { display: none; }
-.nav-ask .robot-icon { color: var(--rotaract); transition: transform .5s cubic-bezier(.3, 1.4, .4, 1); }
-.nav-ask:hover .robot-icon, .nav-ask:focus-visible .robot-icon { transform: translateY(-1px) scale(1.12); }
+.nav-ask .robot-icon { color: var(--ink); transition: transform .5s cubic-bezier(.3, 1.4, .4, 1), color .3s ease; }
+.nav-ask:hover .robot-icon, .nav-ask:focus-visible .robot-icon { color: var(--robot, var(--rotaract)); transform: translateY(-1px) scale(1.12); }
+.site-header .nav-ask, .site-header .nav-ask:hover { background: transparent !important; }
 /* The assistant's robot: its eyes blink now and then, and its antenna wiggles when its button is hovered */
 .robot-icon { flex: none; overflow: visible; }
 .robot-eye { transform-box: fill-box; transform-origin: center; animation: robot-blink 5.5s infinite; }
@@ -1495,7 +1496,7 @@ html.intro-on:not(.intro-copy) .home-hero-copy > * { opacity: 0; }
 .nav-cta:hover .nav-cta-arrow, .nav-cta:focus-visible .nav-cta-arrow { transform: rotate(-45deg); }
 .site-header .nav > .nav-glow { animation: none; }
 @media (max-width: 1040px) {
-  .nav-ask { justify-content: flex-start; gap: 10px; }
+  .nav-ask { display: none !important; } /* phones and tablets use the round assistant button instead */
   .nav-cta { padding: 8px 8px 8px 24px; justify-content: space-between; }
 }
 @media (min-width: 1041px) {
@@ -1509,13 +1510,12 @@ html.intro-on:not(.intro-copy) .home-hero-copy > * { opacity: 0; }
   }
   .site-header.is-stuck .nav { box-shadow: 0 0 0 1px rgba(12, 12, 12, .07), inset 0 1px 0 #fff, 0 4px 10px -4px rgba(12, 12, 12, .12), 0 24px 50px -24px rgba(12, 12, 12, .45); }
   .nav-glow { display: block; position: absolute; top: 6px; bottom: 6px; left: 0; width: 0; z-index: -1; border-radius: 999px; background: #ececec; opacity: 0; pointer-events: none; }
-  .nav[data-ready] .nav-glow { transition: transform .5s cubic-bezier(.3, 1.25, .4, 1), width .5s cubic-bezier(.3, 1.25, .4, 1), opacity .25s ease; }
+  .nav[data-ready] .nav-glow { transition: transform .5s cubic-bezier(.3, 1.25, .4, 1), width .5s cubic-bezier(.3, 1.25, .4, 1), opacity .25s ease, background-color .45s ease; }
   .nav-glow.is-on { opacity: 1; }
   .nav[data-glow] .nav-pill, .nav[data-glow] .nav-pill:hover, .nav[data-glow] .nav-pill.is-current { background: transparent; }
   .site-header .nav-pill { position: relative; padding: 11px 18px; transition: color .25s ease, transform .2s ease; }
   .site-header .nav-pill:active { transform: scale(.96); }
-  /* a small coral dot marks the page you are on */
-  .site-header .nav-pill.is-current::after { content: ''; position: absolute; left: 50%; bottom: 4px; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--coral); }
+  .site-header .nav-ask { padding: 8px 12px; }
   .site-header .nav-cta { margin-left: 6px; padding: 6px 6px 6px 24px; box-shadow: 0 8px 18px -10px rgba(12, 12, 12, .6); }
   .site-header .nav-cta:hover { transform: translateY(-1px); }
 }
