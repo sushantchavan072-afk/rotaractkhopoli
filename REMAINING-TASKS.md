@@ -112,7 +112,6 @@ These members show initials instead of a photo:
 | Member | Role(s) |
 |---|---|
 | Rtr. Anvay Narwekar | Treasurer |
-| Rtr. Piyush Phatak | Club Service Director |
 | Rtr. Shreya Salunkhe | Community Service Director, Sergeant-at-Arms |
 | Rtr. Aniket Sardar | Immediate Past President, Rotaract-Rotary Relations Officer |
 | Rtr. Harsh | Club Editor, Sports Chair |
@@ -121,7 +120,7 @@ These members show initials instead of a photo:
 - Best: a head-and-shoulders photo against a plain background, like the existing portraits.
 - Any size works; they are cropped automatically.
 
-Photos already on the site: Vageesh, Srushti, Mihir, Rohan, Khadija, Gargi, Sarvesh, Jayesh, Gaurav and Rutika.
+Photos already on the site: Vageesh, Srushti, Mihir, Rohan, Khadija, Gargi, Sarvesh, Jayesh, Gaurav, Rutika and Piyush.
 
 ### 6a. Board for Rotaract year 2026–27
 - [ ] Confirmed
@@ -140,28 +139,16 @@ These members appear with first names only: **Rtr. Harsh**, **Rtr. Sarvesh**, **
 
 **Needed:** Rtr. Srushti Sathe's email and/or phone, **only if** she is happy for them to be shown on the Contact page next to the President's.
 
-### 9. Real project photos (to replace the stock photos)
+### 9. Project photos
 - [ ] Received
 
-Several images are still **temporary stock photos** from Unsplash (listed in `public/images/CREDITS.md`). They look fine, but a club site is far more convincing with its own pictures.
+All stock photos have been removed: every photo on the site is now the club's own (see `public/images/CREDITS.md`). With only five group and event photos, some of them appear in more than one place, and most event pages show a coloured placeholder.
 
-| Where it appears | Current file | What would suit it |
-|---|---|---|
-| Home and About "Our story" photo | `volunteer.jpg` | A member at a project |
-| Gallery page and photos around the home page | `gallery/1.jpg` … `gallery/7.jpg` | Any 7 good project or fellowship photos |
-| Event: Paintscape | `events/paintscape.jpg` | Photo from that event |
-| Event: Cultural Exchange with RAC Delhi Rohini (Saanjh) | `events/joint-meeting.jpg` | A screenshot of the online meeting is fine |
-| Event: Gau Seva | `events/gau-seva.jpg` | Photo from that event |
-| Event: Introduction to DEI | `events/dei-session.jpg` | A screenshot of the session is fine |
-| Event: Mega Tree Plantation Drive | `events/tree-plantation.jpg` | Photo from that event |
-| Event: Slide Craft (Canva workshop) | `events/pd-session.jpg` | A screenshot of the session is fine |
-| Blog post covers | reuse the gallery and event photos | Not needed separately |
+**Needed:**
+- a photo for each event, named with the event's web address name (the `slug` in `data/club.js`), for example `project-bachpan.jpg`, `installation-ceremony.jpg`, `tree-plantation.jpg`, `paintscape.jpg`. Landscape photos work best;
+- more photos for the Gallery page and the home page (fellowship, meetings, projects). Any good club photos help.
 
-Already real: the home page hero photo (also used in the intro animation and on link previews), the team photos on the home page, Cyber Crime Awareness, Road Safety Drive, Ramparva (the hero photo), leaders' photos and logos.
-
-**No photo yet (a coloured placeholder shows):** World Zoonoses Day session, Kothaligad Trek, 7th Installation Ceremony, Stress Management session, Club Orientation and Assembly, One Nation – Jawan 3.0, Independence Day, Sanskruti Sangam, AI Career Blueprint, Rakhi With Khakee, the cultural exchanges with RAC Acropolis Royals and RAC Visnagar, Teachers’ Day, Mazha Bappa, Samyati 4.0, Gajsanskruti 10.0, the Business and Jobs session, the ICYE visits, the District Interact Assembly and Project Bachpan 2.0. Name each photo with the event's web address name (for example `project-bachpan.jpg`, `installation-ceremony.jpg`); the names are the `slug` values in `data/club.js`.
-
-**Needed:** photos labelled with the event name. Landscape photos work best for events and the hero. Extra photos from an event can also be added as a small gallery on that event's page.
+Extra photos from an event can also be added as a small gallery on that event's page.
 
 ### 10. Event details to confirm or complete
 - [ ] Confirmed
@@ -258,7 +245,7 @@ Please have someone read them for accuracy and tone. Correct, replace or remove 
 | 2 | Add the site to Google Search Console | You | **High** |
 | 3 | Check the Vercel and GitHub link | You | **High** |
 | 4 | Shared club email | Club | **High** |
-| 9 | Real project photos | Club | **High** |
+| 9 | Event and gallery photos | Club | **High** |
 | 10 | Confirm event details | Club | **High** |
 | 5 | Social media links | Club | Medium |
 | 6a | Confirm the 2026–27 board | Club | **High** |

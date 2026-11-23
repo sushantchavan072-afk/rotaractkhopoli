@@ -200,6 +200,7 @@ section:nth-of-type(6n) .eyebrow-dot { background: var(--interact); }
 .page-hero-logo { grid-area: logo; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 56px 40px; display: grid; place-items: center; }
 .page-hero-logo img { width: 100%; max-width: 380px; height: auto; }
 .page-hero-wide { margin-top: 44px; height: 520px; border-radius: var(--radius); overflow: hidden; }
+.page-hero-wide .photo.is-top { object-position: center top; }
 
 /* ---------- Home hero ---------- */
 .home-hero { padding: 0 0 20px; }

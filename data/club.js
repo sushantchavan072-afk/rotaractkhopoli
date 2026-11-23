@@ -351,7 +351,7 @@ export const coreMembers = [
 
 export const boardOfDirectors = [
   { name: 'Rtr. Vageesh Baheti', photo: 'vageesh', roles: ['Club Service Director (CSD)', 'International Service Director (ISD)'] },
-  { name: 'Rtr. Piyush Phatak', roles: ['Club Service Director (CSD)'] },
+  { name: 'Rtr. Piyush Phatak', photo: 'piyush-phatak', roles: ['Club Service Director (CSD)'] },
   { name: 'Rtr. Shreya Salunkhe', roles: ['Community Service Director (CMD)', 'Sergeant-at-Arms (SAA)'] },
   { name: 'Rtr. Khadija Bearingwala', photo: 'khadija-bearingwala', roles: ['Professional Development Director (PDD)', 'Diversity, Equity & Inclusion Director (DEID)'] },
   { name: 'Rtr. Gargi Gaikwad', photo: 'gargi-gaikwad', roles: ['International Service Director (ISD)'] },
@@ -622,7 +622,7 @@ export const waysToHelp = [
 export const posts = [
   {
     slug: 'our-story-since-2020', title: 'Our story: a Rotaract club built during a difficult year', date: '2026-11-18',
-    tags: ['Club', 'History'], image: '/images/gallery/1.jpg',
+    tags: ['Club', 'History'], image: '/images/cta-team.jpg',
     excerpt: 'How Rotaract Club of Khopoli started in November 2020, and the habits that start left behind.',
     body: [
       { p: 'Rotaract Club of Khopoli received its charter in November 2020, when public gatherings were restricted and most service work had moved to phone calls and spreadsheets. The first projects were practical: getting essentials to families and helping students who had lost access to classes.' },
@@ -634,7 +634,7 @@ export const posts = [
   },
   {
     slug: 'seven-avenues-of-service', title: 'The seven avenues of service, explained', date: '2026-11-12',
-    tags: ['Avenues'], image: '/images/gallery/3.jpg',
+    tags: ['Avenues'], image: '/images/events/cyber-crime-awareness.jpg',
     excerpt: 'Community, professional, club and international service, plus PR, DEI and public image: what each avenue means for Khopoli.',
     body: [
       { p: 'Every Rotaractor in Khopoli picks an avenue, and every project belongs to one. Here is what the seven avenues cover in our club.' },
@@ -666,7 +666,7 @@ export const posts = [
   },
   {
     slug: 'how-to-join-rotaract-khopoli', title: 'How to join Rotaract Club of Khopoli', date: '2026-10-05',
-    tags: ['Membership'], image: '/images/gallery/4.jpg',
+    tags: ['Membership'], image: '/images/hero-team.jpg',
     excerpt: 'Who can join, what membership involves, and the four steps from application to induction.',
     body: [
       { p: 'Membership is open to anyone 18 and above living, studying or working in and around Khopoli. There is no campus requirement and no upper age limit.' },
@@ -677,7 +677,7 @@ export const posts = [
   },
   {
     slug: 'what-is-district-3131', title: 'What is Rotaract District 3131?', date: '2026-09-22',
-    tags: ['District'], image: '/images/events/dei-session.jpg',
+    tags: ['District'], image: '/images/hero-stage.jpg',
     excerpt: 'The district our club belongs to: 100+ clubs and 2,700+ Rotaractors across Pune and Raigad.',
     body: [
       { p: 'Rotaract District 3131 brings together the Rotaract clubs of the Pune and Raigad revenue districts of Maharashtra. It was formed in 2008-09 when the old District 3130 was split in two.' },
@@ -687,7 +687,7 @@ export const posts = [
   },
   {
     slug: 'rotary-rotaract-interact', title: 'Rotary, Rotaract and Interact: one family', date: '2026-09-08',
-    tags: ['Rotary'], image: '/images/events/joint-meeting.jpg',
+    tags: ['Rotary'], image: '/images/events/road-safety-drive.jpg',
     excerpt: 'How the three programmes fit together, and where Rotaract Club of Khopoli sits.',
     body: [
       { p: 'Rotary is a worldwide network of service clubs for working professionals, founded in 1905. Rotaract is its programme for young adults, and Interact is its school-age wing.' },

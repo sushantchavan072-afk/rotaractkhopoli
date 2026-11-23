@@ -93,10 +93,11 @@ export function Section({ children, tone = 'plain', id, className = '' }) {
  * Kindora-style page header.
  * layout 'center' (default): eyebrow, title and text centred.
  * layout 'split': eyebrow + title on the left, text + actions on the right.
- * wideImage: a full-width rounded photo under the header (About, Join).
+ * wideImage: a full-width rounded photo under the header (About, Join); wideImageTop keeps its top in view
+ *   (for group photos whose faces sit near the top edge).
  * logo: shows a logo card beside the title (District, Rotary pages).
  */
-export function PageHero({ eyebrow, title, desc, children, layout = 'center', wideImage, logo, as: H = 'h1' }) {
+export function PageHero({ eyebrow, title, desc, children, layout = 'center', wideImage, wideImageTop = false, logo, as: H = 'h1' }) {
   return (
     <section className={`page-hero is-${logo ? 'split' : layout}`}>
       <div className="container">
@@ -111,7 +112,7 @@ export function PageHero({ eyebrow, title, desc, children, layout = 'center', wi
           </div>
           {logo && <div className="page-hero-logo"><Image src={logo.src} alt={logo.alt} width={logo.w} height={logo.h} priority sizes="(max-width: 900px) 80vw, 420px" /></div>}
         </div>
-        {wideImage && <div className="page-hero-wide"><Photo src={wideImage} alt="" label={title} priority sizes="(max-width: 1240px) 100vw, 1240px" /></div>}
+        {wideImage && <div className="page-hero-wide"><Photo src={wideImage} alt="" label={title} className={wideImageTop ? 'is-top' : ''} priority sizes="(max-width: 1240px) 100vw, 1240px" /></div>}
       </div>
     </section>
   );

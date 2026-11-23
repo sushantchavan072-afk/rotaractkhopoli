@@ -45,22 +45,13 @@ const TINTS = ['rose', 'sky', 'gold'];
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const formatPostDate = (iso) => { const [y, m, d] = iso.split('-').map(Number); return `${String(d).padStart(2, '0')} ${MONTHS[m - 1]} ${y}`; };
 
-/** Every photo on the site with a caption, used by the gallery page. Replace with the club's own photos. */
+/** Every club photo on the site with a caption, used by the gallery page. Only the club's own photos. */
 export const GALLERY = [
+  ['/images/hero-stage.jpg', 'Members on stage at Ramparva – Ek Diwali Sandhya'],
   ['/images/events/road-safety-drive.jpg', 'Road safety awareness drive with Interactors and the traffic police'],
   ['/images/cta-team.jpg', 'Members of Rotaract Club of Khopoli'],
   ['/images/events/cyber-crime-awareness.jpg', 'Cyber crime awareness session with Rotary Club of Khopoli'],
-  ['/images/gallery/1.jpg', 'Sorting supplies for families'],
-  ['/images/events/tree-plantation.jpg', 'Saplings ready for planting'],
-  ['/images/gallery/2.jpg', 'Children at a school session'],
-  ['/images/gallery/3.jpg', 'Hands joined before a project'],
-  ['/images/hero-stage.jpg', 'Members on stage at Ramparva – Ek Diwali Sandhya'],
-  ['/images/gallery/5.jpg', 'Smiles after a community visit'],
-  ['/images/events/paintscape.jpg', 'Colours from Paintscape'],
-  ['/images/gallery/6.jpg', 'Seedlings in the nursery tray'],
-  ['/images/gallery/7.jpg', 'Service starts with a hand'],
-  ['/images/events/dei-session.jpg', 'Discussion at the DEI session'],
-  ['/images/gallery/4.jpg', 'Fellowship among members'],
+  ['/images/hero-team.jpg', 'Club members together'],
 ];
 
 /* ======================= Shared Kindora-style blocks ======================= */
@@ -172,7 +163,7 @@ function MetricCards() {
           <span className="metric-label">Projects this Rotaract year</span>
           <Pills>From tree plantation to Project Bachpan, each with one accountable lead.</Pills>
           <Link href="/events" className="metric-arrow" aria-label="See all projects"><ArrowRight size={22} /></Link>
-          <div className="metric-photo"><Photo src="/images/gallery/5.jpg" alt="" label=" " sizes="260px" /></div>
+          <div className="metric-photo"><Photo src="/images/events/road-safety-drive.jpg" alt="" label=" " sizes="260px" /></div>
         </div>
         <div className="metric-card is-dark">
           <strong>{uniqueMemberCount}+</strong>
@@ -184,7 +175,7 @@ function MetricCards() {
           <strong>{avenues.length}</strong>
           <span className="metric-label">Avenues of service</span>
           <Pills>Community, professional, club, international, PR, DEI and public image.</Pills>
-          <div className="metric-photo is-wide"><Photo src="/images/events/tree-plantation.jpg" alt="" label=" " sizes="420px" /></div>
+          <div className="metric-photo is-wide"><Photo src="/images/hero-stage.jpg" alt="" label=" " sizes="420px" /></div>
         </div>
       </div>
     </Section>
@@ -214,7 +205,7 @@ function ResultsBlocks({ tone = 'plain' }) {
       <Intro center label="Our results" title="Results that inspire change" description="Young people, local problems, real follow-through." />
       <div className="story-block">
         <div className="story-photo">
-          <Photo src="/images/volunteer.jpg" alt="A volunteer at a community project" label="Community Service" sizes="(max-width: 900px) 100vw, 45vw" />
+          <Photo src="/images/hero-stage.jpg" alt="Members on stage at Ramparva, the club\u2019s community Diwali evening" label="Community Service" sizes="(max-width: 900px) 100vw, 45vw" />
           <ChartCard title="Projects by avenue" caption="This Rotaract year" bars={byAvenue} />
         </div>
         <div className="story-copy">
@@ -229,7 +220,7 @@ function ResultsBlocks({ tone = 'plain' }) {
       </div>
       <div className="story-block is-flipped">
         <div className="story-photo">
-          <Photo src="/images/events/pd-session.jpg" alt="Members at a professional development session" label="Professional Development" sizes="(max-width: 900px) 100vw, 45vw" />
+          <Photo src="/images/events/cyber-crime-awareness.jpg" alt="Members at the cyber crime awareness session" label="Professional Development" sizes="(max-width: 900px) 100vw, 45vw" />
           <ChartCard title="Projects per month" caption="June to October" bars={byMonth} />
         </div>
         <div className="story-copy">
@@ -262,7 +253,7 @@ function VolunteerBlock() {
         </div>
         <div className="volunteer-media">
           <p className="volunteer-lead">Most community projects are open to volunteers. Come for one drive and see how it feels.</p>
-          <div className="volunteer-photo"><Photo src="/images/gallery/4.jpg" alt="Young people at a club fellowship" label=" " sizes="(max-width: 900px) 100vw, 50vw" /></div>
+          <div className="volunteer-photo"><Photo src="/images/hero-team.jpg" alt="Club members together" label=" " sizes="(max-width: 900px) 100vw, 50vw" /></div>
           <Link href="/gallery" className="story-reel"><span><small>See our</small><strong>photo gallery</strong></span><span className="play-button" aria-hidden="true"><Play size={14} /></span></Link>
           <span className="volunteer-tag">Real projects,<br />real people</span>
         </div>
@@ -308,7 +299,7 @@ function WideBanner() {
   return (
     <Section>
       <div className="wide-banner">
-        <Photo src="/images/gallery/2.jpg" alt="Children at a school session" label=" " sizes="(max-width: 1240px) 100vw, 1240px" />
+        <Photo src="/images/events/road-safety-drive.jpg" alt="Members and Interactors at the road safety awareness drive" label=" " sizes="(max-width: 1240px) 100vw, 1240px" />
         <div className="wide-banner-card">
           <h2>Empowering young people to lead in Khopoli</h2>
           <p>Every member owns a project, manages a budget and reports the outcome, building skills a classroom does not teach.</p>
@@ -455,7 +446,7 @@ export function Home() {
 export function About() {
   return (
     <>
-      <PageHero layout="split" eyebrow="About Us" title="Know about our mission, vision and journey" desc={club.intro} wideImage="/images/gallery/1.jpg">
+      <PageHero layout="split" eyebrow="About Us" title="Know about our mission, vision and journey" desc={club.intro} wideImage="/images/hero-stage.jpg">
         <Btn href="/events" icon={false}>See Our Work</Btn>
       </PageHero>
 
@@ -483,7 +474,7 @@ export function About() {
       <Section>
         <div className="story-block">
           <div className="story-photo">
-            <Photo src="/images/volunteer.jpg" alt="A volunteer at a community project" label="Our story" sizes="(max-width: 900px) 100vw, 45vw" />
+            <Photo src="/images/cta-team.jpg" alt="Members of Rotaract Club of Khopoli" label="Our story" sizes="(max-width: 900px) 100vw, 45vw" />
             <ChartCard title="Projects per month" caption="This Rotaract year" bars={['06', '07', '08', '09', '10'].map((m) => ({ label: MONTHS[Number(m) - 1], value: events.filter((e) => e.date.slice(5, 7) === m).length }))} />
           </div>
           <div className="story-copy prose">
@@ -975,7 +966,7 @@ export function Faqs() {
 export function Join() {
   return (
     <>
-      <PageHero layout="split" eyebrow="Join the club" title="Join a club that finishes what it starts" desc="Membership is open to young adults living, studying or working in and around Khopoli. There is no campus requirement." wideImage="/images/gallery/4.jpg" />
+      <PageHero layout="split" eyebrow="Join the club" title="Join a club that finishes what it starts" desc="Membership is open to young adults living, studying or working in and around Khopoli. There is no campus requirement." wideImage="/images/cta-team.jpg" wideImageTop />
       <Section>
         <Intro center label="What we expect" title="Three commitments, nothing hidden" />
         <ol className="value-grid numbered">

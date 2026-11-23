@@ -1,17 +1,16 @@
-# Photo credits
+# Photos
 
-These are **temporary stock photos** from [Unsplash](https://unsplash.com). They are free to use under the [Unsplash License](https://unsplash.com/license).
-Replace them with the club's own project photos by saving files with the same names.
+Every photo on the site is the club's own; the temporary stock photos have been removed.
 
-| File | Unsplash photo |
-|---|---|
-| volunteer.jpg | https://unsplash.com/photos/photo-1559027615-cd4628902d4a |
-| events/paintscape.jpg | https://unsplash.com/photos/photo-1513364776144-60967b0f800f |
-| events/joint-meeting.jpg | https://unsplash.com/photos/photo-1588196749597-9ff075ee6b5b |
-| events/gau-seva.jpg | https://unsplash.com/photos/photo-1570042225831-d98fa7577f1e |
-| events/dei-session.jpg | https://unsplash.com/photos/photo-1515187029135-18ee286d815b |
-| events/tree-plantation.jpg | https://unsplash.com/photos/photo-1542601906990-b4d3fb778b09 |
-| events/pd-session.jpg | https://unsplash.com/photos/photo-1524178232363-1fb2b075b655 |
-| gallery/1.jpg … 7.jpg | 1593113598332-cd288d649433, 1542810634-71277d95dcbb, 1531206715517-5c0ba140b2b8, 1529156069898-49953e39b3ac, 1497486751825-1233686d5d80, 1530836369250-ef72a3f5cda8, 1469571486292-0ba58a3f068b |
+| File | What it is | Where it appears |
+|---|---|---|
+| `hero-stage.jpg` | Members on stage at Ramparva – Ek Diwali Sandhya | Home hero and intro, link-preview image (cropped as `public/og-stage.jpg`), Ramparva event page, About, gallery, home cards, blog covers |
+| `hero-team.jpg` | Five members together outdoors | Home impact card and volunteer section, gallery, blog cover |
+| `cta-team.jpg` | Seven members together | Home "Together, we can make a difference", About "Our story", Join page, gallery, blog cover |
+| `events/road-safety-drive.jpg` | Road Safety Awareness Drive | Event page, home cards and banner, gallery, blog cover |
+| `events/cyber-crime-awareness.jpg` | Cyber Crime Awareness session | Event page, home avenue section, gallery, blog cover |
+| `members/*.webp` | Member portraits | Our Team and About pages |
 
-The home hero photo (`hero-stage.jpg`, also used in the intro animation and cropped for the share image `public/og-stage.jpg`) is the club's own photo of its members on stage. The team photo in the black impact card on the home page (`hero-team.jpg`) is also the club's own. The hero photo is from Ramparva – Ek Diwali Sandhya and is also used on that event's page.
+Leader photographs and theme logos (`leaders/`, `themes/`, `logos/`) are from Rotary International, Rotary District 3131 and Rotaract District 3131.
+
+Events without a photo show a coloured placeholder until one is added as `events/<event slug>.jpg` (the slugs are in `data/club.js`).
