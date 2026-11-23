@@ -4,6 +4,7 @@ import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { createPortal } from 'react-dom';
 import { downloadIcs } from '../lib/calendar';
 // Icons: react-icons (Font Awesome 6), the same icon library Kindora uses.
 import {
@@ -381,9 +382,7 @@ export function MailForm({ title, intro, subject, fields, submitLabel = 'Send Me
             <div className="field" key={f.name}>
               <label htmlFor={id}>{f.label}{!f.required && <span className="optional"> (optional)</span>}</label>
               {f.options ? (
-                <select id={id} name={f.name} defaultValue={f.options[0]} required={f.required}>
-                  {f.options.map((o) => <option key={o}>{o}</option>)}
-                </select>
+                <PillSelect id={id} name={f.name} options={f.options} ariaLabel={f.label} />
               ) : f.rows ? (
                 <textarea id={id} name={f.name} rows={f.rows} placeholder={f.placeholder} required={f.required} minLength={f.minLength} />
               ) : (
@@ -763,6 +762,124 @@ function Segmented({ options, value, onChange, label }) {
   );
 }
 
+/**
+ * The site's dropdown: a pill button that opens a floating card of pill-shaped options, used instead of
+ * the browser's own select menu. It behaves like a select: arrow keys, Home/End, Enter or Space to pick,
+ * Escape to close, typing a letter jumps to an option, and a click outside closes it. In a form, a hidden
+ * input carries the value, and the form's reset puts it back to the default. The open list is drawn in a
+ * layer on top of the page (so cards and sections below can never cover it) and follows its button
+ * when the page scrolls or resizes.
+ */
+export function PillSelect({ id, name, options, value: controlled, defaultValue, onChange, ariaLabel, className = '' }) {
+  const initial = defaultValue ?? options[0];
+  const [inner, setInner] = useState(initial);
+  const value = controlled ?? inner;
+  const [open, setOpen] = useState(false);
+  const [active, setActive] = useState(0);
+  const [pos, setPos] = useState(null); // where the open list sits on screen
+  const wrap = useRef(null);
+  const btn = useRef(null);
+  const list = useRef(null);
+  const typed = useRef({ text: '', at: 0 });
+  const listId = useId();
+
+  const place = useCallback(() => {
+    const r = btn.current.getBoundingClientRect();
+    const need = Math.min(340, options.length * 46 + 14);
+    const below = window.innerHeight - r.bottom;
+    const up = below < need + 16 && r.top > below;
+    const room = (up ? r.top : below) - 24; // keep the list on screen, scrolling inside it if needed
+    setPos({ left: r.left, width: r.width, up, top: up ? undefined : r.bottom + 8, bottom: up ? window.innerHeight - r.top + 8 : undefined, maxHeight: Math.max(160, Math.min(340, room)) });
+  }, [options.length]);
+  const show = () => {
+    place();
+    setActive(Math.max(0, options.indexOf(value)));
+    setOpen(true);
+  };
+  const close = (refocus = true) => { setOpen(false); if (refocus) btn.current?.focus(); };
+  const choose = (v) => {
+    if (controlled === undefined) setInner(v);
+    if (v !== value) onChange?.(v);
+    close();
+  };
+
+  useEffect(() => {
+    if (!open) return undefined;
+    list.current?.focus({ preventScroll: true });
+    const away = (e) => { if (!wrap.current?.contains(e.target) && !list.current?.contains(e.target)) setOpen(false); };
+    document.addEventListener('pointerdown', away);
+    window.addEventListener('scroll', place, true);
+    window.addEventListener('resize', place);
+    return () => {
+      document.removeEventListener('pointerdown', away);
+      window.removeEventListener('scroll', place, true);
+      window.removeEventListener('resize', place);
+    };
+  }, [open, place]);
+  useEffect(() => {
+    if (open) list.current?.children[active]?.scrollIntoView({ block: 'nearest' });
+  }, [open, active]);
+  useEffect(() => {
+    const form = wrap.current?.closest('form');
+    if (!form) return undefined;
+    const reset = () => setInner(initial);
+    form.addEventListener('reset', reset);
+    return () => form.removeEventListener('reset', reset);
+  }, [initial]);
+
+  const onListKey = (e) => {
+    const last = options.length - 1;
+    const moves = { ArrowDown: Math.min(last, active + 1), ArrowUp: Math.max(0, active - 1), Home: 0, End: last };
+    if (e.key in moves) { e.preventDefault(); setActive(moves[e.key]); return; }
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); choose(options[active]); return; }
+    if (e.key === 'Escape') { e.preventDefault(); close(); return; }
+    if (e.key === 'Tab') { setOpen(false); return; }
+    if (e.key.length === 1 && /\S/.test(e.key)) {
+      const now = e.timeStamp;
+      typed.current = { text: (now - typed.current.at < 700 ? typed.current.text : '') + e.key.toLowerCase(), at: now };
+      const from = typed.current.text.length > 1 ? active : active + 1;
+      const order = [...options.slice(from), ...options.slice(0, from)];
+      const hit = order.find((o) => o.toLowerCase().startsWith(typed.current.text));
+      if (hit) setActive(options.indexOf(hit));
+    }
+  };
+
+  return (
+    <div ref={wrap} className={`pill-select ${open ? 'is-open' : ''} ${className}`}>
+      <button
+        ref={btn} id={id} type="button" className="pill-select-btn"
+        aria-haspopup="listbox" aria-expanded={open} aria-controls={open ? listId : undefined}
+        aria-label={ariaLabel ? `${ariaLabel}: ${value}` : undefined}
+        onClick={() => (open ? close(false) : show())}
+        onKeyDown={(e) => { if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); show(); } }}
+      >
+        <span className="pill-select-value">{value}</span>
+        <span className="pill-select-chev" aria-hidden="true"><ChevronDown size={12} /></span>
+      </button>
+      {name && <input type="hidden" name={name} value={value} />}
+      {open && pos && createPortal(
+        <ul
+          ref={list} id={listId} className={`pill-select-list ${pos.up ? 'is-up' : ''}`} role="listbox" tabIndex={-1}
+          style={{ left: pos.left, width: pos.width, top: pos.top, bottom: pos.bottom, maxHeight: pos.maxHeight }}
+          aria-label={ariaLabel} aria-activedescendant={`${listId}-${active}`} onKeyDown={onListKey}
+        >
+          {options.map((o, i) => (
+            <li
+              key={o} id={`${listId}-${i}`} role="option" aria-selected={o === value}
+              className={`pill-select-option ${i === active ? 'is-active' : ''}`}
+              onPointerMove={() => setActive(i)} onClick={() => choose(o)}
+            >
+              <span>{o}</span>
+              {o === value && <Check size={12} aria-hidden="true" />}
+            </li>
+          ))}
+        </ul>,
+        document.body,
+      )}
+    </div>
+  );
+}
+
 export function EventsExplorer({ events, perPage = 6 }) {
   const [page, setPage] = useState(1);
   const [when, setWhen] = useState('all');
@@ -782,10 +899,7 @@ export function EventsExplorer({ events, perPage = 6 }) {
       )}
       <div className="filters" role="group" aria-label="Filter events">
         <Segmented label="Show" options={[['all', 'All'], ['upcoming', 'Upcoming'], ['past', 'Completed']]} value={when} onChange={(k) => { setWhen(k); setPage(1); }} />
-        <label className="sr-only" htmlFor="avenue-filter">Filter by avenue</label>
-        <select id="avenue-filter" value={avenue} onChange={(e) => { setAvenue(e.target.value); setPage(1); }}>
-          {avenueNames.map((a) => <option key={a}>{a}</option>)}
-        </select>
+        <PillSelect id="avenue-filter" options={avenueNames} value={avenue} ariaLabel="Filter by avenue" onChange={(v) => { setAvenue(v); setPage(1); }} />
       </div>
       <p className="sr-only" role="status" aria-live="polite">{list.length} events shown</p>
       {list.length ? (

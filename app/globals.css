@@ -360,7 +360,24 @@ section:nth-of-type(6n) .eyebrow-dot { background: var(--interact); }
 .segmented button:hover:not(.is-active) { color: var(--ink); }
 .segmented button:active { transform: scale(.95); }
 @media (prefers-reduced-motion: reduce) { .segmented[data-ready] .segmented-thumb, .segmented button { transition: none; } }
-.filters select, .field select { appearance: none; background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%230c0c0c' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 18px center; border: 1px solid var(--line-strong); border-radius: 14px; padding: 14px 46px 14px 18px; min-width: 240px; }
+/* Pill dropdown (PillSelect in components/ui.jsx), used instead of the browser's select menu */
+.pill-select { position: relative; display: inline-block; min-width: 260px; }
+.field .pill-select { display: block; width: 100%; }
+.pill-select-btn { width: 100%; min-height: 52px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 7px 6px 22px; border: 1px solid var(--line-strong); border-radius: 40px; background: var(--surface); color: var(--ink); font-size: 15.5px; font-weight: 500; text-align: left; transition: border-color .2s, box-shadow .2s; }
+.pill-select-btn:hover, .pill-select.is-open .pill-select-btn { border-color: var(--ink); }
+.pill-select.is-open .pill-select-btn { box-shadow: 0 0 0 3px rgba(0, 0, 0, .06); }
+.pill-select-value { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pill-select-chev { flex: none; width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%; background: var(--ink); color: var(--on-ink); transition: transform .3s cubic-bezier(.2, .7, .2, 1); }
+.pill-select.is-open .pill-select-chev { transform: rotate(180deg); }
+.pill-select-list { position: fixed; z-index: 120; max-height: min(340px, 60vh); margin: 0; padding: 6px; overflow-y: auto; overscroll-behavior: contain; list-style: none; border: 1px solid var(--line); border-radius: 24px; background: var(--surface); box-shadow: 0 24px 48px -20px rgba(0, 0, 0, .28); outline: none; transform-origin: top center; animation: pill-select-in .22s cubic-bezier(.2, .7, .2, 1); }
+.pill-select-list.is-up { transform-origin: bottom center; animation-name: pill-select-in-up; }
+.pill-select-option { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 11px 16px; border-radius: 30px; color: var(--text-2); font-size: 15px; line-height: 1.35; cursor: pointer; transition: background .15s, color .15s; }
+.pill-select-option + .pill-select-option { margin-top: 2px; }
+.pill-select-option.is-active { background: var(--surface-2); color: var(--ink); }
+.pill-select-option[aria-selected='true'] { background: var(--ink); color: var(--on-ink); }
+@keyframes pill-select-in { from { opacity: 0; transform: translateY(-6px) scale(.98); } }
+@keyframes pill-select-in-up { from { opacity: 0; transform: translateY(6px) scale(.98); } }
+@media (prefers-reduced-motion: reduce) { .pill-select-list { animation: none; } .pill-select-chev { transition: none; } }
 .notice-banner { display: flex; gap: 22px; align-items: center; justify-content: space-between; background: var(--sun-50); border-radius: 24px; padding: 28px 32px; margin-bottom: 30px; }
 .notice-banner strong { font-size: 18px; font-weight: 600; }
 .notice-banner p { margin: 4px 0 0; font-size: 15px; }
@@ -642,8 +659,8 @@ section:nth-of-type(6n) .eyebrow-dot { background: var(--interact); }
 .field label::after { content: ''; }
 .optional { font-weight: 400; color: var(--muted); }
 .hint { font-size: 13px; color: var(--muted); }
-.field input, .field textarea, .field select { width: 100%; background: var(--surface); border: 1px solid var(--line-strong); border-radius: 14px; padding: 15px 18px; outline: none; resize: vertical; font-size: 16px; }
-.field input:focus, .field textarea:focus, .field select:focus { border-color: var(--ink); box-shadow: 0 0 0 3px rgba(0,0,0,.08); }
+.field input, .field textarea { width: 100%; background: var(--surface); border: 1px solid var(--line-strong); border-radius: 14px; padding: 15px 18px; outline: none; resize: vertical; font-size: 16px; }
+.field input:focus, .field textarea:focus { border-color: var(--ink); box-shadow: 0 0 0 3px rgba(0,0,0,.08); }
 .field input:user-invalid, .field textarea:user-invalid { border-color: #c0392b; }
 .consent { font-size: 13px; margin: 0; }
 .submit-btn { width: 100%; background: var(--ink); color: var(--on-ink); border: 0; border-radius: 40px; min-height: 54px; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 500; font-size: 15px; }
@@ -773,7 +790,7 @@ section:nth-of-type(6n) .eyebrow-dot { background: var(--interact); }
   .impact-band { padding: 36px 26px 50px; }
   .filters { flex-direction: column; align-items: stretch; }
   .segmented button { flex: 1; padding: 11px 8px; }
-  .filters select { width: 100%; }
+  .filters .pill-select { width: 100%; }
   .notice-banner { flex-direction: column; align-items: flex-start; }
   .form-card { padding: 26px 20px; }
   .why-grid { grid-template-columns: 1fr; }
