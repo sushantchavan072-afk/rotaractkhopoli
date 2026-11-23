@@ -12,7 +12,7 @@ import {
   FaRegCommentDots as MessageCircle, FaPlay as Play,
 } from 'react-icons/fa6';
 import {
-  club, clubFacts, officers, clubEmail, contact, avenues, events, eventsNewestFirst, formatDate,
+  club, clubFacts, officers, clubEmail, contact, avenues, events, eventsNewestFirst, formatDate, formatDateRange,
   coreMembers, boardOfDirectors, chairpersons, uniqueMemberCount, initials, testimonials,
   allFaqs, faqGroups, district, rotary, sponsorTiers, joinCommitments, rotaractYear,
   membersWithRoles, eventsForAvenue, SITE_URL, FAMILY_LOGOS, values, volunteerReasons, waysToHelp,
@@ -27,7 +27,13 @@ import ClubCalendar from '@/components/ui/club-calendar';
 import { placeOnMap, MAP_SIZE } from '../lib/world-map';
 
 const ICONS = { HandHeart, GraduationCap, Users, Globe2, Megaphone, HeartHandshake, Sparkles, ShieldCheck, UserPlus, Lightbulb, Package, Handshake };
-const eventImage = (e) => `/images/events/${e.slug}.jpg`;
+/** An event's photo: its own `image`, else public/images/events/<slug>.jpg if that file exists, else null (placeholder). */
+const eventImage = (e) => {
+  if (e.image) return e.image;
+  const rel = `/images/events/${e.slug}.jpg`;
+  return existsSync(join(process.cwd(), 'public', rel)) ? rel : null;
+};
+const withPhoto = (e) => ({ ...e, image: eventImage(e) });
 /** Only point at a member photo that actually exists in /public, so missing portraits never trigger a 404. */
 const memberImage = (m) => {
   if (!m.photo) return undefined;
@@ -51,11 +57,10 @@ export const GALLERY = [
   ['/images/events/tree-plantation.jpg', 'Saplings ready for planting'],
   ['/images/gallery/2.jpg', 'Children at a school session'],
   ['/images/gallery/3.jpg', 'Hands joined before a project'],
-  ['/images/events/maha-aarti.jpg', 'Diya at the Maha Aarti evening'],
+  ['/images/hero-stage.jpg', 'Members on stage at Ramparva – Ek Diwali Sandhya'],
   ['/images/gallery/5.jpg', 'Smiles after a community visit'],
   ['/images/events/paintscape.jpg', 'Colours from Paintscape'],
   ['/images/gallery/6.jpg', 'Seedlings in the nursery tray'],
-  ['/images/events/zoo-day.jpg', 'Zoo Day with RAC Bicholim'],
   ['/images/gallery/7.jpg', 'Service starts with a hand'],
   ['/images/events/dei-session.jpg', 'Discussion at the DEI session'],
   ['/images/gallery/4.jpg', 'Fellowship among members'],
@@ -168,7 +173,7 @@ function MetricCards() {
         <div className="metric-card is-coral">
           <strong>{events.length}</strong>
           <span className="metric-label">Projects this Rotaract year</span>
-          <Pills>From Maha Aarti to tree plantation, each with one accountable lead.</Pills>
+          <Pills>From tree plantation to Project Bachpan, each with one accountable lead.</Pills>
           <Link href="/events" className="metric-arrow" aria-label="See all projects"><ArrowRight size={22} /></Link>
           <div className="metric-photo"><Photo src="/images/gallery/5.jpg" alt="" label=" " sizes="260px" /></div>
         </div>
@@ -321,7 +326,7 @@ function ProjectsSection({ tone = 'plain' }) {
   return (
     <Section tone={tone}>
       <Intro center label="Our projects" title="Projects you can be part of" description="Every project is documented with dates, venue and partners." />
-      <div className="card-grid">{eventsNewestFirst.slice(0, 3).map((e, i) => <EventCard e={e} i={i} key={e.slug} />)}</div>
+      <div className="card-grid">{eventsNewestFirst.slice(0, 3).map((e, i) => <EventCard e={withPhoto(e)} i={i} key={e.slug} />)}</div>
       <div className="center-row"><Btn href="/events" kind="outline">View All Events</Btn></div>
     </Section>
   );
@@ -427,7 +432,7 @@ export function Home() {
             <Link href={`/events/${latest.slug}`} className="hero-info-card">
               <small>Latest project</small>
               <strong>{latest.title}</strong>
-              <span>{formatDate(latest.date)}</span>
+              <span>{formatDateRange(latest)}</span>
             </Link>
             <div className="hero-small-tag">Chartered<br />{club.charteredOn}</div>
           </div>
@@ -582,7 +587,7 @@ export function AvenueDetail({ slug }) {
       </PageHero>
       <Section>
         <Intro center label="Projects" title={`${a.name} projects`} description={projects.length ? 'Recent work in this avenue.' : 'Projects for this avenue are being planned for the new Rotaract year.'} />
-        {projects.length ? <div className="card-grid">{projects.map((e, i) => <EventCard e={e} i={i} key={e.slug} />)}</div>
+        {projects.length ? <div className="card-grid">{projects.map((e, i) => <EventCard e={withPhoto(e)} i={i} key={e.slug} />)}</div>
           : <p className="empty-note">No projects logged yet. Have an idea? <Link href="/contact">Tell us</Link> and we will help you run it.</p>}
       </Section>
       {slug === 'international-service' && (
@@ -608,7 +613,8 @@ export function AvenueDetail({ slug }) {
 /* ======================= Events (Kindora "Programs") ======================= */
 
 export function Events() {
-  const featured = eventsNewestFirst[0];
+  // The newest project that has a photo leads the page.
+  const featured = eventsNewestFirst.find((e) => eventImage(e)) ?? eventsNewestFirst[0];
   return (
     <>
       <PageHero layout="split" eyebrow="Our projects" title="Explore our life changing projects" desc="Dates, times and venues are confirmed by the secretary. Most community projects are open to volunteers.">
@@ -622,7 +628,7 @@ export function Events() {
             <h2>{featured.title}</h2>
             <p>{featured.summary}</p>
             <Btn href={`/events/${featured.slug}`} icon={false}>View Event</Btn>
-            <dl className="event-card-facts"><div><dt>Date</dt><dd>{formatDate(featured.date)}</dd></div><div><dt>Venue</dt><dd>{featured.venue}</dd></div></dl>
+            <dl className="event-card-facts"><div><dt>Date</dt><dd>{formatDateRange(featured)}</dd></div><div><dt>Venue</dt><dd>{featured.venue}</dd></div></dl>
           </div>
         </div>
       </Section>
@@ -632,7 +638,7 @@ export function Events() {
       </Section>
       <Section>
         <Intro center label="All projects" title="Each project is a chance to serve" description="Filter by status or avenue." />
-        <EventsExplorer events={eventsNewestFirst} />
+        <EventsExplorer events={eventsNewestFirst.map(withPhoto)} />
       </Section>
       <Section>
         <Intro center label="Our network" title="Part of something bigger" />
@@ -651,7 +657,7 @@ export function EventDetail({ slug }) {
   const online = /online/i.test(e.venue);
   const jsonLd = {
     '@context': 'https://schema.org', '@type': 'Event', name: e.title, description: e.summary,
-    startDate: e.date, endDate: e.endDate ?? e.date, image: `${SITE_URL}${eventImage(e)}`,
+    startDate: e.date, endDate: e.endDate ?? e.date, image: `${SITE_URL}${eventImage(e) ?? '/og-stage.jpg'}`,
     eventAttendanceMode: online ? 'https://schema.org/OnlineEventAttendanceMode' : 'https://schema.org/OfflineEventAttendanceMode',
     location: online ? { '@type': 'VirtualLocation', url: `${SITE_URL}/events/${e.slug}` } : { '@type': 'Place', name: e.venue, address: e.venue },
     organizer: { '@type': 'Organization', name: club.name, url: SITE_URL },
@@ -665,7 +671,7 @@ export function EventDetail({ slug }) {
           <h1>{e.title}</h1>
           <ul className="fact-chips">
             <li><EventStatus event={e} /></li>
-            <li><CalendarDays size={16} aria-hidden="true" /> {formatDate(e.date)}</li>
+            <li><CalendarDays size={16} aria-hidden="true" /> {formatDateRange(e)}</li>
             {e.time && <li><Clock size={16} aria-hidden="true" /> {e.time}</li>}
             <li><MapPin size={16} aria-hidden="true" /> {e.venue}</li>
             {e.partner && <li><Handshake size={16} aria-hidden="true" /> {e.partner}</li>}
@@ -679,7 +685,7 @@ export function EventDetail({ slug }) {
             {e.outcomes?.length > 0 && <dl className="outcome-grid">{e.outcomes.map((o) => <div key={o.label}><dd>{o.value}</dd><dt>{o.label}</dt></div>)}</dl>}
             {[].concat(e.report ?? e.summary).map((para) => <p key={para.slice(0, 40)}>{para}</p>)}
             <h2>Project details</h2>
-            <p>This {avenue ? avenue.name.toLowerCase() : 'club'} project took place at {e.venue} on {formatDate(e.date)}{e.time ? `, ${e.time}` : ''}.</p>
+            <p>This {avenue ? avenue.name.toLowerCase() : 'club'} project took place at {e.venue} on {formatDateRange(e)}{e.time ? `, ${e.time}` : ''}.</p>
             {e.partner && <p className="partner-note"><span className="partner-icon" aria-hidden="true"><Handshake size={18} /></span><span>Organised in partnership with <strong>{e.partner}</strong></span></p>}
             {e.gallery?.length > 0 && <GalleryGrid photos={e.gallery.map((src) => [src, e.title])} />}
             <div className="detail-actions">
@@ -699,7 +705,7 @@ export function EventDetail({ slug }) {
       </Section>
       <Section>
         <Intro center title="More events" />
-        <div className="card-grid">{others.map((o, i) => <EventCard e={o} i={i} key={o.slug} />)}</div>
+        <div className="card-grid">{others.map((o, i) => <EventCard e={withPhoto(o)} i={i} key={o.slug} />)}</div>
       </Section>
       <FaqBox items={faqGroups[2].items} />
       <CommunityCTA />

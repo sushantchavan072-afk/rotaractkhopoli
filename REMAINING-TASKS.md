@@ -108,6 +108,11 @@ These members show initials instead of a photo:
 
 Photos already on the site: Vageesh, Srushti, Mihir, Rohan, Khadija, Gargi, Sarvesh, Jayesh, Gaurav and Rutika.
 
+### 6a. Board for Rotaract year 2026–27
+- [ ] Confirmed
+
+The club's event reports say that at the 7th Installation Ceremony (2 August 2026) **Rtr. Vaishnav Phatak** was installed as President and **Rtr. Vageesh Baheti** as Secretary, with **Rtr. Mihir Butala** as Vice President, **Rtr. Aniket Sardar** as IPP and **Rtr. Anmay Narvekar** as Treasurer. The Team page and the Contact page still show the earlier board (Vageesh Baheti as President, Srushti Sathe as Secretary, Anvay Narwekar as Treasurer). The Ramparva banner in the hero photo also names Vageesh Baheti as President, so please confirm which board is current before the Team page is changed.
+
 ### 7. Full names
 - [ ] Received
 
@@ -129,37 +134,33 @@ Several images are still **temporary stock photos** from Unsplash (listed in `pu
 |---|---|---|
 | Home and About "Our story" photo | `volunteer.jpg` | A member at a project |
 | Gallery page and photos around the home page | `gallery/1.jpg` … `gallery/7.jpg` | Any 7 good project or fellowship photos |
-| Event: Maha Aarti | `events/maha-aarti.jpg` | Photo from that event |
-| Event: Paintscape | `events/paintscape.jpg` | 〃 |
-| Event: Joint Meeting with RAC Saanjh Delhi | `events/joint-meeting.jpg` | A screenshot of the online meeting is fine |
+| Event: Paintscape | `events/paintscape.jpg` | Photo from that event |
+| Event: Cultural Exchange with RAC Delhi Rohini (Saanjh) | `events/joint-meeting.jpg` | A screenshot of the online meeting is fine |
 | Event: Gau Seva | `events/gau-seva.jpg` | Photo from that event |
-| Event: Zoo Day with RAC Bicholim | `events/zoo-day.jpg` | 〃 |
-| Event: DEI Session | `events/dei-session.jpg` | 〃 |
-| Event: Tree Plantation | `events/tree-plantation.jpg` | 〃 |
-| Event: PD Session (Canva Hacks) | `events/pd-session.jpg` | A screenshot of the session is fine |
+| Event: Introduction to DEI | `events/dei-session.jpg` | A screenshot of the session is fine |
+| Event: Mega Tree Plantation Drive | `events/tree-plantation.jpg` | Photo from that event |
+| Event: Slide Craft (Canva workshop) | `events/pd-session.jpg` | A screenshot of the session is fine |
 | Blog post covers | reuse the gallery and event photos | Not needed separately |
 
-Already real: the home page hero photo (also used in the intro animation and on link previews), the team photos on the home page, Cyber Crime Awareness, Road Safety Drive, leaders' photos and logos.
+Already real: the home page hero photo (also used in the intro animation and on link previews), the team photos on the home page, Cyber Crime Awareness, Road Safety Drive, Ramparva (the hero photo), leaders' photos and logos.
+
+**No photo yet (a coloured placeholder shows):** World Zoonoses Day session, Kothaligad Trek, 7th Installation Ceremony, Stress Management session, Club Orientation and Assembly, One Nation – Jawan 3.0, Independence Day, Sanskruti Sangam, AI Career Blueprint, Rakhi With Khakee, the cultural exchanges with RAC Acropolis Royals and RAC Visnagar, Teachers’ Day, Mazha Bappa, Samyati 4.0, Gajsanskruti 10.0, the Business and Jobs session, the ICYE visits, the District Interact Assembly and Project Bachpan 2.0. Name each photo with the event's web address name (for example `project-bachpan.jpg`, `installation-ceremony.jpg`); the names are the `slug` values in `data/club.js`.
 
 **Needed:** photos labelled with the event name. Landscape photos work best for events and the hero. Extra photos from an event can also be added as a small gallery on that event's page.
 
 ### 10. Event details to confirm or complete
 - [ ] Confirmed
 
-The event list came from the old website, and its dates, times and venues were marked as **indicative**. Please check each row and correct anything wrong:
+The event list now comes from the club's own monthly reports (July, August, September and October 2026, and the Ramparva / Project Bachpan 2.0 report). Internal board and general body meetings are left out, and records of one event filed under several avenues are merged. A few details are still missing from the reports:
 
-| Date on site | Time on site | Event | Venue on site |
-|---|---|---|---|
-| 14 June 2026 | 6:30 PM - 9:00 PM | Maha Aarti | Shree Ram Mandir, Khopoli |
-| 1 July 2026 | 11:00 AM onwards | Paintscape | Shaniwarwada Premises, Khopoli |
-| 26 July 2026 | 7:00 PM - 8:30 PM | Joint Meeting with RAC Saanjh Delhi | Online · Zoom |
-| 9 August 2026 | 8:00 AM - 12:00 PM | Gau Seva | Gaushala, Vavoshi Road, Khopoli |
-| 23 August 2026 | 9:30 AM - 3:00 PM | Zoo Day with RAC Bicholim | Bondla Wildlife Sanctuary, Goa |
-| 6 September 2026 | 5:00 PM - 7:00 PM | DEI Session | Rotary Bhavan, Khopoli |
-| 20 September 2026 | 7:30 AM - 11:00 AM | Tree Plantation | Khopoli Municipal Ground & Hill Slope |
-| 7 October 2026 | **missing** | Cyber Crime Awareness | **"Khopoli" only** (exact place?) |
-| 11 October 2026 | 6:00 PM - 8:00 PM | PD Session: Creative PPT Making & Canva Hacks | Online · Google Meet |
-| 15 October 2026 | **missing** | Road Safety Awareness Drive | **"Khopoli" only** (exact place?) |
+| Event | What is missing |
+|---|---|
+| Ramparva – Ek Diwali Sandhya (7 October) | Venue (shown as "Khopoli") and time |
+| Mazha Bappa (13–26 September) | What the initiative was, and where |
+| Samyati 4.0 (18 September – 20 October) | What the activity was |
+| Gajsanskruti 10.0 (26 September) | What the club did there |
+| ICYE visits (1 October) | A line on each exchange |
+| Most events | Start and end times (shown only where the reports give them) |
 
 **Where it goes:** `data/club.js` → `events`.
 
@@ -167,6 +168,8 @@ The event list came from the old website, and its dates, times and venues were m
 - [ ] Received
 
 **Why:** the FAQ tells visitors that the club reports beneficiary numbers and spend for every project, and sponsors look for this. Each event page can show a row of figures, plus a short write-up of what happened.
+
+Attendance from the reports is now shown on every event page, along with figures the reports give (trees planted, children reached, schools and so on). Beneficiary numbers and spend are still missing.
 
 **Needed per event (whatever you have):**
 - number of beneficiaries;
@@ -214,15 +217,7 @@ The FAQ currently says there is "a nominal annual subscription" without an amoun
 ### 15. Partners named on the site
 - [ ] Confirmed
 
-These organisations are named as partners on event pages:
-- Rotary Club of Khopoli
-- Rotaract Club Saanjh, Delhi
-- Rotaract Club of Bicholim
-- Khopoli Municipal Council
-- Interact Club of Khopoli
-- the Traffic Police Department
-
-Please confirm they are happy to be named.
+Event pages now name the partner clubs and organisations given in the club's reports (for example Rotary Club of Khopoli, Rotaract Club of KGRDCP, Rotaract Club of Bicholim, Khopoli Municipal Council, the Traffic Police Department, and Project Bachpan 2.0's sponsors Weblution and Artist Duck – Media and Tech). Please confirm they are happy to be named.
 
 ### 16. Blog posts
 - [ ] Reviewed
@@ -230,7 +225,7 @@ Please confirm they are happy to be named.
 The blog has 6 articles. They were written for the site from the club's information:
 1. Our story: a Rotaract club built during a difficult year
 2. The seven avenues of service, explained
-3. A year of projects: from Maha Aarti to Canva hacks
+3. A year of projects: from Paintscape to Project Bachpan (rewritten from the club's event reports)
 4. How to join Rotaract Club of Khopoli
 5. What is Rotaract District 3131?
 6. Rotary, Rotaract and Interact: one family
@@ -250,6 +245,7 @@ Please have someone read them for accuracy and tone. Correct, replace or remove 
 | 9 | Real project photos | Club | **High** |
 | 10 | Confirm event details | Club | **High** |
 | 5 | Social media links | Club | Medium |
+| 6a | Confirm the 2026–27 board | Club | **High** |
 | 6 | Missing member photos | Club | Medium |
 | 7 | Full names (Harsh, Sarvesh, Gaurav) | Club | Medium |
 | 12 | New event calendar | Club | Medium |

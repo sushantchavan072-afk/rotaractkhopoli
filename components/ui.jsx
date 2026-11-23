@@ -14,7 +14,7 @@ import {
 } from 'react-icons/fa6';
 import {
   ALL_PAGES, NAV, club, clubEmail, contact, officers, initials, FORM_ENDPOINT, FAMILY_LOGOS,
-  formatDate, isPast, rotaractYear,
+  formatDateRange, isPast, rotaractYear,
 } from '../data/club';
 
 // The lanyard badge is only downloaded when someone opens a member's badge.
@@ -712,14 +712,14 @@ export function EventCard({ e, i = 0, headingLevel = 3 }) {
   return (
     <article className="event-card">
       <Link href={`/events/${e.slug}`} className="event-card-photo" tabIndex={-1} aria-hidden="true">
-        <Photo src={`/images/events/${e.slug}.jpg`} alt="" label={e.title} tone={i} sizes="(max-width: 700px) 100vw, (max-width: 1040px) 50vw, 33vw" />
+        <Photo src={e.image} alt="" label={e.title} tone={i} sizes="(max-width: 700px) 100vw, (max-width: 1040px) 50vw, 33vw" />
       </Link>
       <div className="event-card-body">
         <div className="event-card-meta"><span className="chip">{e.avenue}</span><EventStatus event={e} /></div>
         <H>{e.title}</H>
         <p>{e.summary}</p>
         <dl className="event-card-facts">
-          <div><dt>Date</dt><dd>{formatDate(e.date)}</dd></div>
+          <div><dt>Date</dt><dd>{formatDateRange(e)}</dd></div>
           <div><dt>Venue</dt><dd>{e.venue}</dd></div>
         </dl>
         <Link href={`/events/${e.slug}`} className="card-btn">View Event<span className="sr-only">: {e.title}</span></Link>

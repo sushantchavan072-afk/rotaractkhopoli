@@ -31,8 +31,9 @@ const AVENUE_HUE = {
   'International Service': 'interact',
   'Professional Development': 'rotary',
   'Diversity, Equity & Inclusion': 'rotaract',
-  'Public Relations': 'gold',
+  'Public Relations': 'sun',
   'Public Image': 'sun',
+  'Rotary–Rotaract Relations': 'gold',
 };
 const hueOf = (avenue) => AVENUE_HUE[avenue] ?? 'ink';
 
@@ -202,6 +203,12 @@ export default function ClubCalendar({ events }) {
               <div className="cal-row" role="row" key={w}>
                 {cells.slice(w * 7, w * 7 + 7).map((k) => {
                   const list = byDay.get(k) ?? [];
+                  // Events running over several days are named on their first day (and at the start of each
+                  // week or month); on the days in between they show as a slim bar in their avenue colour.
+                  const named = list.filter((e) => !e.endDate || e.date === k || weekday(k) === 0 || parse(k).d === 1);
+                  const tags = named.slice(0, 2);
+                  const bars = list.filter((e) => !named.includes(e)).slice(0, Math.max(0, 3 - tags.length));
+                  const hidden = list.length - tags.length - bars.length;
                   const rot = rotaryOn(k);
                   const outside = k.slice(0, 7) !== first.slice(0, 7);
                   const cls = ['cal-day', outside && 'is-outside', k === today && 'is-today', k === selected && 'is-selected',
@@ -214,8 +221,9 @@ export default function ClubCalendar({ events }) {
                         {rot && <span className="cal-rotary" aria-hidden="true" title={rot.title} />}
                         {list.length > 0 && (
                           <span className="cal-marks" aria-hidden="true">
-                            {list.slice(0, 2).map((e) => <span key={e.slug} className={`cal-tag hue-${hueOf(e.avenue)}`}>{e.title}</span>)}
-                            {list.length > 2 && <span className="cal-more">+{list.length - 2}</span>}
+                            {tags.map((e) => <span key={e.slug} className={`cal-tag hue-${hueOf(e.avenue)}`}>{e.title}</span>)}
+                            {bars.map((e) => <span key={e.slug} className={`cal-span hue-${hueOf(e.avenue)}`} />)}
+                            {hidden > 0 && <span className="cal-more">+{hidden}</span>}
                             <span className="cal-dots">{list.slice(0, 3).map((e) => <i key={e.slug} className={`cal-dot hue-${hueOf(e.avenue)}`} />)}</span>
                           </span>
                         )}
