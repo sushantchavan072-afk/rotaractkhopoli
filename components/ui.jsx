@@ -12,8 +12,8 @@ import {
   FaXmark as X, FaPlus as Plus, FaRegEnvelope as Mail, FaMagnifyingGlass as Search,
   FaRegCalendarPlus as CalendarPlus, FaShareNodes as Share2, FaCheck as Check, FaInstagram as Instagram,
   FaFacebookF as Facebook, FaLinkedinIn as Linkedin, FaYoutube as Youtube, FaHeart as Heart,
-  FaWandMagicSparkles as Sparkles,
 } from 'react-icons/fa6';
+import RobotIcon from './ui/robot-icon';
 import {
   ALL_PAGES, NAV, club, clubEmail, contact, officers, initials, FORM_ENDPOINT, FAMILY_LOGOS,
   formatDateRange, isPast, rotaractYear,
@@ -277,7 +277,7 @@ export function Header() {
             </Link>
           ))}
           <button type="button" className="nav-pill nav-ask" onClick={() => { setOpen(false); window.dispatchEvent(new Event('rck:ask')); }}>
-            <Sparkles size={14} aria-hidden="true" /> Ask AI
+            <RobotIcon size={19} /> Ask AI
           </button>
           <Link href="/join" className="nav-cta">Join the Club <span className="nav-cta-arrow" aria-hidden="true"><ArrowRight size={13} /></span></Link>
           <span className="nav-glow" ref={glowRef} aria-hidden="true" />

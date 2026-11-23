@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { FaWandMagicSparkles } from 'react-icons/fa6';
+import RobotIcon from './robot-icon';
 
 // The chat window's code is only downloaded the first time someone opens it.
 const AskPanel = dynamic(() => import('./ask-panel'), { ssr: false });
@@ -24,7 +24,7 @@ export default function AskLauncher() {
     <>
       {!open && (
         <button type="button" className="ask-fab" aria-label="Ask the club assistant" onClick={() => { setLoaded(true); setOpen(true); }}>
-          <FaWandMagicSparkles size={20} aria-hidden="true" />
+          <RobotIcon size={30} />
         </button>
       )}
       {loaded && <AskPanel open={open} onClose={() => setOpen(false)} />}

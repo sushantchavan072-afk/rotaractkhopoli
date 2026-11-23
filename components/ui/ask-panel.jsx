@@ -2,7 +2,8 @@
 
 import { Fragment, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { FaWandMagicSparkles, FaXmark, FaArrowUp, FaStop, FaRotateLeft, FaArrowRight } from 'react-icons/fa6';
+import RobotIcon from './robot-icon';
+import { FaXmark, FaArrowUp, FaStop, FaRotateLeft, FaArrowRight } from 'react-icons/fa6';
 
 const SUGGESTIONS = [
   'How do I join the club?',
@@ -119,7 +120,7 @@ export default function AskPanel({ open, onClose }) {
   return (
     <div ref={panel} className={`ask-panel ${open ? 'is-open' : ''}`} role="dialog" aria-modal="false" aria-label="Ask the club assistant" hidden={!open}>
       <header className="ask-head">
-        <span className="ask-avatar" aria-hidden="true"><FaWandMagicSparkles size={16} /></span>
+        <span className="ask-avatar" aria-hidden="true"><RobotIcon size={24} /></span>
         <div className="ask-title">
           <strong>Ask Rotaract Khopoli</strong>
           <span>Answers from this website</span>

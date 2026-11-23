@@ -1480,8 +1480,16 @@ html.intro-on:not(.intro-copy) .home-hero-copy > * { opacity: 0; }
 
 /* ---------- Menu pill, redesigned: frosted glass, a gliding highlight, and livelier actions ---------- */
 .nav-glow { display: none; }
-.nav-ask svg { color: var(--rotaract); transition: transform .5s cubic-bezier(.3, 1.4, .4, 1); }
-.nav-ask:hover svg, .nav-ask:focus-visible svg { transform: rotate(-18deg) scale(1.18); }
+.nav-ask .robot-icon { color: var(--rotaract); transition: transform .5s cubic-bezier(.3, 1.4, .4, 1); }
+.nav-ask:hover .robot-icon, .nav-ask:focus-visible .robot-icon { transform: translateY(-1px) scale(1.12); }
+/* The assistant's robot: its eyes blink now and then, and its antenna wiggles when its button is hovered */
+.robot-icon { flex: none; overflow: visible; }
+.robot-eye { transform-box: fill-box; transform-origin: center; animation: robot-blink 5.5s infinite; }
+.robot-antenna { transform-box: view-box; transform-origin: 32px 16px; }
+:is(.nav-ask, .ask-fab, .ask-head):hover .robot-antenna { animation: robot-antenna .7s ease; }
+@keyframes robot-blink { 0%, 90%, 100% { transform: scaleY(1); } 93% { transform: scaleY(.12); } 96% { transform: scaleY(1); } }
+@keyframes robot-antenna { 25% { rotate: -16deg; } 55% { rotate: 12deg; } 80% { rotate: -5deg; } }
+@media (prefers-reduced-motion: reduce) { .robot-eye, :is(.nav-ask, .ask-fab, .ask-head):hover .robot-antenna { animation: none; } }
 .nav-cta { display: inline-flex; align-items: center; justify-content: center; gap: 12px; }
 .nav-cta-arrow { flex: none; width: 32px; height: 32px; display: grid; place-items: center; border-radius: 50%; background: #fff; color: var(--ink); transition: transform .45s cubic-bezier(.3, 1.4, .4, 1); }
 .nav-cta:hover .nav-cta-arrow, .nav-cta:focus-visible .nav-cta-arrow { transform: rotate(-45deg); }
@@ -1512,7 +1520,7 @@ html.intro-on:not(.intro-copy) .home-hero-copy > * { opacity: 0; }
   .site-header .nav-cta:hover { transform: translateY(-1px); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .nav-glow, .nav[data-ready] .nav-glow, .nav-ask svg, .nav-cta-arrow { transition: none; }
+  .nav-glow, .nav[data-ready] .nav-glow, .nav-ask .robot-icon, .nav-cta-arrow { transition: none; }
 }
 
 /* ---------- Site assistant (components/ui/ask-launcher.jsx and ask-panel.jsx) ---------- */
