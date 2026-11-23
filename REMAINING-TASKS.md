@@ -29,25 +29,20 @@ Tick items off as you go by changing `[ ]` to `[x]`.
 
 **Tip:** do this after item 4 below (the club email), so the sheet and the optional email alerts belong to the club account rather than a personal one.
 
-### 2. Set the website's real address
+### 2. Get the site into Google (Search Console)
 - [ ] Done
 
-**Why:** the site currently assumes its address is `https://rotaractkhopoli.org`. That address is used for:
-- link previews when the site is shared on WhatsApp, Instagram or LinkedIn;
-- the sitemap that Google reads;
-- the "official" address of each page in search results.
+The website now works out its own address: on Vercel it uses the project's production domain (today `rotaractkhopolii.vercel.app`, and the club's own domain automatically once one is added in Vercel). Link previews, the sitemap and each page's "official" address all follow it, so nothing needs setting. `NEXT_PUBLIC_SITE_URL` still overrides it if ever needed.
 
-If the club does not own that domain, previews and search results point to a site that doesn't exist.
+**Why Search Console:** it tells Google the site exists, shows which searches bring people to it, and warns about problems.
 
-**How (choose one):**
-- **No custom domain yet:**
-  1. In Vercel go to **Project → Settings → Environment Variables**.
-  2. Add `NEXT_PUBLIC_SITE_URL` = `https://rotaractkhopolii.vercel.app` for Production.
-  3. Go to **Deployments → ⋯ → Redeploy**.
-- **The club buys a domain** (for example rotaractkhopoli.org or .in):
-  1. Add it in **Vercel → Project → Settings → Domains** and follow Vercel's DNS steps.
-  2. Set `NEXT_PUBLIC_SITE_URL` to that domain.
-  3. Redeploy.
+**How:**
+1. Open **search.google.com/search-console** with the club's Google account (see item 4) and choose **Add property → URL prefix**, entering the site's address.
+2. For the verification step, choose **HTML tag** and copy the code inside `content="…"`. Send it to your developer: it goes into `app/layout.jsx` as `verification: { google: '…' }`. Then press **Verify**.
+3. Under **Sitemaps**, submit `sitemap.xml`.
+4. Optional: do the same at **bing.com/webmasters** (it can import from Search Console in one click).
+
+**If the club buys a domain** (for example rotaractkhopoli.org or .in): add it in **Vercel → Project → Settings → Domains**, follow Vercel's DNS steps and set it as the production domain, then add it in Search Console as above.
 
 ### 3. Check Vercel is still linked to GitHub
 - [ ] Done
@@ -239,7 +234,7 @@ Please have someone read them for accuracy and tone. Correct, replace or remove 
 | # | Item | Who | Priority |
 |---|---|---|---|
 | 1 | Connect forms to Google Sheets | You | **High** |
-| 2 | Set the real website address | You | **High** |
+| 2 | Add the site to Google Search Console | You | **High** |
 | 3 | Check the Vercel and GitHub link | You | **High** |
 | 4 | Shared club email | Club | **High** |
 | 9 | Real project photos | Club | **High** |

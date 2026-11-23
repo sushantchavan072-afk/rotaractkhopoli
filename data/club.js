@@ -41,7 +41,16 @@ export const clubEmail = contact.email || officers[1].email || officers[0].email
 /** Optional form backend (Formspree, Getform, etc.). When set, forms POST here instead of opening the email app. */
 export const FORM_ENDPOINT = process.env.NEXT_PUBLIC_FORM_ENDPOINT || '';
 
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://rotaractkhopoli.org').replace(/\/$/, '');
+/**
+ * The site's public address, used for canonical links, share cards, structured data and the sitemap.
+ * NEXT_PUBLIC_SITE_URL wins when set. Otherwise Vercel's production domain is used (it becomes the club's
+ * own domain automatically once one is added in Vercel), and outside Vercel the current live address.
+ */
+export const SITE_URL = (
+  process.env.NEXT_PUBLIC_SITE_URL
+  || (process.env.VERCEL_PROJECT_PRODUCTION_URL && `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`)
+  || 'https://rotaractkhopolii.vercel.app'
+).replace(/\/$/, '');
 
 /** The Rotaract year shown on the Members page. */
 export const rotaractYear = '2026–27';

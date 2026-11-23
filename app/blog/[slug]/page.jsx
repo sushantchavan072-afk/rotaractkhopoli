@@ -8,7 +8,7 @@ export function generateStaticParams(){ return posts.map((p) => ({ slug: p.slug 
 export async function generateMetadata({ params }){
   const { slug } = await params;
   const p = posts.find((x) => x.slug === slug);
-  return p ? pageMeta(`/blog/${p.slug}`, p.title, p.excerpt, p.image) : {};
+  return p ? pageMeta(`/blog/${p.slug}`, p.title, p.excerpt, p.image, { article: { publishedTime: p.date } }) : {};
 }
 export default async function Page({ params }){
   const { slug } = await params;

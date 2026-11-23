@@ -15,7 +15,7 @@ import {
   club, clubFacts, officers, clubEmail, contact, avenues, events, eventsNewestFirst, formatDate, formatDateRange,
   coreMembers, boardOfDirectors, chairpersons, uniqueMemberCount, initials, testimonials,
   allFaqs, faqGroups, district, rotary, sponsorTiers, joinCommitments, rotaractYear,
-  membersWithRoles, eventsForAvenue, SITE_URL, FAMILY_LOGOS, values, volunteerReasons, waysToHelp,
+  membersWithRoles, eventsForAvenue, FAMILY_LOGOS, values, volunteerReasons, waysToHelp,
   postsNewestFirst, PAGE_SIZE, riPresident, drr, districtGovernor,
 } from '../data/club';
 import {
@@ -25,14 +25,11 @@ import {
 import { Team, WorldMap } from '@/components/ui/lazy';
 import ClubCalendar from '@/components/ui/club-calendar';
 import { placeOnMap, MAP_SIZE } from '../lib/world-map';
+import { eventPhoto } from '../lib/event-photo';
+import { breadcrumbJsonLd, eventJsonLd, postJsonLd, faqJsonLd } from '../lib/seo';
 
 const ICONS = { HandHeart, GraduationCap, Users, Globe2, Megaphone, HeartHandshake, Sparkles, ShieldCheck, UserPlus, Lightbulb, Package, Handshake };
-/** An event's photo: its own `image`, else public/images/events/<slug>.jpg if that file exists, else null (placeholder). */
-const eventImage = (e) => {
-  if (e.image) return e.image;
-  const rel = `/images/events/${e.slug}.jpg`;
-  return existsSync(join(process.cwd(), 'public', rel)) ? rel : null;
-};
+const eventImage = eventPhoto;
 const withPhoto = (e) => ({ ...e, image: eventImage(e) });
 /** Only point at a member photo that actually exists in /public, so missing portraits never trigger a 404. */
 const memberImage = (m) => {
@@ -582,6 +579,7 @@ export function AvenueDetail({ slug }) {
   const others = avenues.filter((x) => x.slug !== slug);
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd([['Avenues of Service', '/avenues'], [a.name, `/avenues/${a.slug}`]])) }} />
       <PageHero layout="split" eyebrow={a.focus} title={a.name} desc={a.description}>
         <Btn href={`/contact?about=${encodeURIComponent(`${a.name} project idea`)}`} icon={false}>Suggest a Project</Btn>
       </PageHero>
@@ -654,14 +652,7 @@ export function EventDetail({ slug }) {
   const e = events.find((x) => x.slug === slug);
   const others = eventsNewestFirst.filter((x) => x.slug !== slug).slice(0, 3);
   const avenue = avenues.find((a) => a.eventAvenues.includes(e.avenue));
-  const online = /online/i.test(e.venue);
-  const jsonLd = {
-    '@context': 'https://schema.org', '@type': 'Event', name: e.title, description: e.summary,
-    startDate: e.date, endDate: e.endDate ?? e.date, image: `${SITE_URL}${eventImage(e) ?? '/og-stage.jpg'}`,
-    eventAttendanceMode: online ? 'https://schema.org/OnlineEventAttendanceMode' : 'https://schema.org/OfflineEventAttendanceMode',
-    location: online ? { '@type': 'VirtualLocation', url: `${SITE_URL}/events/${e.slug}` } : { '@type': 'Place', name: e.venue, address: e.venue },
-    organizer: { '@type': 'Organization', name: club.name, url: SITE_URL },
-  };
+  const jsonLd = [eventJsonLd(e, eventImage(e)), breadcrumbJsonLd([['Events', '/events'], [e.title, `/events/${e.slug}`]])];
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
@@ -740,7 +731,7 @@ export function Blog({ page = 1 }) {
 export function BlogPost({ slug }) {
   const p = postsNewestFirst.find((x) => x.slug === slug);
   const others = postsNewestFirst.filter((x) => x.slug !== slug).slice(0, 3);
-  const jsonLd = { '@context': 'https://schema.org', '@type': 'BlogPosting', headline: p.title, datePublished: p.date, image: `${SITE_URL}${p.image}`, author: { '@type': 'Organization', name: club.name }, publisher: { '@type': 'Organization', name: club.name } };
+  const jsonLd = [postJsonLd(p), breadcrumbJsonLd([['Blog', '/blog'], [p.title, `/blog/${p.slug}`]])];
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
@@ -971,6 +962,7 @@ export function RotaryInfo() {
 export function Faqs() {
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd(allFaqs)) }} />
       <PageHero eyebrow="Questions answered" title="Frequently asked questions" desc="About the club, membership, events and how Rotaract connects to Rotary." />
       <Section><div className="faq-page"><FaqSearch groups={faqGroups} /></div></Section>
       <CommunityCTA />

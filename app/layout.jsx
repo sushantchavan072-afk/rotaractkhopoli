@@ -5,7 +5,7 @@ import {Header, Footer, ScrollReveal} from '../components/ui';
 import MouseTrail from '@/components/ui/mouse-trail';
 import CustomCursor from '@/components/ui/custom-cursor';
 import {club, SITE_URL} from '../data/club';
-import {organizationJsonLd} from '../lib/seo';
+import {siteJsonLd} from '../lib/seo';
 
 export const metadata = {
   metadataBase: new URL(SITE_URL),
@@ -33,7 +33,7 @@ export default function RootLayout({ children }){
       </head>
       <body>
         <MouseTrail />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd) }} />
         <Header/>
         <main id="main" tabIndex={-1}>{children}</main>
         <Footer/>
