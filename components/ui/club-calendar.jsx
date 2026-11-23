@@ -17,8 +17,7 @@ import { downloadIcs, googleCalendarUrl } from '@/lib/calendar';
  *   days are marked in Rotary gold.
  * - Choosing a day lists what is on; upcoming projects can be added to Google Calendar or saved
  *   as an .ics file, one at a time or all together.
- * - Avenue filters, a Rotaract-year strip (July to June) to jump between months, arrow-key and
- *   Page Up/Down navigation, and swiping between months on phones.
+ * - Arrow-key and Page Up/Down navigation, and swiping between months on phones.
  *
  * New events in data/club.js appear here automatically.
  */
@@ -84,8 +83,6 @@ export default function ClubCalendar({ events }) {
   const today = useToday();
   const [view, setView] = useState(null); // { y, m } once the visitor moves away from this month
   const [picked, setPicked] = useState(null); // a chosen day, else today
-  const [avenue, setAvenue] = useState('all');
-  const [showRotary, setShowRotary] = useState(true);
   const [dir, setDir] = useState(0); // which way the month grid slides in
   const gridRef = useRef(null);
   const focusNext = useRef(false);
@@ -94,20 +91,18 @@ export default function ClubCalendar({ events }) {
   const month = view ?? (today ? { y: parse(today).y, m: parse(today).m } : null);
   const selected = picked ?? today;
 
-  const avenues = useMemo(() => [...new Set(events.map((e) => e.avenue))], [events]);
-  const shown = useMemo(() => events.filter((e) => avenue === 'all' || e.avenue === avenue), [events, avenue]);
   const byDay = useMemo(() => {
     const map = new Map();
-    for (const e of shown) {
+    for (const e of events) {
       const last = e.endDate ?? e.date;
       for (let k = e.date; k <= last; k = addDays(k, 1)) map.set(k, [...(map.get(k) ?? []), e]);
     }
     return map;
-  }, [shown]);
-  const rotaryOn = (k) => (showRotary ? rotaryDays.find((r) => r.date === k.slice(5)) : undefined);
+  }, [events]);
+  const rotaryOn = (k) => rotaryDays.find((r) => r.date === k.slice(5));
   const upcoming = useMemo(
-    () => (today ? shown.filter((e) => (e.endDate ?? e.date) >= today).sort((a, b) => a.date.localeCompare(b.date)) : []),
-    [shown, today],
+    () => (today ? events.filter((e) => (e.endDate ?? e.date) >= today).sort((a, b) => a.date.localeCompare(b.date)) : []),
+    [events, today],
   );
 
   // Move keyboard focus to the newly selected day after arrow-key navigation.
@@ -128,7 +123,6 @@ export default function ClubCalendar({ events }) {
   const monthEvents = new Set();
   for (let d = 1; d <= daysInMonth(month.y, month.m); d++) (byDay.get(keyOf(month.y, month.m, d)) ?? []).forEach((e) => monthEvents.add(e));
   const focusable = selected && selected.slice(0, 7) === first.slice(0, 7) ? selected : first;
-  const rotaryYear = month.m >= 6 ? month.y : month.y - 1;
 
   const goMonth = (next, d = 0) => { setDir(d); setView(next); };
   const go = (n) => goMonth(shiftMonth(month, n), n);
@@ -182,18 +176,6 @@ export default function ClubCalendar({ events }) {
           </div>
         </div>
 
-        <div className="cal-filters" role="group" aria-label="Show on the calendar">
-          <button type="button" className={`cal-chip ${avenue === 'all' ? 'is-on' : ''}`} aria-pressed={avenue === 'all'} onClick={() => setAvenue('all')}>All avenues</button>
-          {avenues.map((a) => (
-            <button key={a} type="button" className={`cal-chip ${avenue === a ? 'is-on' : ''}`} aria-pressed={avenue === a} onClick={() => setAvenue(avenue === a ? 'all' : a)}>
-              <i className={`cal-dot hue-${hueOf(a)}`} aria-hidden="true" />{a}
-            </button>
-          ))}
-          <button type="button" className={`cal-chip ${showRotary ? 'is-on' : ''}`} aria-pressed={showRotary} onClick={() => setShowRotary(!showRotary)}>
-            <i className="cal-dot hue-gold is-ring" aria-hidden="true" />Rotary days
-          </button>
-        </div>
-
         <div className="cal-grid" role="grid" aria-labelledby="cal-title" ref={gridRef} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
           <div className="cal-row cal-weekdays" role="row">
             {WEEKDAYS.map((w) => <div key={w} role="columnheader" aria-label={w}><span aria-hidden="true">{w.slice(0, 3)}</span></div>)}
@@ -237,24 +219,7 @@ export default function ClubCalendar({ events }) {
         </div>
         <p className="sr-only" aria-live="polite">{MONTHS[month.m]} {month.y}: {monthEvents.size ? plural(monthEvents.size, 'project') : 'no projects'}</p>
 
-        <div className="cal-year" role="group" aria-label={`Rotaract year ${rotaryYear}–${String(rotaryYear + 1).slice(2)}`}>
-          <span className="cal-year-label">Rotaract year {rotaryYear}–{String(rotaryYear + 1).slice(2)}</span>
-          <div className="cal-year-months">
-            {Array.from({ length: 12 }, (_, i) => {
-              const t = shiftMonth({ y: rotaryYear, m: 6 }, i);
-              const prefix = `${t.y}-${pad(t.m + 1)}`;
-              const n = shown.filter((e) => e.date.startsWith(prefix) || (e.endDate ?? e.date).startsWith(prefix)).length;
-              const on = t.y === month.y && t.m === month.m;
-              return (
-                <button key={prefix} type="button" className={`cal-month ${on ? 'is-on' : ''} ${today?.startsWith(prefix) ? 'is-now' : ''}`}
-                  aria-current={on ? 'date' : undefined} aria-label={`${MONTHS[t.m]} ${t.y}, ${n ? plural(n, 'project') : 'no projects'}`}
-                  onClick={() => goMonth(t, Math.sign(t.y * 12 + t.m - (month.y * 12 + month.m)))}>
-                  {MONTHS[t.m].slice(0, 3)}{n > 0 && <b>{n}</b>}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        <p className="cal-legend"><i className="cal-dot hue-gold is-ring" aria-hidden="true" /> Rotary family day</p>
       </div>
 
       <aside className="cal-side" aria-label="Selected day">

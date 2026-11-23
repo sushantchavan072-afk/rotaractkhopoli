@@ -728,6 +728,41 @@ export function EventCard({ e, i = 0, headingLevel = 3 }) {
   );
 }
 
+/**
+ * A pill switch whose white thumb glides to the chosen option. The thumb takes the chosen button's own
+ * width and position, so it fits any label and screen size. Until the script runs, the chosen button
+ * simply has the white background itself.
+ */
+function Segmented({ options, value, onChange, label }) {
+  const box = useRef(null);
+  const thumb = useRef(null);
+  useLayoutEffect(() => {
+    const el = box.current;
+    const t = thumb.current;
+    if (!el || !t) return undefined;
+    const place = () => {
+      const b = el.querySelector('[aria-pressed="true"]');
+      if (!b) return;
+      t.style.width = `${b.offsetWidth}px`;
+      t.style.transform = `translateX(${b.offsetLeft}px)`;
+    };
+    place();
+    el.dataset.thumb = '';
+    const raf = requestAnimationFrame(() => { el.dataset.ready = ''; }); // glide only after the first placement
+    const ro = new ResizeObserver(place);
+    ro.observe(el);
+    return () => { cancelAnimationFrame(raf); ro.disconnect(); };
+  }, [value]);
+  return (
+    <div className="segmented" ref={box} role="group" aria-label={label}>
+      <span className="segmented-thumb" ref={thumb} aria-hidden="true" />
+      {options.map(([k, l]) => (
+        <button key={k} type="button" aria-pressed={value === k} className={value === k ? 'is-active' : ''} onClick={() => onChange(k)}>{l}</button>
+      ))}
+    </div>
+  );
+}
+
 export function EventsExplorer({ events, perPage = 6 }) {
   const [page, setPage] = useState(1);
   const [when, setWhen] = useState('all');
@@ -746,11 +781,7 @@ export function EventsExplorer({ events, perPage = 6 }) {
         </div>
       )}
       <div className="filters" role="group" aria-label="Filter events">
-        <div className="segmented">
-          {[['all', 'All'], ['upcoming', 'Upcoming'], ['past', 'Completed']].map(([k, l]) => (
-            <button key={k} type="button" aria-pressed={when === k} className={when === k ? 'is-active' : ''} onClick={() => { setWhen(k); setPage(1); }}>{l}</button>
-          ))}
-        </div>
+        <Segmented label="Show" options={[['all', 'All'], ['upcoming', 'Upcoming'], ['past', 'Completed']]} value={when} onChange={(k) => { setWhen(k); setPage(1); }} />
         <label className="sr-only" htmlFor="avenue-filter">Filter by avenue</label>
         <select id="avenue-filter" value={avenue} onChange={(e) => { setAvenue(e.target.value); setPage(1); }}>
           {avenueNames.map((a) => <option key={a}>{a}</option>)}
@@ -759,7 +790,8 @@ export function EventsExplorer({ events, perPage = 6 }) {
       <p className="sr-only" role="status" aria-live="polite">{list.length} events shown</p>
       {list.length ? (
         <>
-          <div className="card-grid">{list.slice((page - 1) * perPage, page * perPage).map((e, i) => <EventCard e={e} i={i} key={e.slug} headingLevel={2} />)}</div>
+          {/* Keyed by the filters, so the cards fade up again whenever the selection changes */}
+          <div className="card-grid" key={`${when}|${avenue}|${page}`}>{list.slice((page - 1) * perPage, page * perPage).map((e, i) => <EventCard e={e} i={i} key={e.slug} headingLevel={2} />)}</div>
           {list.length > perPage && (
             <nav className="pagination" aria-label="Event pages">
               {Array.from({ length: Math.ceil(list.length / perPage) }, (_, n) => (
