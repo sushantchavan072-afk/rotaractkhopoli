@@ -12,6 +12,7 @@ import {
   FaXmark as X, FaPlus as Plus, FaRegEnvelope as Mail, FaMagnifyingGlass as Search,
   FaRegCalendarPlus as CalendarPlus, FaShareNodes as Share2, FaCheck as Check, FaInstagram as Instagram,
   FaFacebookF as Facebook, FaLinkedinIn as Linkedin, FaYoutube as Youtube, FaHeart as Heart,
+  FaWandMagicSparkles as Sparkles,
 } from 'react-icons/fa6';
 import {
   ALL_PAGES, NAV, club, clubEmail, contact, officers, initials, FORM_ENDPOINT, FAMILY_LOGOS,
@@ -204,6 +205,38 @@ export function Header() {
     return () => window.removeEventListener('keydown', onKey);
   }, [pagesOpen, open]);
   const isCurrent = (href) => (href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`));
+
+  // Desktop: one soft highlight glides to whichever item is hovered or focused, and rests on the
+  // current page (or the open "All Pages" button) otherwise.
+  const navRef = useRef(null);
+  const glowRef = useRef(null);
+  const moveGlow = useCallback((el) => {
+    const nav = navRef.current;
+    const glow = glowRef.current;
+    if (!nav || !glow) return;
+    if (!el || !window.matchMedia('(min-width: 1041px)').matches) { glow.classList.remove('is-on'); return; }
+    glow.style.width = `${el.offsetWidth}px`;
+    glow.style.transform = `translateX(${el.offsetLeft}px)`;
+    glow.classList.add('is-on');
+    nav.dataset.glow = '';
+  }, []);
+  const restGlow = useCallback(() => moveGlow(navRef.current?.querySelector('.pages-toggle.is-open, .nav-pill.is-current')), [moveGlow]);
+  useLayoutEffect(() => {
+    restGlow();
+    const raf = requestAnimationFrame(() => { if (navRef.current) navRef.current.dataset.ready = ''; }); // glide only after the first placement
+    return () => cancelAnimationFrame(raf);
+  }, [pathname, pagesOpen, restGlow]);
+  useEffect(() => {
+    const ro = new ResizeObserver(() => restGlow());
+    if (navRef.current) ro.observe(navRef.current);
+    return () => ro.disconnect();
+  }, [restGlow]);
+  const onNavPointer = (e) => {
+    const item = e.target.closest('.nav-pill, .nav-cta');
+    if (!item || !navRef.current?.contains(item)) return;
+    if (item.classList.contains('nav-cta')) restGlow(); else moveGlow(item);
+  };
+
   return (
     <header className={`site-header ${isHome ? 'is-overlay' : ''} ${stuck ? 'is-stuck' : ''}`}>
       <a className="skip-link" href="#main">Skip to content</a>
@@ -216,7 +249,11 @@ export function Header() {
         </div>
         {/* Phone menu: tapping outside it closes it */}
         {open && <button type="button" className="menu-backdrop" tabIndex={-1} aria-hidden="true" onClick={() => setOpen(false)} />}
-        <nav id="main-nav" className={`nav ${open ? 'is-open' : ''}`} aria-label="Main">
+        <nav
+          id="main-nav" ref={navRef} className={`nav ${open ? 'is-open' : ''}`} aria-label="Main"
+          onPointerOver={onNavPointer} onPointerLeave={restGlow}
+          onFocus={(e) => { const item = e.target.closest('.nav-pill'); if (item) moveGlow(item); }} onBlur={restGlow}
+        >
           <div
             className="pages-wrap"
             onMouseEnter={() => { if (!pagesOpen && window.matchMedia('(hover: hover) and (min-width: 1041px)').matches) { setPagesByHover(true); setPagesOpen(true); } }}
@@ -239,7 +276,11 @@ export function Header() {
               {item.label}
             </Link>
           ))}
-          <Link href="/join" className="nav-cta">Join the Club</Link>
+          <button type="button" className="nav-pill nav-ask" onClick={() => { setOpen(false); window.dispatchEvent(new Event('rck:ask')); }}>
+            <Sparkles size={14} aria-hidden="true" /> Ask AI
+          </button>
+          <Link href="/join" className="nav-cta">Join the Club <span className="nav-cta-arrow" aria-hidden="true"><ArrowRight size={13} /></span></Link>
+          <span className="nav-glow" ref={glowRef} aria-hidden="true" />
         </nav>
       </div>
     </header>

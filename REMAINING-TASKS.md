@@ -29,6 +29,21 @@ Tick items off as you go by changing `[ ]` to `[x]`.
 
 **Tip:** do this after item 4 below (the club email), so the sheet and the optional email alerts belong to the club account rather than a personal one.
 
+### 1a. Switch on the AI assistant
+- [ ] Done
+
+**What it is:** the "Ask AI" button in the menu (and the round pink button on phones) opens a chat where visitors can ask anything about the club. It searches this website's own content (events, team, avenues, FAQs, blog, district and Rotary pages) and has Claude, Anthropic's AI model, write a short answer from what it found, with numbered links to the pages it used. It never answers from outside the site.
+
+**Right now** it runs in search-only mode: it lists the most relevant pages but doesn't write answers. To switch on written answers:
+1. Create an account at **console.anthropic.com** (use the club's Google account from item 4), add a payment method and set a monthly **spend limit** under Billing (for example $10).
+2. Under **API Keys**, create a key and copy it.
+3. In **Vercel → Project → Settings → Environment Variables**, add `ANTHROPIC_API_KEY` with that key, for Production.
+4. Redeploy, open the site, press **Ask AI** and try a question.
+
+**Cost:** each answer uses Claude Opus 5.5 and costs roughly $0.01–0.02 (about ₹1–2), so a few hundred questions a month stays within a few dollars. The spend limit stops it ever costing more than you set. To use a different Claude model, add `ANTHROPIC_MODEL` (for example `claude-haiku-5-5`, which is far cheaper but writes less carefully).
+
+**Safety:** answers come only from the site's pages, each visitor is limited to 20 questions per 10 minutes, and the chat tells visitors that AI answers can be wrong.
+
 ### 2. Get the site into Google (Search Console)
 - [ ] Done
 
@@ -234,6 +249,7 @@ Please have someone read them for accuracy and tone. Correct, replace or remove 
 | # | Item | Who | Priority |
 |---|---|---|---|
 | 1 | Connect forms to Google Sheets | You | **High** |
+| 1a | Switch on the AI assistant (API key) | You | **High** |
 | 2 | Add the site to Google Search Console | You | **High** |
 | 3 | Check the Vercel and GitHub link | You | **High** |
 | 4 | Shared club email | Club | **High** |
