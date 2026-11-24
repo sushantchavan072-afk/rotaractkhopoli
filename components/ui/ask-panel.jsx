@@ -3,7 +3,7 @@
 import { Fragment, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import RobotIcon from './robot-icon';
-import { FaXmark, FaArrowUp, FaStop, FaRotateLeft, FaArrowRight } from 'react-icons/fa6';
+import { FaXmark, FaArrowUp, FaStop, FaRotateLeft, FaArrowRight, FaGlobe, FaArrowUpRightFromSquare } from 'react-icons/fa6';
 
 const SUGGESTIONS = [
   'How do I join the club?',
@@ -15,7 +15,8 @@ const STORE = 'rck-ask';
 
 /** **bold** and [1] citations inside a line of the answer. */
 function inline(line, sources) {
-  return line.split(/(\*\*[^*]+\*\*|\[\d+(?:\s*,\s*\d+)*\])/g).map((part, i) => {
+  return line.split(/(\*\*[^*]+\*\*|\[\d+(?:\s*,\s*\d+)*\]|From the web:)/g).map((part, i) => {
+    if (part === 'From the web:') return <span key={i} className="ask-web-badge">From the web</span>;
     if (/^\*\*[^*]+\*\*$/.test(part)) return <strong key={i}>{part.slice(2, -2)}</strong>;
     const cite = part.match(/^\[(\d+(?:\s*,\s*\d+)*)\]$/);
     if (cite) {
@@ -42,6 +43,15 @@ function Answer({ text, sources }) {
     }
     return <p key={i}>{lines.map((l, j) => <Fragment key={j}>{j > 0 && <br />}{inline(l, sources)}</Fragment>)}</p>;
   });
+}
+
+/**
+ * Google's "search suggestions" chip, which Google asks sites to show next to answers that used Google Search.
+ * Its HTML comes from Google and is shown in a sealed frame (no scripts), with links opening in a new tab.
+ */
+function SearchSuggestions({ html }) {
+  const doc = `<!doctype html><html><head><base target="_blank"><style>body{margin:0;background:transparent;font-family:system-ui,sans-serif}</style></head><body>${html}</body></html>`;
+  return <iframe className="ask-suggest-frame" title="Related Google searches" srcDoc={doc} sandbox="allow-popups allow-popups-to-escape-sandbox" loading="lazy" />;
 }
 
 export default function AskPanel({ open, onClose }) {
@@ -103,6 +113,7 @@ export default function AskPanel({ open, onClose }) {
           if (ev.type === 'sources') update((m) => ({ ...m, sources: ev.sources, mode: ev.mode }));
           else if (ev.type === 'text') update((m) => ({ ...m, pending: false, text: m.text + ev.text }));
           else if (ev.type === 'notice') update((m) => ({ ...m, pending: false, notice: ev.text }));
+          else if (ev.type === 'web') update((m) => ({ ...m, web: { sources: ev.sources ?? [], suggestions: ev.suggestions ?? '' } }));
           else if (ev.type === 'error') update((m) => ({ ...m, pending: false, error: true, text: m.text || ev.message }));
         }
       }
@@ -123,7 +134,7 @@ export default function AskPanel({ open, onClose }) {
         <span className="ask-avatar" aria-hidden="true"><RobotIcon size={24} /></span>
         <div className="ask-title">
           <strong>Ask Rotaract Khopoli</strong>
-          <span>Answers from this website</span>
+          <span>Answers from this website and the web</span>
         </div>
         {messages.length > 0 && <button type="button" className="ask-icon-btn" onClick={reset} aria-label="Start a new conversation" title="New conversation"><FaRotateLeft size={14} /></button>}
         <button type="button" className="ask-icon-btn" onClick={onClose} aria-label="Close the assistant"><FaXmark size={16} /></button>
@@ -149,11 +160,21 @@ export default function AskPanel({ open, onClose }) {
                   <Answer text={m.text} sources={m.sources ?? []} />
                   {m.notice && <p className="ask-notice">{m.notice}</p>}
                   {m.stopped && <p className="ask-notice">Stopped.</p>}
-                  {!m.error && m.sources?.length > 0 && (
+                  {!m.error && m.sources?.length > 0 && (!m.web?.sources?.length || /\[\d/.test(m.text)) && (
                     <div className="ask-sources">
+                      {m.web?.sources?.length > 0 && <span className="ask-sources-label">On this site</span>}
                       {m.sources.slice(0, 4).map((s, n) => (
                         <Link key={s.url + s.title} href={s.url} className="ask-source"><b>{n + 1}</b><span>{s.title}</span><FaArrowRight size={10} aria-hidden="true" /></Link>
                       ))}
+                    </div>
+                  )}
+                  {!m.error && m.web?.sources?.length > 0 && (
+                    <div className="ask-sources is-web">
+                      <span className="ask-sources-label"><FaGlobe size={11} aria-hidden="true" /> From the web</span>
+                      {m.web.sources.slice(0, 4).map((s) => (
+                        <a key={s.url} href={s.url} className="ask-source" target="_blank" rel="noopener noreferrer"><b><FaGlobe size={10} aria-hidden="true" /></b><span>{s.title}</span><FaArrowUpRightFromSquare size={10} aria-hidden="true" /></a>
+                      ))}
+                      {m.web.suggestions && <SearchSuggestions html={m.web.suggestions} />}
                     </div>
                   )}
                 </>

@@ -46,6 +46,8 @@ Good to know:
 - The free tier has per-minute and per-day limits. If they are reached, the assistant doesn't break: it lists the best-matching pages until the limit resets.
 - On the free tier Google may use the questions and answers to improve its products. The questions are about the club's public information, and the chat asks visitors not to type personal details. The Privacy Policy says so too.
 - To try a different Gemini model, add `GEMINI_MODEL` (default `gemini-3.8-flash`).
+- When this website doesn't answer a question about the club or Rotary, the assistant looks it up with Google Search and marks that part "From the web" with links. Google Search has its own free daily allowance; when it runs out, the assistant answers from the site only. Add `AI_WEB_SEARCH` = `off` to switch web search off.
+- Each Gemini model has its own small daily free allowance; the assistant moves to the next model automatically when one is used up.
 
 **Paid option: Anthropic Claude.** Add `ANTHROPIC_API_KEY` instead (from console.anthropic.com, with a monthly spend limit set under Billing). It uses Claude Opus 5.5 at roughly $0.01–0.02 per answer. If both keys are set, Claude is used; add `AI_PROVIDER` = `gemini` to choose Gemini.
 
