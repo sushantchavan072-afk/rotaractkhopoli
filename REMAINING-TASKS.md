@@ -106,21 +106,12 @@ The website now works out its own address: on Vercel it uses the project's produ
 
 **Optional:** members' personal Instagram or LinkedIn links. They appear as small icons when someone hovers over that member's card on the Teams page.
 
-### 6. Member photos still missing
-- [ ] Received
+### 6. Member photos
+- [x] Received
 
-These members show initials instead of a photo:
+Every member on the Team page now has a photo: Vageesh, Srushti, Mihir, Rohan, Khadija, Gargi, Sarvesh, Jayesh, Gaurav, Rutika, Piyush, Shreya, Anmay and Aniket.
 
-| Member | Role(s) |
-|---|---|
-| Rtr. Aniket Sardar | Immediate Past President, Rotaract-Rotary Relations Officer |
-| Rtr. Harsh | Club Editor, Sports Chair |
-
-**Needed:** one photo per person, **named with the person's name** (for example `aniket-sardar.jpg`).
-- Best: a head-and-shoulders photo against a plain background, like the existing portraits.
-- Any size works; they are cropped automatically.
-
-Photos already on the site: Vageesh, Srushti, Mihir, Rohan, Khadija, Gargi, Sarvesh, Jayesh, Gaurav, Rutika, Piyush, Shreya and Anmay.
+For a new member, send one head-and-shoulders photo **named with the person's name** (for example `firstname-lastname.jpg`); any size works.
 
 ### 6a. Board for Rotaract year 2026–27
 - [ ] Confirmed
@@ -130,7 +121,7 @@ The club's event reports say that at the 7th Installation Ceremony (2 August 202
 ### 7. Full names
 - [ ] Received
 
-These members appear with first names only: **Rtr. Harsh**, **Rtr. Sarvesh**, **Rtr. Gaurav**.
+These members appear with first names only: **Rtr. Sarvesh**, **Rtr. Gaurav**.
 
 **Needed:** their full names as they should appear on the site.
 
@@ -249,8 +240,8 @@ Please have someone read them for accuracy and tone. Correct, replace or remove 
 | 10 | Confirm event details | Club | **High** |
 | 5 | Social media links | Club | Medium |
 | 6a | Confirm the 2026–27 board | Club | **High** |
-| 6 | Missing member photos | Club | Medium |
-| 7 | Full names (Harsh, Sarvesh, Gaurav) | Club | Medium |
+| 6 | ~~Missing member photos~~ (done) | Club | — |
+| 7 | Full names (Sarvesh, Gaurav) | Club | Medium |
 | 12 | New event calendar | Club | Medium |
 | 11 | Project results | Club | Medium |
 | 13 | Testimonials | Club | Medium |

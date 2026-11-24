@@ -194,7 +194,7 @@ The full, detailed list (with what is needed, why and where it goes) is in **[RE
 
 - [ ] A shared club email (`contact.email`) and social media links
 - [ ] Real photos of projects and members
-- [ ] Full names for Rtr. Harsh, Rtr. Sarvesh and Rtr. Gaurav
+- [ ] Full names for Rtr. Sarvesh and Rtr. Gaurav
 - [ ] The secretary's contact details
 - [ ] Real, consented testimonials
 - [ ] Outcomes for completed projects (beneficiaries, volunteers, money spent)

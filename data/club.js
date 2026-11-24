@@ -356,15 +356,13 @@ export const boardOfDirectors = [
   { name: 'Rtr. Khadija Bearingwala', photo: 'khadija-bearingwala', roles: ['Professional Development Director (PDD)', 'Diversity, Equity & Inclusion Director (DEID)'] },
   { name: 'Rtr. Gargi Gaikwad', photo: 'gargi-gaikwad', roles: ['International Service Director (ISD)'] },
   { name: 'Rtr. Mihir Butala', photo: 'mihir-butala', roles: ['Public Image Director (PID)', 'World Rotaract Week Chair (WRWC)'] },
-  { name: 'Rtr. Aniket Sardar', roles: ['Immediate Past President (IPP)', 'Rotaract-Rotary Relations Officer (RRRO)'] },
-  { name: 'Rtr. Harsh', roles: ['Club Editor'] },
+  { name: 'Rtr. Aniket Sardar', photo: 'aniket-sardar', roles: ['Immediate Past President (IPP)', 'Rotaract-Rotary Relations Officer (RRRO)'] },
   { name: 'Rtr. Sarvesh', photo: 'sarvesh', roles: ['Club Public Relations Officer (PRO)'] },
   { name: 'Rtr. Jayesh Dalvi', photo: 'jayesh-dalvi', roles: ['Club Advisor'] },
 ];
 
 export const chairpersons = [
   { name: 'Rtr. Gaurav', photo: 'gaurav', roles: ['Membership Development Director'] },
-  { name: 'Rtr. Harsh', roles: ['Sports Chair'] },
   { name: 'Rtr. Rutika Zavar', photo: 'rutika-zavar', roles: ['Financial Chair'] },
   { name: 'Rtr. Gargi Gaikwad', photo: 'gargi-gaikwad', roles: ['Creative Head'] },
   { name: 'Rtr. Khadija Bearingwala', photo: 'khadija-bearingwala', roles: ['Creative Head'] },
