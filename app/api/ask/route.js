@@ -129,10 +129,12 @@ export async function POST(request) {
       } catch (err) {
         if (!request.signal.aborted) {
           console.error(`ask: ${ai} request failed`, err?.status ?? '', err?.message ?? err);
-          if (ai === 'gemini' && geminiOverLimit(err) && !wrote) {
-            // Free tier used up for now: still help, with the best-matching pages.
-            listPages('The assistant has answered a lot of questions today and is resting, so here are the pages on this site that best match yours:');
-            send({ type: 'done' });
+          if (ai === 'gemini' && !wrote && (geminiOverLimit(err) || geminiBusy(err))) {
+            // Free tier used up or every model busy: still help, with the best-matching pages.
+            listPages(geminiOverLimit(err)
+              ? 'The assistant has answered a lot of questions today and is resting, so here are the pages on this site that best match yours:'
+              : 'The assistant is very busy right now, so here are the pages on this site that best match your question:');
+            send({ type: 'done', detail: errorDetail(ai, err) });
           } else {
             const busy = ai === 'claude' ? claudeBusy(err) : geminiBusy(err);
             send({ type: 'error', message: busy ? 'The assistant is busy right now. Please try again in a moment.' : 'Something went wrong. Please try again, or use the Contact page.', detail: errorDetail(ai, err) });
