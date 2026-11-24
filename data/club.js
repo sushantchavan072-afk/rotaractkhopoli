@@ -345,14 +345,14 @@ export const coreMembers = [
   { name: 'Rtr. Vageesh Baheti', photo: 'vageesh', roles: ['President'], bio: "Leads the club's service year, chairs board meetings and owns every commitment the club makes publicly." },
   { name: 'Rtr. Srushti Sathe', photo: 'srushti-sathe', roles: ['Secretary'], bio: 'Keeps minutes, correspondence, membership records and the club calendar in order.' },
   { name: 'Rtr. Mihir Butala', photo: 'mihir-butala', roles: ['President Elect'], bio: "Prepares to lead the club's next service year, deputises at meetings and shepherds cross-avenue projects." },
-  { name: 'Rtr. Anvay Narwekar', roles: ['Treasurer'], bio: 'Maintains club accounts, dues, project budgets and the annual statement placed before the general body.' },
+  { name: 'Rtr. Anmay Narwekar', photo: 'anmay-narwekar', roles: ['Treasurer'], bio: 'Maintains club accounts, dues, project budgets and the annual statement placed before the general body.' },
   { name: 'Rtr. Rohan Puri', roles: ['Club Mentor'], photo: 'rohan', bio: 'Guides the board through planning, protocol and district expectations.' },
 ];
 
 export const boardOfDirectors = [
   { name: 'Rtr. Vageesh Baheti', photo: 'vageesh', roles: ['Club Service Director (CSD)', 'International Service Director (ISD)'] },
   { name: 'Rtr. Piyush Phatak', photo: 'piyush-phatak', roles: ['Club Service Director (CSD)'] },
-  { name: 'Rtr. Shreya Salunkhe', roles: ['Community Service Director (CMD)', 'Sergeant-at-Arms (SAA)'] },
+  { name: 'Rtr. Shreya Salunkhe', photo: 'shreya-salunkhe', roles: ['Community Service Director (CMD)', 'Sergeant-at-Arms (SAA)'] },
   { name: 'Rtr. Khadija Bearingwala', photo: 'khadija-bearingwala', roles: ['Professional Development Director (PDD)', 'Diversity, Equity & Inclusion Director (DEID)'] },
   { name: 'Rtr. Gargi Gaikwad', photo: 'gargi-gaikwad', roles: ['International Service Director (ISD)'] },
   { name: 'Rtr. Mihir Butala', photo: 'mihir-butala', roles: ['Public Image Director (PID)', 'World Rotaract Week Chair (WRWC)'] },

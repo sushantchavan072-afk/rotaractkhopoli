@@ -34,7 +34,7 @@ function inline(line, sources) {
 
 /** Paragraphs and "- " lists from the assistant's plain-text answer. */
 function Answer({ text, sources }) {
-  const blocks = text.trim().split(/\n{2,}/);
+  const blocks = text.replace(/\]\s*,\s*\[/g, '][').trim().split(/\n{2,}/);
   return blocks.map((block, i) => {
     const lines = block.split('\n').filter((l) => l.trim());
     if (lines.length && lines.every((l) => /^\s*[-•]\s+/.test(l))) {

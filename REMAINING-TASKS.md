@@ -111,21 +111,19 @@ These members show initials instead of a photo:
 
 | Member | Role(s) |
 |---|---|
-| Rtr. Anvay Narwekar | Treasurer |
-| Rtr. Shreya Salunkhe | Community Service Director, Sergeant-at-Arms |
 | Rtr. Aniket Sardar | Immediate Past President, Rotaract-Rotary Relations Officer |
 | Rtr. Harsh | Club Editor, Sports Chair |
 
-**Needed:** one photo per person, **named with the person's name** (for example `anvay-narwekar.jpg`).
+**Needed:** one photo per person, **named with the person's name** (for example `aniket-sardar.jpg`).
 - Best: a head-and-shoulders photo against a plain background, like the existing portraits.
 - Any size works; they are cropped automatically.
 
-Photos already on the site: Vageesh, Srushti, Mihir, Rohan, Khadija, Gargi, Sarvesh, Jayesh, Gaurav, Rutika and Piyush.
+Photos already on the site: Vageesh, Srushti, Mihir, Rohan, Khadija, Gargi, Sarvesh, Jayesh, Gaurav, Rutika, Piyush, Shreya and Anmay.
 
 ### 6a. Board for Rotaract year 2026–27
 - [ ] Confirmed
 
-The club's event reports say that at the 7th Installation Ceremony (2 August 2026) **Rtr. Vaishnav Phatak** was installed as President and **Rtr. Vageesh Baheti** as Secretary, with **Rtr. Mihir Butala** as Vice President, **Rtr. Aniket Sardar** as IPP and **Rtr. Anmay Narvekar** as Treasurer. The Team page and the Contact page still show the earlier board (Vageesh Baheti as President, Srushti Sathe as Secretary, Anvay Narwekar as Treasurer). The Ramparva banner in the hero photo also names Vageesh Baheti as President, so please confirm which board is current before the Team page is changed.
+The club's event reports say that at the 7th Installation Ceremony (2 August 2026) **Rtr. Vaishnav Phatak** was installed as President and **Rtr. Vageesh Baheti** as Secretary, with **Rtr. Mihir Butala** as Vice President, **Rtr. Aniket Sardar** as IPP and **Rtr. Anmay Narvekar** as Treasurer. The Team page and the Contact page still show the earlier board (Vageesh Baheti as President, Srushti Sathe as Secretary, Anmay Narwekar as Treasurer). The Ramparva banner in the hero photo also names Vageesh Baheti as President, so please confirm which board is current before the Team page is changed.
 
 ### 7. Full names
 - [ ] Received
