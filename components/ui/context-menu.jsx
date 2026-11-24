@@ -245,7 +245,7 @@ function Menu({ items, at, onPick, onClose, depth = 0, onLeave, onEnter, labelle
   return (
     <>
       <div
-        ref={box} className={`ctx${leaving ? ' is-leaving' : ''}`} role="menu" tabIndex={-1} aria-labelledby={labelledBy} onKeyDown={onKey}
+        ref={box} className={`ctx${depth > 0 ? ' is-side' : ''}${leaving ? ' is-leaving' : ''}`} role="menu" tabIndex={-1} aria-labelledby={labelledBy} onKeyDown={onKey}
         aria-hidden={leaving || undefined} aria-activedescendant={active >= 0 ? `ctx-${depth}-${active}` : undefined}
         style={pos ? { left: pos.left, top: pos.top, transformOrigin: pos.origin, '--ctx-dx': dx } : { left: -9999, top: 0, visibility: 'hidden' }}
         onPointerEnter={onEnter} onContextMenu={(e) => e.preventDefault()}

@@ -1604,6 +1604,9 @@ body:has(.nav.is-open) .ask-fab { opacity: 0; pointer-events: none; }
 .ctx { position: fixed; z-index: 180; min-width: 212px; max-width: 320px; padding: 8px; background: #fff; border-radius: 11px; color: #1e1e1e; font: 500 12px/1.4 var(--font); outline: none; user-select: none; -webkit-user-select: none;
   box-shadow: 0 0 0 1px rgba(12, 12, 12, .08), 0 2px 6px rgba(12, 12, 12, .06), 0 18px 40px -14px rgba(12, 12, 12, .3);
   animation: ctx-in .22s cubic-bezier(.22, 1, .36, 1); }
+/* The menu takes focus so the arrow keys work; the highlighted row shows where you are, so the menu keeps its own
+   look instead of the site's focus ring. */
+.ctx:focus-visible { border-radius: 11px; box-shadow: 0 0 0 1px rgba(12, 12, 12, .08), 0 2px 6px rgba(12, 12, 12, .06), 0 18px 40px -14px rgba(12, 12, 12, .3); }
 @keyframes ctx-in { from { opacity: 0; transform: translateX(var(--ctx-dx, 0px)) scale(.96); } }
 /* Closing: a quick fade (removed after 150ms, FADE_MS in context-menu.jsx). */
 .ctx.is-leaving { animation: ctx-out .15s cubic-bezier(.4, 0, 1, 1) forwards; pointer-events: none; }
@@ -1623,6 +1626,9 @@ body:has(.nav.is-open) .ask-fab { opacity: 0; pointer-events: none; }
 .ctx-key { flex: none; color: #555; font-weight: 400; }
 .ctx-arrow { flex: none; display: block; margin-right: -3px; color: #555; }
 .ctx-sep { height: 1px; margin: 8px 0; background: #e3e3e3; }
+/* Side menus are only as wide as their longest item, with a little room after it. */
+.ctx.is-side { min-width: 0; }
+.ctx.is-side .ctx-item { padding-right: 20px; }
 @media (prefers-reduced-motion: reduce) { .ctx, .ctx.is-leaving { animation: none; } .ctx-hl { transition: none; } }
 @media print { .ctx { display: none !important; } }
 
