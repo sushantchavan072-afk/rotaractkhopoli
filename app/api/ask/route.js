@@ -78,9 +78,11 @@ function errorDetail(ai, err) {
   let reason = raw;
   try {
     const parsed = JSON.parse(raw.slice(raw.indexOf('{')));
-    reason = [parsed?.error?.status, parsed?.error?.message].filter(Boolean).join(': ') || raw;
+    const quota = (parsed?.error?.details ?? []).flatMap((d) => d?.violations ?? []).map((v) => v.quotaId || v.quotaMetric).filter(Boolean);
+    const retry = (parsed?.error?.details ?? []).find((d) => d?.retryDelay)?.retryDelay;
+    reason = [parsed?.error?.status, String(parsed?.error?.message ?? '').split('. For more')[0], quota.length && `quota: ${quota.join(', ')}`, retry && `retry in ${retry}`].filter(Boolean).join(' | ') || raw;
   } catch { /* not JSON */ }
-  reason = reason.replace(/(AIza|AQ\.|sk-ant-)[\w.-]{10,}/g, '[key]').slice(0, 220);
+  reason = reason.replace(/(AIza|AQ\.|sk-ant-)[\w.-]{10,}/g, '[key]').slice(0, 400);
   return { provider: ai, status: err?.status ?? null, reason, tried: err?.triedModels };
 }
 
