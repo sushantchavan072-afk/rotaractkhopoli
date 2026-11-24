@@ -295,7 +295,7 @@ export function Header() {
               {item.label}
             </Link>
           ))}
-          <button type="button" className="nav-pill nav-ask" aria-label="Ask AI" title="Ask AI" onPointerEnter={tintRobot} onFocus={tintRobot} onClick={() => { setOpen(false); window.dispatchEvent(new Event('rck:ask')); }}>
+          <button type="button" className="nav-pill nav-ask" aria-label="Ask Joey, the club’s AI assistant" title="Ask Joey" onPointerEnter={tintRobot} onFocus={tintRobot} onClick={() => { setOpen(false); window.dispatchEvent(new Event('rck:ask')); }}>
             <RobotIcon size={24} />
           </button>
           <Link href="/join" className="nav-cta">Join the Club <span className="nav-cta-arrow" aria-hidden="true"><ArrowRight size={13} /></span></Link>

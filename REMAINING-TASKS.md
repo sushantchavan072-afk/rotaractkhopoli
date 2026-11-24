@@ -32,7 +32,7 @@ Tick items off as you go by changing `[ ]` to `[x]`.
 ### 1a. Switch on the AI assistant (free, with Google Gemini)
 - [ ] Done
 
-**What it is:** the robot button in the menu (and the round pink button on phones) opens a chat where visitors can ask anything about the club. It searches this website's own content (events, team, avenues, FAQs, blog, district and Rotary pages) and has an AI write a short answer from what it found, with numbered links to the pages it used. It never answers from outside the site.
+**What it is:** Joey, the club's AI assistant. The robot button in the menu (and the round pink button on phones) opens a chat where visitors can ask anything about the club. It searches this website's own content (events, team, avenues, FAQs, blog, district and Rotary pages) and has an AI write a short answer from what it found, with numbered links to the pages it used. It never answers from outside the site.
 
 **Right now** it runs in search-only mode: it lists the most relevant pages but doesn't write answers.
 

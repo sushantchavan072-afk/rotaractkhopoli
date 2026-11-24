@@ -119,7 +119,7 @@ export default function AskPanel({ open, onClose }) {
       }
       update((m) => ({ ...m, pending: false }));
     } catch (err) {
-      update((m) => ({ ...m, pending: false, ...(err?.name === 'AbortError' ? { stopped: true } : { error: true, text: m.text || 'Couldn’t reach the assistant. Check your connection and try again.' }) }));
+      update((m) => ({ ...m, pending: false, ...(err?.name === 'AbortError' ? { stopped: true } : { error: true, text: m.text || 'Couldn’t reach Joey. Check your connection and try again.' }) }));
     } finally {
       setBusy(false);
       controller.current = null;
@@ -129,21 +129,21 @@ export default function AskPanel({ open, onClose }) {
   const reset = () => { controller.current?.abort(); setMessages([]); field.current?.focus(); };
 
   return (
-    <div ref={panel} className={`ask-panel ${open ? 'is-open' : ''}`} role="dialog" aria-modal="false" aria-label="Ask the club assistant" hidden={!open}>
+    <div ref={panel} className={`ask-panel ${open ? 'is-open' : ''}`} role="dialog" aria-modal="false" aria-label="Chat with Joey, the club’s assistant" hidden={!open}>
       <header className="ask-head">
         <span className="ask-avatar" aria-hidden="true"><RobotIcon size={24} /></span>
         <div className="ask-title">
-          <strong>Ask Rotaract Khopoli</strong>
+          <strong>Joey</strong>
           <span>Answers from this website and the web</span>
         </div>
         {messages.length > 0 && <button type="button" className="ask-icon-btn" onClick={reset} aria-label="Start a new conversation" title="New conversation"><FaRotateLeft size={14} /></button>}
-        <button type="button" className="ask-icon-btn" onClick={onClose} aria-label="Close the assistant"><FaXmark size={16} /></button>
+        <button type="button" className="ask-icon-btn" onClick={onClose} aria-label="Close Joey"><FaXmark size={16} /></button>
       </header>
 
       <div className="ask-body" ref={list} aria-live="polite">
         {messages.length === 0 ? (
           <div className="ask-welcome">
-            <p className="ask-hello">Hi! Ask me anything about the club: joining, volunteering, our projects, the team or Rotaract.</p>
+            <p className="ask-hello">Hi, I’m <strong>Joey</strong>, Rotaract Club of Khopoli’s assistant! Ask me anything about the club: joining, volunteering, our projects, the team or Rotaract.</p>
             <div className="ask-suggest">
               {SUGGESTIONS.map((s) => <button key={s} type="button" onClick={() => ask(s)}>{s}</button>)}
             </div>

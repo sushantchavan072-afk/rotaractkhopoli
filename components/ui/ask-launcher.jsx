@@ -9,7 +9,7 @@ const AskPanel = dynamic(() => import('./ask-panel'), { ssr: false });
 
 /**
  * The site assistant's entry points: a round button in the corner on phones and tablets, and the
- * "Ask AI" item in the desktop menu (which fires the `rck:ask` event). Mounted once in the layout,
+ * robot (Joey) in the desktop menu (which fires the `rck:ask` event). Mounted once in the layout,
  * so a conversation carries on across pages.
  */
 export default function AskLauncher() {
@@ -23,7 +23,7 @@ export default function AskLauncher() {
   return (
     <>
       {!open && (
-        <button type="button" className="ask-fab" aria-label="Ask the club assistant" onClick={() => { setLoaded(true); setOpen(true); }}>
+        <button type="button" className="ask-fab" aria-label="Chat with Joey, the club’s assistant" title="Ask Joey" onClick={() => { setLoaded(true); setOpen(true); }}>
           <RobotIcon size={30} />
         </button>
       )}
