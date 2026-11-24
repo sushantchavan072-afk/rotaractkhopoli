@@ -175,8 +175,8 @@ export async function POST(request) {
       } catch (err) {
         if (!request.signal.aborted) {
           console.error(`ask: ${ai} request failed`, err?.status ?? '', err?.message ?? err);
-          if (ai === 'gemini' && !wrote && (geminiOverLimit(err) || geminiBusy(err))) {
-            // Free tier used up or every model busy: still help, with the best-matching pages.
+          if (ai === 'gemini' && !wrote) {
+            // Nothing written yet: whatever went wrong (limits, busy, retired models), still help with the best-matching pages.
             listPages(geminiOverLimit(err)
               ? 'The assistant has answered a lot of questions today and is resting, so here are the pages on this site that best match yours:'
               : 'The assistant is very busy right now, so here are the pages on this site that best match your question:');
