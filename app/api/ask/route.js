@@ -1,7 +1,7 @@
 import { search } from '../../../lib/knowledge';
 import { club } from '../../../data/club';
 import { claudeConfigured, streamClaude, claudeBusy } from '../../../lib/ai/claude';
-import { geminiConfigured, streamGemini, geminiBusy, geminiOverLimit } from '../../../lib/ai/gemini';
+import { geminiConfigured, streamGemini, geminiBusy, geminiOverLimit, geminiModels, geminiSearchWords } from '../../../lib/ai/gemini';
 
 /**
  * POST /api/ask: the site assistant. Body: { question, history?: [{ role: 'user' | 'assistant', content }] }.
@@ -35,8 +35,8 @@ const SYSTEM = `You are the friendly website assistant for ${club.name}, a commu
 How to answer:
 - Facts must come only from the numbered sources in the visitor's message. They are passages from this website. Never invent names, dates, times, places, numbers, fees, phone numbers or email addresses, and never guess.
 - If the sources answer only part of the question, answer that part and say what the site doesn't cover. If they don't answer it at all, say you don't have that on the site yet and suggest the Contact page or emailing the club.
-- Greetings, thanks and small talk: reply warmly in one short sentence and offer to help; don't say the site lacks anything.
-- After each sentence that uses a source, cite it like [1] or [1][2], using the source numbers given.
+- Only when the whole message is a greeting, thanks or small talk, reply warmly in one short sentence and offer to help. Otherwise go straight to the answer, without a greeting or filler.
+- After each sentence that uses a source, cite the one or two most relevant sources like [1] or [1][2], using the source numbers given.
 - If sources disagree (for example about who holds a role), give both briefly and suggest confirming with the club.
 - Use the date given as "today" to tell past events from upcoming ones, and say "upcoming" or "completed" when it helps.
 - For a follow-up such as "when was it?" or "who led it?", use the earlier conversation to work out what "it" means.
@@ -87,6 +87,12 @@ function errorDetail(ai, err) {
 const todayIST = () => new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
 const json = (body, status) => Response.json(body, { status });
 
+/** GET /api/ask: which AI is switched on and, for Gemini, which models it will try (no secrets). */
+export async function GET() {
+  const ai = provider();
+  return Response.json({ provider: ai, ...(ai === 'gemini' && { models: await geminiModels() }) }, { headers: { 'Cache-Control': 'no-store' } });
+}
+
 export async function POST(request) {
   const origin = request.headers.get('origin');
   if (origin && new URL(origin).host !== request.headers.get('host')) return json({ error: 'Not allowed.' }, 403);
@@ -111,7 +117,10 @@ export async function POST(request) {
     return new Response(body, { headers: { 'Content-Type': 'application/x-ndjson; charset=utf-8', 'Cache-Control': 'no-store' } });
   }
 
-  const passages = search(`${question} ${question} ${lastUser}`, { limit: 6 });
+  // The site is in English: a question in another script is first turned into English search words.
+  const latin = (question.match(/[a-z]/gi) ?? []).length;
+  const english = latin < question.replace(/\s/g, '').length / 2 && provider() === 'gemini' ? await geminiSearchWords(question, request.signal) : '';
+  const passages = search(`${question} ${question} ${english} ${english} ${lastUser}`, { limit: 6 });
   const sources = [];
   for (const p of passages) {
     if (!sources.some((s) => s.url === p.url && s.title === p.title)) sources.push({ title: p.title.replace(/^(FAQ|Blog): /, ''), url: p.url });
