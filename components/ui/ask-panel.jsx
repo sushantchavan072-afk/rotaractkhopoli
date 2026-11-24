@@ -108,6 +108,9 @@ function closeMotion(el) {
     : el.animate([{ transform: 'none', opacity: 1 }, { opacity: 1, offset: 0.55 }, { transform: f.small, opacity: 0 }], { duration: 340, easing: AWAY, fill: 'forwards' });
 }
 
+/** A device with a fine pointer and hover (a computer), where focusing a text box doesn't pop up a keyboard. */
+const typesFreely = () => window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
 export default function AskPanel({ open, onClose }) {
   const [messages, setMessages] = useState(() => {
     try { return JSON.parse(sessionStorage.getItem(STORE)) ?? []; } catch { return []; }
@@ -153,7 +156,11 @@ export default function AskPanel({ open, onClose }) {
   useEffect(() => {
     if (!open) return undefined;
     if (!panel.current?.contains(document.activeElement)) opener.current = document.activeElement;
-    field.current?.focus({ preventScroll: true });
+    // Only a mouse-and-keyboard device puts the cursor straight into the question box. On touch screens that
+    // would pop the on-screen keyboard up uninvited, so the chat itself takes focus and the keyboard opens
+    // only when the visitor taps the box.
+    if (typesFreely()) field.current?.focus({ preventScroll: true });
+    else panel.current?.focus({ preventScroll: true });
     const onKey = (e) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -208,10 +215,10 @@ export default function AskPanel({ open, onClose }) {
     }
   }
 
-  const reset = () => { controller.current?.abort(); setMessages([]); field.current?.focus(); };
+  const reset = () => { controller.current?.abort(); setMessages([]); if (typesFreely()) field.current?.focus(); };
 
   return (
-    <div ref={panel} className={`ask-panel ${open ? 'is-open' : ''}`} role="dialog" aria-modal="false" aria-label="Chat with Joey, the club’s assistant" hidden={!visible}>
+    <div ref={panel} className={`ask-panel ${open ? 'is-open' : ''}`} role="dialog" aria-modal="false" aria-label="Chat with Joey, the club’s assistant" tabIndex={-1} hidden={!visible}>
       <header className="ask-head">
         <span className="ask-avatar" aria-hidden="true"><RobotIcon size={24} /></span>
         <div className="ask-title">

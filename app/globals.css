@@ -1530,6 +1530,7 @@ html.intro-on:not(.intro-copy) .home-hero-copy > * { opacity: 0; }
 
 .ask-panel { position: fixed; right: 24px; bottom: 24px; z-index: 150; width: min(420px, calc(100vw - 32px)); height: min(640px, calc(100dvh - 48px)); display: flex; flex-direction: column; overflow: hidden; border: 1px solid rgba(12, 12, 12, .08); border-radius: 28px; background: #fff; box-shadow: 0 30px 70px -24px rgba(12, 12, 12, .45); will-change: transform, opacity; }
 .ask-panel[hidden] { display: none; }
+.ask-panel:focus, .ask-panel:focus-visible { outline: none; box-shadow: 0 30px 70px -24px rgba(12, 12, 12, .45); } /* the chat takes focus itself on touch screens */
 /* The round button tucks away while the chat is open and pops back as it closes (see ask-launcher.jsx) */
 .ask-fab.is-away { transform: scale(.3); opacity: 0; pointer-events: none; animation: none; transition: transform .22s ease, opacity .18s ease; }
 .ask-fab.is-back { animation: ask-pop .5s cubic-bezier(.3, 1.4, .4, 1) .26s backwards; }
