@@ -93,7 +93,7 @@ function errorDetail(ai, err) {
     reason = [parsed?.error?.status, String(parsed?.error?.message ?? '').split('. For more')[0], quota.length && `quota: ${quota.join(', ')}`, retry && `retry in ${retry}`].filter(Boolean).join(' | ') || raw;
   } catch { /* not JSON */ }
   reason = reason.replace(/(AIza|AQ\.|sk-ant-)[\w.-]{10,}/g, '[key]').slice(0, 400);
-  return { provider: ai, status: err?.status ?? null, reason, tried: err?.triedModels };
+  return { provider: ai, status: err?.status ?? null, reason, tried: err?.triedModels, failures: err?.failures };
 }
 
 const todayIST = () => new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
