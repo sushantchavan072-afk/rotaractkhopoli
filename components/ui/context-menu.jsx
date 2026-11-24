@@ -105,17 +105,48 @@ function place(x, y, w, h, altX = x) {
   return { left, top, origin: `${originX} ${originY}` };
 }
 
-function Menu({ items, at, onPick, onClose, depth = 0, onLeave, labelledBy, hueRef }) {
+function RowContent({ it }) {
+  return (
+    <>
+      <span className="ctx-label">{it.label}</span>
+      {it.submenu ? (
+        <svg className="ctx-arrow" width="8" height="8" viewBox="0 0 8 8" aria-hidden="true"><path d="M2.5 1.5 5.5 4l-3 2.5" fill="none" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" /></svg>
+      ) : it.key && <span className="ctx-key">{it.key}</span>}
+    </>
+  );
+}
+
+const FADE_MS = 150; // how long a menu or side menu takes to fade away (globals.css .ctx.is-leaving)
+const INTENT_MS = 140; // with a side menu open, time for the pointer to cross other rows on its way into it
+
+function Menu({ items, at, onPick, onClose, depth = 0, onLeave, onEnter, labelledBy, hueRef, leaving = false }) {
   const box = useRef(null);
+  const hl = useRef(null); // the highlight that glides from row to row
   const [pos, setPos] = useState(null);
   const [active, setActiveIndex] = useState(-1);
+  const activeRef = useRef(-1);
   const [hue, setHue] = useState(HUES[0]);
   const setActive = (i) => {
-    if (i !== active) { hueRef.current = (hueRef.current + 1) % HUES.length; setHue(HUES[hueRef.current]); }
+    if (i !== activeRef.current) { hueRef.current = (hueRef.current + 1) % HUES.length; setHue(HUES[hueRef.current]); }
+    activeRef.current = i;
     setActiveIndex(i);
   };
-  const [sub, setSub] = useState(null); // { index, at: { x, y, altX } }
+  const [sub, setSubState] = useState(null); // the open side menu: { index, at: { x, y, altX } }
+  const [gone, setGone] = useState(null); // a side menu that is fading away
+  const subRef = useRef(null);
   const subTimer = useRef(0);
+  const goneTimer = useRef(0);
+  const setSub = (next) => {
+    const cur = subRef.current;
+    if (next && cur?.index === next.index) return; // already open
+    if (cur) {
+      window.clearTimeout(goneTimer.current);
+      setGone(cur);
+      goneTimer.current = window.setTimeout(() => setGone(null), FADE_MS);
+    }
+    subRef.current = next;
+    setSubState(next);
+  };
   const usable = items.map((it, i) => (it.type === 'sep' || it.disabled ? -1 : i)).filter((i) => i >= 0);
 
   useLayoutEffect(() => {
@@ -124,8 +155,31 @@ function Menu({ items, at, onPick, onClose, depth = 0, onLeave, labelledBy, hueR
   }, [at]);
   // Take keyboard focus once placed (a hidden element can't be focused).
   const placed = Boolean(pos);
-  useEffect(() => { if (placed) box.current?.focus({ preventScroll: true }); }, [placed]);
-  useEffect(() => () => window.clearTimeout(subTimer.current), []);
+  useEffect(() => { if (placed && !leaving) box.current?.focus({ preventScroll: true }); }, [placed]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => () => { window.clearTimeout(subTimer.current); window.clearTimeout(goneTimer.current); }, []);
+
+  // Glide the highlight to the active row. The highlight is a white-text copy of the menu on the row colour,
+  // shown only inside a pill-shaped window (clip-path) that slides from row to row, so the white text always
+  // moves exactly with the pill and the colour blends into the next one on the way.
+  useLayoutEffect(() => {
+    const el = hl.current;
+    const row = active >= 0 ? box.current?.querySelector(`[data-i="${active}"]`) : null;
+    if (!el) return;
+    if (!row) { el.classList.remove('is-on'); return; }
+    const fresh = !el.classList.contains('is-on'); // first highlight: appear in place rather than slide in
+    if (fresh) el.style.transition = 'none';
+    const top = row.offsetTop;
+    const left = row.offsetLeft;
+    const right = el.clientWidth - left - row.offsetWidth;
+    const bottom = el.clientHeight - top - row.offsetHeight;
+    el.style.setProperty('--ctx-hl', hue);
+    el.style.clipPath = `inset(${top}px ${right}px ${bottom}px ${left}px round ${row.offsetHeight / 2}px)`;
+    if (fresh) {
+      el.getBoundingClientRect();
+      el.style.transition = '';
+      el.classList.add('is-on');
+    }
+  }, [active, hue]);
 
   const openSub = (i, delay = 0) => {
     window.clearTimeout(subTimer.current);
@@ -137,6 +191,16 @@ function Menu({ items, at, onPick, onClose, depth = 0, onLeave, labelledBy, hueR
       if (row && menu) setSub({ index: i, at: { x: menu.right + SUB_GAP, y: row.top - PAD, altX: menu.left - SUB_GAP } });
     }, delay);
   };
+  const onRowEnter = (i, it) => {
+    if (subRef.current && subRef.current.index !== i) {
+      // A side menu is open: the pointer may just be passing over this row on its way into it.
+      window.clearTimeout(subTimer.current);
+      subTimer.current = window.setTimeout(() => { if (!it.disabled) setActive(i); openSub(i); }, INTENT_MS);
+      return;
+    }
+    if (!it.disabled) setActive(i);
+    openSub(i, it.submenu ? 90 : 0);
+  };
   const choose = (i) => {
     const it = items[i];
     if (!it || it.type === 'sep' || it.disabled) return;
@@ -144,6 +208,7 @@ function Menu({ items, at, onPick, onClose, depth = 0, onLeave, labelledBy, hueR
     onPick(it);
   };
   const onKey = (e) => {
+    if (leaving) return;
     const k = e.key;
     if (k === 'ArrowDown' || k === 'ArrowUp') {
       e.preventDefault();
@@ -171,34 +236,48 @@ function Menu({ items, at, onPick, onClose, depth = 0, onLeave, labelledBy, hueR
     }
   };
 
+  // Side menus slide in a few pixels from the menu they belong to.
+  const dx = depth > 0 && pos ? (pos.origin.startsWith('left') ? '-6px' : '6px') : '0px';
+  // Pointer reached the side menu: keep it open and its row highlighted.
+  const enterSide = (index) => { window.clearTimeout(subTimer.current); setActive(index); };
+  // Left / Escape in the side menu: close it and return to its row.
+  const leaveSide = (index) => { setSub(null); box.current?.focus({ preventScroll: true }); setActive(index); };
   return (
     <>
       <div
-        ref={box} className="ctx" role="menu" tabIndex={-1} aria-labelledby={labelledBy} onKeyDown={onKey}
-        aria-activedescendant={active >= 0 ? `ctx-${depth}-${active}` : undefined}
-        style={pos ? { left: pos.left, top: pos.top, transformOrigin: pos.origin } : { left: -9999, top: 0, visibility: 'hidden' }}
-        onContextMenu={(e) => e.preventDefault()}
+        ref={box} className={`ctx${leaving ? ' is-leaving' : ''}`} role="menu" tabIndex={-1} aria-labelledby={labelledBy} onKeyDown={onKey}
+        aria-hidden={leaving || undefined} aria-activedescendant={active >= 0 ? `ctx-${depth}-${active}` : undefined}
+        style={pos ? { left: pos.left, top: pos.top, transformOrigin: pos.origin, '--ctx-dx': dx } : { left: -9999, top: 0, visibility: 'hidden' }}
+        onPointerEnter={onEnter} onContextMenu={(e) => e.preventDefault()}
       >
         {items.map((it, i) => (it.type === 'sep' ? <div key={`s${i}`} className="ctx-sep" role="separator" /> : (
           <div
             key={it.label} id={`ctx-${depth}-${i}`} data-i={i} role="menuitem" aria-disabled={it.disabled || undefined}
             aria-haspopup={it.submenu ? 'menu' : undefined} aria-expanded={it.submenu ? sub?.index === i : undefined}
             className={`ctx-item ${active === i ? 'is-active' : ''} ${it.current ? 'is-current' : ''}`}
-            style={active === i ? { '--ctx-hl': hue } : undefined}
-            onPointerEnter={() => { if (!it.disabled) setActive(i); openSub(i, it.submenu ? 90 : 160); }}
+            onPointerEnter={() => onRowEnter(i, it)}
             onClick={() => choose(i)}
           >
-            <span className="ctx-label">{it.label}</span>
-            {it.submenu ? (
-              <svg className="ctx-arrow" width="8" height="8" viewBox="0 0 8 8" aria-hidden="true"><path d="M2.5 1.5 5.5 4l-3 2.5" fill="none" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" /></svg>
-            ) : it.key && <span className="ctx-key">{it.key}</span>}
+            <RowContent it={it} />
           </div>
         )))}
+        <div ref={hl} className="ctx-hl" aria-hidden="true">
+          {items.map((it, i) => (it.type === 'sep'
+            ? <div key={`s${i}`} className="ctx-sep" />
+            : <div key={it.label} className={`ctx-item ${it.current ? 'is-current' : ''}`}><RowContent it={it} /></div>))}
+        </div>
       </div>
+      {gone && gone.index !== sub?.index && (
+        <Menu
+          key={`sub-${gone.index}`} items={items[gone.index].submenu} at={gone.at} depth={depth + 1} onPick={onPick} onClose={onClose}
+          labelledBy={`ctx-${depth}-${gone.index}`} hueRef={hueRef} leaving
+        />
+      )}
       {sub && (
         <Menu
-          items={items[sub.index].submenu} at={sub.at} depth={depth + 1} onPick={onPick} onClose={onClose} labelledBy={`ctx-${depth}-${sub.index}`} hueRef={hueRef}
-          onLeave={() => { setSub(null); box.current?.focus({ preventScroll: true }); setActive(sub.index); }}
+          key={`sub-${sub.index}`} items={items[sub.index].submenu} at={sub.at} depth={depth + 1} onPick={onPick} onClose={onClose}
+          labelledBy={`ctx-${depth}-${sub.index}`} hueRef={hueRef} leaving={leaving}
+          onEnter={() => enterSide(sub.index)} onLeave={() => leaveSide(sub.index)}
         />
       )}
     </>
@@ -206,10 +285,17 @@ function Menu({ items, at, onPick, onClose, depth = 0, onLeave, labelledBy, hueR
 }
 
 export default function ContextMenu() {
-  const [menu, setMenu] = useState(null); // { items, at, key }
+  const [menu, setMenu] = useState(null); // { items, at, key, leaving }
   const router = useRouter();
   const pathname = usePathname();
-  const close = useCallback(() => setMenu(null), []);
+  // Closing fades the menu away first; it is removed once the fade has finished.
+  const close = useCallback(() => setMenu((m) => (m && !m.leaving ? { ...m, leaving: true } : m)), []);
+  const leaving = Boolean(menu?.leaving);
+  useEffect(() => {
+    if (!leaving) return undefined;
+    const t = window.setTimeout(() => setMenu((m) => (m?.leaving ? null : m)), FADE_MS);
+    return () => window.clearTimeout(t);
+  }, [leaving]);
   const hueRef = useRef(0); // shared by the menu and its side menus, so the colours keep moving on
 
   // Close whenever the page changes.
@@ -244,8 +330,9 @@ export default function ContextMenu() {
     return () => document.removeEventListener('contextmenu', onContext);
   }, [router]);
 
+  const openKey = menu && !menu.leaving ? menu.key : null;
   useEffect(() => {
-    if (!menu) return undefined;
+    if (!openKey) return undefined;
     const onDown = (e) => { if (!(e.target instanceof Element && e.target.closest('.ctx'))) close(); };
     // Scrolling closes the menu, but not a scroll that was already gliding (smooth or trackpad) when it opened.
     const openedAt = performance.now();
@@ -263,12 +350,12 @@ export default function ContextMenu() {
       window.removeEventListener('resize', close);
       window.removeEventListener('blur', close);
     };
-  }, [menu, close]);
+  }, [openKey, close]);
 
   if (!menu) return null;
   return (
     <Menu
-      key={menu.key} items={menu.items} at={menu.at} onClose={close} hueRef={hueRef}
+      key={menu.key} items={menu.items} at={menu.at} onClose={close} hueRef={hueRef} leaving={leaving}
       onPick={(it) => { close(); it.run?.(); }}
     />
   );
