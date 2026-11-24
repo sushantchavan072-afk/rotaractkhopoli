@@ -1,5 +1,5 @@
 import { SITE_URL } from '../data/club';
 
 export default function robots() {
-  return { rules: [{ userAgent: '*', allow: '/' }], sitemap: `${SITE_URL}/sitemap.xml` };
+  return { rules: [{ userAgent: '*', allow: '/', disallow: ['/admin', '/api/'] }], sitemap: `${SITE_URL}/sitemap.xml` };
 }

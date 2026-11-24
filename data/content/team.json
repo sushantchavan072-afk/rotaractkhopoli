@@ -1,0 +1,173 @@
+{
+  "rotaractYear": "2026–27",
+  "officers": [
+    {
+      "role": "President",
+      "name": "Rtr. Vageesh Baheti",
+      "email": "rtrvageeshb@gmail.com",
+      "phone": "9075518009"
+    },
+    {
+      "role": "Secretary",
+      "name": "Rtr. Srushti Sathe",
+      "email": "",
+      "phone": ""
+    }
+  ],
+  "coreMembers": [
+    {
+      "name": "Rtr. Vageesh Baheti",
+      "photo": "vageesh",
+      "roles": [
+        "President"
+      ],
+      "bio": "Leads the club's service year, chairs board meetings and owns every commitment the club makes publicly."
+    },
+    {
+      "name": "Rtr. Srushti Sathe",
+      "photo": "srushti-sathe",
+      "roles": [
+        "Secretary"
+      ],
+      "bio": "Keeps minutes, correspondence, membership records and the club calendar in order."
+    },
+    {
+      "name": "Rtr. Mihir Butala",
+      "photo": "mihir-butala",
+      "roles": [
+        "President Elect"
+      ],
+      "bio": "Prepares to lead the club's next service year, deputises at meetings and shepherds cross-avenue projects."
+    },
+    {
+      "name": "Rtr. Anmay Narwekar",
+      "photo": "anmay-narwekar",
+      "roles": [
+        "Treasurer"
+      ],
+      "bio": "Maintains club accounts, dues, project budgets and the annual statement placed before the general body."
+    },
+    {
+      "name": "Rtr. Rohan Puri",
+      "photo": "rohan",
+      "roles": [
+        "Club Mentor"
+      ],
+      "bio": "Guides the board through planning, protocol and district expectations."
+    }
+  ],
+  "boardOfDirectors": [
+    {
+      "name": "Rtr. Vageesh Baheti",
+      "photo": "vageesh",
+      "roles": [
+        "Club Service Director (CSD)",
+        "International Service Director (ISD)"
+      ]
+    },
+    {
+      "name": "Rtr. Piyush Phatak",
+      "photo": "piyush-phatak",
+      "roles": [
+        "Club Service Director (CSD)"
+      ]
+    },
+    {
+      "name": "Rtr. Shreya Salunkhe",
+      "photo": "shreya-salunkhe",
+      "roles": [
+        "Community Service Director (CMD)",
+        "Sergeant-at-Arms (SAA)"
+      ]
+    },
+    {
+      "name": "Rtr. Khadija Bearingwala",
+      "photo": "khadija-bearingwala",
+      "roles": [
+        "Professional Development Director (PDD)",
+        "Diversity, Equity & Inclusion Director (DEID)"
+      ]
+    },
+    {
+      "name": "Rtr. Gargi Gaikwad",
+      "photo": "gargi-gaikwad",
+      "roles": [
+        "International Service Director (ISD)"
+      ]
+    },
+    {
+      "name": "Rtr. Mihir Butala",
+      "photo": "mihir-butala",
+      "roles": [
+        "Public Image Director (PID)",
+        "World Rotaract Week Chair (WRWC)"
+      ]
+    },
+    {
+      "name": "Rtr. Aniket Sardar",
+      "photo": "aniket-sardar",
+      "roles": [
+        "Immediate Past President (IPP)",
+        "Rotaract-Rotary Relations Officer (RRRO)"
+      ]
+    },
+    {
+      "name": "Rtr. Sarvesh",
+      "photo": "sarvesh",
+      "roles": [
+        "Club Public Relations Officer (PRO)"
+      ]
+    },
+    {
+      "name": "Rtr. Jayesh Dalvi",
+      "photo": "jayesh-dalvi",
+      "roles": [
+        "Club Advisor"
+      ]
+    }
+  ],
+  "chairpersons": [
+    {
+      "name": "Rtr. Gaurav",
+      "photo": "gaurav",
+      "roles": [
+        "Membership Development Director"
+      ]
+    },
+    {
+      "name": "Rtr. Rutika Zavar",
+      "photo": "rutika-zavar",
+      "roles": [
+        "Financial Chair"
+      ]
+    },
+    {
+      "name": "Rtr. Gargi Gaikwad",
+      "photo": "gargi-gaikwad",
+      "roles": [
+        "Creative Head"
+      ]
+    },
+    {
+      "name": "Rtr. Khadija Bearingwala",
+      "photo": "khadija-bearingwala",
+      "roles": [
+        "Creative Head"
+      ]
+    },
+    {
+      "name": "Rtr. Vageesh Baheti",
+      "photo": "vageesh",
+      "roles": [
+        "Social Media Chair"
+      ]
+    },
+    {
+      "name": "Rtr. Rohan Puri",
+      "photo": "rohan",
+      "roles": [
+        "Professional Assistance Officer (PAO)"
+      ]
+    }
+  ]
+}

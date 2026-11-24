@@ -51,6 +51,32 @@ Good to know:
 
 **Paid option: Anthropic Claude.** Add `ANTHROPIC_API_KEY` instead (from console.anthropic.com, with a monthly spend limit set under Billing). It uses Claude Opus 5.5 at roughly $0.01–0.02 per answer. If both keys are set, Claude is used; add `AI_PROVIDER` = `gemini` to choose Gemini.
 
+### 1b. Switch on the admin page (add events, photos and the team yourself)
+- [ ] Done
+
+**What it is:** a password-protected page at **/admin** (for example `rotaractkhopoli.vercel.app/admin`) where the board can add, edit and delete events (with photos and results), change the Team page (office bearers, board, chairpersons, their photos, the Rotaract year and the contact people) and manage the Gallery. Pressing **Save changes** saves everything as one update in the website's GitHub repository; Vercel then publishes the site again and the change is live in about two minutes. Every save is kept in GitHub's history, so any mistake can be undone.
+
+**It needs two settings in Vercel:**
+
+1. **A GitHub key** (made once, by the GitHub account that owns the repository):
+   1. On github.com, click your profile photo → **Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token**.
+   2. Name it `Rotaract website admin`. Set **Expiration** to the longest allowed (for example one year) and put a reminder in your calendar to renew it.
+   3. Under **Repository access**, choose **Only select repositories** and pick the website's repository (`rotaractkhopolii`).
+   4. Under **Permissions → Repository permissions**, set **Contents** to **Read and write**. Leave everything else as it is.
+   5. Press **Generate token** and copy it (it is shown only once).
+2. In **Vercel → Project → Settings → Environment Variables**, add (for Production):
+   - Key `GITHUB_TOKEN`, Value: the key from step 1.
+   - Key `ADMIN_PASSWORD`, Value: a password for the board, at least 12 characters (for example four random words). Share it only with board members.
+3. Go to **Deployments → ⋯ → Redeploy**, then open **/admin** on the site and sign in.
+
+Good to know:
+- **Changing the password:** edit `ADMIN_PASSWORD` in Vercel and redeploy. Everyone is signed out.
+- **When the GitHub key expires,** saving shows “the GitHub key is wrong or has expired”: make a new key (step 1) and replace `GITHUB_TOKEN` in Vercel.
+- **Each July:** open **Team**, press **Change to 2027–28** (it always offers the next year), update the three lists and the President and Secretary under **Contact people**, then **Save changes**. Photos stay with each person; add new ones with **Add photo**.
+- Photos are resized automatically in the browser before they are uploaded. A save can carry a few photos at a time; the page says when to save before adding more.
+- If two people save at the same time, the second one is asked to reload the page instead of overwriting the first one's changes.
+- The admin page is hidden from search engines and every change is checked on the server before it is saved.
+
 ### 2. Get the site into Google (Search Console)
 - [ ] Done
 
@@ -233,6 +259,7 @@ Please have someone read them for accuracy and tone. Correct, replace or remove 
 |---|---|---|---|
 | 1 | Connect forms to Google Sheets | You | **High** |
 | 1a | Switch on the AI assistant (free Gemini key) | You | **High** |
+| 1b | Switch on the admin page (GitHub key + password) | You | **High** |
 | 2 | Add the site to Google Search Console | You | **High** |
 | 3 | Check the Vercel and GitHub link | You | **High** |
 | 4 | Shared club email | Club | **High** |

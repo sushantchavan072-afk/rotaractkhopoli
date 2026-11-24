@@ -792,7 +792,7 @@ export function EventCard({ e, i = 0, headingLevel = 3 }) {
  * width and position, so it fits any label and screen size. Until the script runs, the chosen button
  * simply has the white background itself.
  */
-function Segmented({ options, value, onChange, label }) {
+export function Segmented({ options, value, onChange, label }) {
   const box = useRef(null);
   const thumb = useRef(null);
   useLayoutEffect(() => {

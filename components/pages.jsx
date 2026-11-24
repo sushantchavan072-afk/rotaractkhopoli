@@ -14,7 +14,7 @@ import {
 import {
   club, clubFacts, officers, clubEmail, contact, avenues, events, eventsNewestFirst, formatDate, formatDateRange,
   coreMembers, boardOfDirectors, chairpersons, uniqueMemberCount, initials, testimonials,
-  allFaqs, faqGroups, district, rotary, sponsorTiers, joinCommitments, rotaractYear,
+  allFaqs, faqGroups, district, rotary, sponsorTiers, joinCommitments, rotaractYear, galleryPhotos,
   membersWithRoles, eventsForAvenue, FAMILY_LOGOS, values, volunteerReasons, waysToHelp,
   postsNewestFirst, PAGE_SIZE, riPresident, drr, districtGovernor,
 } from '../data/club';
@@ -46,13 +46,7 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 const formatPostDate = (iso) => { const [y, m, d] = iso.split('-').map(Number); return `${String(d).padStart(2, '0')} ${MONTHS[m - 1]} ${y}`; };
 
 /** Every club photo on the site with a caption, used by the gallery page. Only the club's own photos. */
-export const GALLERY = [
-  ['/images/hero-stage.jpg', 'Members on stage at Ramparva – Ek Diwali Sandhya'],
-  ['/images/events/road-safety-drive.jpg', 'Road safety awareness drive with Interactors and the traffic police'],
-  ['/images/cta-team.jpg', 'Members of Rotaract Club of Khopoli'],
-  ['/images/events/cyber-crime-awareness.jpg', 'Cyber crime awareness session with Rotary Club of Khopoli'],
-  ['/images/hero-team.jpg', 'Club members together'],
-];
+export const GALLERY = galleryPhotos.map((g) => [g.src, g.caption]);
 
 /* ======================= Shared Kindora-style blocks ======================= */
 

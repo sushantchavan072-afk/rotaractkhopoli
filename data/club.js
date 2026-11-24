@@ -1,7 +1,13 @@
 /**
  * Single source of truth for the Rotaract Club of Khopoli website.
  * Content carried over from the club's original site (rotaractkhopoli repo, src/data/*).
+ *
+ * Events, the team and the gallery live in data/content/*.json so the club can edit them on the
+ * password-protected admin page (/admin) without touching code. Everything else is edited here.
  */
+import team from './content/team.json';
+import eventList from './content/events.json';
+import galleryList from './content/gallery.json';
 
 export const club = {
   name: 'Rotaract Club of Khopoli',
@@ -17,10 +23,8 @@ export const club = {
     'Rotaract Club of Khopoli is a community based club chartered in November 2020. We are young professionals and students from Khopoli and around who meet, plan and then actually show up, for schools, for the environment, for local livelihoods and for each other.',
 };
 
-export const officers = [
-  { role: 'President', name: 'Rtr. Vageesh Baheti', email: 'rtrvageeshb@gmail.com', phone: '9075518009' },
-  { role: 'Secretary', name: 'Rtr. Srushti Sathe', email: '', phone: '' },
-];
+/** President and Secretary contact details (edited on the admin page: data/content/team.json). */
+export const officers = team.officers;
 
 /**
  * Public contact settings. TODO(club): create a shared club inbox (e.g. a club Gmail) and put it in `email`
@@ -53,7 +57,7 @@ export const SITE_URL = (
 ).replace(/\/$/, '');
 
 /** The Rotaract year shown on the Members page. */
-export const rotaractYear = '2026–27';
+export const rotaractYear = team.rotaractYear;
 
 export const clubFacts = [
   { label: 'Club name', value: club.name },
@@ -130,186 +134,9 @@ export const avenues = [
  * report. Internal board and general body meetings are left out. Records of one event filed under several
  * avenues are merged into one entry.
  * Photos live in public/images/events/<slug>.jpg — a coloured placeholder shows until the file is added.
+ * The list itself is in data/content/events.json (edited on the admin page).
  */
-export const events = [
-  { slug: 'paintscape', date: '2026-07-01', title: 'Paintscape',
-    venue: 'IMDR Canteen', avenue: 'Club Service',
-    partner: 'Rotaract Club of Nigdi, Rotaract Club of Sinhgad College of Pharmacy and Rotaract Club of Pune Pristine Paradise',
-    summary: 'A creative fellowship event where members expressed their ideas through art and strengthened camaraderie within the club.',
-    outcomes: [{ label: 'Attendance', value: '26' }],
-    report: 'Paintscape was a creative fellowship event organised by the Rotaract Club of Khopoli to encourage members to express their ideas and creativity through art while strengthening camaraderie within the club. It gave participants a fun platform to show their artistic skills, interact with fellow Rotaractors and work as a team in a relaxed setting. The event was conducted in collaboration with the Rotaract Club of Nigdi, the Rotaract Club of Sinhgad College of Pharmacy and the Rotaract Club of Pune Pristine Paradise.' },
-  { slug: 'joint-meeting', date: '2026-07-01', title: 'Cultural Exchange with RAC Delhi Rohini (Saanjh)',
-    venue: 'Online · Google Meet', avenue: 'International Service', partner: 'Rotaract Club of Delhi Rohini (Saanjh)',
-    summary: 'A joint meeting where members of both clubs shared their club activities, traditions and regional cultures.',
-    outcomes: [{ label: 'Attendance', value: '13' }],
-    report: 'The Rotaract Club of Khopoli organised a cultural exchange joint meeting with the Rotaract Club of Delhi Rohini (Saanjh) to strengthen inter-club fellowship and promote cultural understanding. Participants shared their club activities, traditions, regional cultures and experiences, building connections and exploring opportunities for future collaboration between the two clubs.' },
-  { slug: 'gau-seva', date: '2026-07-02', title: 'Gau Seva',
-    venue: 'Shree Gau Shala, Katraj', avenue: 'Community Service',
-    summary: 'Members offered fodder and care to the cows at Shree Gau Shala as a gesture of gratitude, kindness and selfless service.',
-    outcomes: [{ label: 'Attendance', value: '8' }],
-    report: 'On 2 July 2026, the Rotaract Club of Khopoli organised a Gau Seva initiative where members came together to offer fodder and care to cows as a gesture of gratitude, kindness and selfless service. The initiative reflected the club’s commitment to community values and compassion towards all living beings, and encouraged empathy and responsibility through a meaningful act of care.' },
-  { slug: 'world-zoonoses-day', date: '2026-07-06', title: 'World Zoonoses Day Awareness Session',
-    venue: 'Online · Google Meet', avenue: 'International Service', partner: 'Rotaract Club of Bicholim (RID 3170)',
-    summary: 'An online session on how zoonotic diseases spread and how to prevent them, conducted by Rtr. Sara Kamat.',
-    outcomes: [{ label: 'Attendance', value: '45' }],
-    report: 'On 6 July 2026, the Rotaract Club of Khopoli, in collaboration with the Rotaract Club of Bicholim (RID 3170), organised an online World Zoonoses Day Awareness Session to spread awareness about zoonotic diseases and promote responsible health practices. The session was conducted by Rtr. Sara Kamat, who shared insights on the transmission, prevention and control of zoonotic diseases while emphasising the One Health approach and the connected health of humans, animals and the environment.' },
-  { slug: 'dei-session', date: '2026-07-09', title: 'Introduction to DEI: From Stories to Change',
-    venue: 'Online · Google Meet', avenue: 'Diversity, Equity & Inclusion',
-    summary: 'An interactive session on diversity, equity and inclusion within Rotaract, built around personal stories and discussion.',
-    outcomes: [{ label: 'Attendance', value: '14' }],
-    report: 'The Rotaract Club of Khopoli organised an interactive awareness session titled “Introduction to DEI: From Stories to Change” to promote the values of diversity, equity and inclusion within Rotaract. Through discussions, personal storytelling and activities, members explored the importance of a respectful, inclusive and equitable environment while building empathy, understanding and meaningful conversations.' },
-  { slug: 'tree-plantation', date: '2026-07-12', time: '10:00 AM - 2:00 PM', title: 'Mega Tree Plantation Drive',
-    venue: 'Khalapur', avenue: 'Community Service', otherAvenues: ['Public Image', 'Public Relations', 'Rotary–Rotaract Relations'],
-    partner: 'Rotary Club of Khopoli and Rotaract Club of KGRDCP',
-    summary: 'Rotaractors and Rotarians planted more than 1,200 trees in the Khalapur area for a greener, healthier environment.',
-    outcomes: [{ label: 'Trees planted', value: '1,200+' }, { label: 'Attendance', value: '75' }],
-    report: [
-      'The Mega Tree Plantation Drive was organised by the Rotaract Club of Khopoli with the Rotary Club of Khopoli and in collaboration with the Rotaract Club of KGRDCP on 12 July 2026, from 10:00 AM to 2:00 PM, in the Khalapur area.',
-      'The event began with a formal collaring ceremony and Rotaract protocols, followed by addresses from club and Rotary leaders. Police personnel were felicitated, participants were briefed on planting guidelines, and saplings were distributed for the drive.',
-      'More than 1,200 trees were planted, improving local green cover and bringing Rotaractors and Rotarians together for a common environmental cause. The meeting closed with announcements, an open forum for feedback and a vote of thanks.',
-    ] },
-  { slug: 'pd-session', date: '2026-07-19', title: 'Slide Craft: Creative PPT & Canva Hacks',
-    venue: 'Online · Google Meet', avenue: 'Professional Development', otherAvenues: ['International Service', 'Public Image', 'Public Relations'],
-    partner: 'Rotaract Club of KGRDCP',
-    summary: 'A joint skill-development workshop on presentation design, typography, colour and practical Canva shortcuts.',
-    outcomes: [{ label: 'Attendance', value: '60' }],
-    report: [
-      'Slide Craft: Creative PPT & Canva Hacks was a joint skill-development workshop organised by the Rotaract Club of Khopoli and the Rotaract Club of KGRDCP on 19 July 2026. It had two technical sessions: Canva shortcuts and visual composition, led by Rtr. Khadija, and creative presentation design, led by Rtr. Dhruvi.',
-      'Participants learnt practical techniques for slide layouts, typography, visual elements, colour combinations and presentation aesthetics, for academic, professional and Rotaract presentations.',
-      'Collaborating clubs included the Rotaract Clubs of SRIT Anantapur, CBIT Proddatur, Tadipatri Impact Leader and SVV (RID 3040), and the Rotaract Clubs of Pune Westside, Daund College, MGM IMSR, Sancheti Healthcare Academy and RSCOE (RID 3131).',
-    ] },
-  { slug: 'kothaligad-trek', date: '2026-07-26', title: 'Kothaligad Trek',
-    venue: 'Kothaligad', avenue: 'Club Service', partner: 'Rotaract Club of KGRDCP',
-    summary: 'A fellowship trek to the historic Kothaligad Fort, organised by the Rotaract Club of KGRDCP with our club.',
-    outcomes: [{ label: 'Attendance', value: '90' }],
-    report: 'The Kothaligad Trek was organised by the Rotaract Club of KGRDCP in collaboration with the Rotaract Club of Khopoli to promote fellowship, teamwork and adventure among members. Participants explored the historic Kothaligad Fort and its natural surroundings, strengthening bonds while encouraging physical fitness, leadership and collaboration in a safe and enjoyable environment.' },
-  { slug: 'installation-ceremony', date: '2026-08-02', time: '8:00 AM - 10:30 AM', title: '7th Installation Ceremony',
-    venue: 'Rotary Hall, Khopoli', avenue: 'Club Service', otherAvenues: ['Public Image', 'Public Relations', 'Rotary–Rotaract Relations'],
-    summary: 'The club’s 7th Installation Ceremony marked the leadership handover for Rotaract year 2026–27 and launched its “Go Green” initiative.',
-    outcomes: [{ label: 'Attendance', value: '60' }],
-    report: [
-      'The 7th Installation Ceremony of the Rotaract Club of Khopoli was held on 2 August 2026 at Rotary Hall, Khopoli, marking the official leadership transition for RIY 2026–27.',
-      'It began with Rotaract protocols and the collaring of President Rtr. Vaishnav Phatak and Secretary Rtr. Vageesh Baheti. The ceremony featured the launch of the club’s “Go Green” initiative, a review of the previous term by IPP Rtr. Aniket Sardar, the induction of new members and the installation of the incoming Board of Directors.',
-      'The gathering was addressed by parent Rotary leadership, including Secretary Rtn. Rohit Bhalla, and District Rotaract Representative PHF Rtr. Dr. Karishma Awari. It closed with an open floor and a vote of thanks by Vice President Rtr. Mihir Butala.',
-    ] },
-  { slug: 'stress-management', date: '2026-08-05', time: '7:00 PM - 8:30 PM', title: 'Stress Management: Pause, Breathe and Recharge',
-    venue: 'Online · Google Meet', avenue: 'Professional Development', otherAvenues: ['International Service'],
-    partner: 'Rotaract Club of Bicholim (RID 3170)',
-    summary: 'A wellness session on handling daily anxiety, with grounding and breathing techniques, hosted by the Rotaract Club of Bicholim.',
-    outcomes: [{ label: 'Attendance', value: '85' }],
-    report: '“Stress Management: Pause, Breathe and Recharge” was an international service wellness session held on 5 August 2026 via Google Meet, hosted by the Rotaract Club of Bicholim (RID 3170) in partnership with the Rotaract Club of Khopoli (RID 3131). Keynote speaker Ms. Vaidehi Naik guided 85 participants through practical techniques to manage daily anxiety, find emotional grounding through the “Pause” method, practise diaphragmatic breathing and build mindfulness routines.' },
-  { slug: 'club-orientation', date: '2026-08-09', time: '9:00 AM - 1:00 PM', title: 'Club Orientation Programme and Club Assembly',
-    venue: 'Rotary Hall, Khopoli', avenue: 'Club Service', otherAvenues: ['Rotary–Rotaract Relations'],
-    summary: 'An orientation on Rotaract and its avenues of service, followed by the official Club Assembly for Rotaract year 2026–27.',
-    outcomes: [{ label: 'Rotaractors', value: '11' }, { label: 'Rotarians', value: '4' }],
-    report: [
-      'The Club Orientation Programme was held on 9 August 2026 at Rotary Hall, Khopoli. Led by District Club Advisor Rtr. Ashlesha, it gave 11 Rotaractors and 4 Rotarians an in-depth look at the Rotaract structure, the avenues of service, member responsibilities and working with the parent Rotary club. It was presided over by President Rtr. Vaishnav Phatak and closed with a vote of thanks by Vice President Rtr. Mihir Butala.',
-      'The official Club Assembly for RIY 2026–27 followed under the chairmanship of President Rtr. Vaishnav Phatak. With Secretary Rtr. Vageesh Baheti and Treasurer Rtr. Anmay Narvekar attending virtually from the Rotaract Inter-District Exchange in RID 3053, Gwalior, Vice President Rtr. Mihir Butala presented the Secretarial Plan of Action and the Club Master Budget on their behalf.',
-    ] },
-  { slug: 'one-nation-jawan', date: '2026-08-13', endDate: '2026-08-15', title: 'One Nation – Jawan 3.0',
-    venue: 'Online', avenue: 'International Service', partner: 'Rotaract Club of Sunshine Sangli (RID 3170)',
-    summary: 'An inter-district initiative around Independence Day honouring the service and sacrifice of India’s armed forces.',
-    outcomes: [{ label: 'Attendance', value: '10' }],
-    report: '“One Nation – Jawan 3.0” was an inter-district initiative organised by the Rotaract Club of Sunshine Sangli (RID 3170) in partnership with the Rotaract Club of Khopoli (RID 3131). Held around Independence Day, it honoured the valour, sacrifices and service of the Indian Armed Forces and brought Rotaractors across districts together to express their gratitude and celebrate patriotism and national unity.' },
-  { slug: 'independence-day', date: '2026-08-15', time: '7:00 AM - 9:00 AM', title: 'Independence Day Celebration',
-    venue: 'Khopoli Nagarparishad Ground', avenue: 'Community Service', partner: 'Khopoli Municipal Council',
-    summary: 'Members joined municipal officials and citizens for the flag hoisting, felicitations and a cultural programme.',
-    outcomes: [{ label: 'Attendance', value: '75' }],
-    report: 'Independence Day was celebrated on 15 August 2026 at the Khopoli Nagarparishad Ground from 7:00 AM to 9:00 AM. Members of the Rotaract Club of Khopoli joined municipal officials, dignitaries and citizens for the flag hoisting and national anthem led by the Chief Guest, Hon. Nagaradhyaksha. The programme included an address on local civic development, felicitation of sanitation workers and meritorious students, cultural presentations and sweet distribution.' },
-  { slug: 'sanskruti-sangam', date: '2026-08-22', time: '7:30 PM - 10:00 PM', title: 'Sanskruti Sangam: Mega Cultural Exchange',
-    venue: 'Online · Google Meet', avenue: 'International Service', partner: 'Rotaract Club of Acropolis Royals (RID 3040)',
-    summary: '132 Rotaractors from clubs across districts and countries shared nine regional cultures in one evening.',
-    outcomes: [{ label: 'Rotaractors', value: '132' }, { label: 'Cultures', value: '9' }, { label: 'Letterheads exchanged', value: '76' }],
-    report: 'The Mega Cultural Exchange was an international service initiative organised online by the Rotaract Club of Acropolis Royals (RID 3040) on 22 August 2026, with clubs from several districts including the Rotaract Club of Khopoli. It brought together 132 Rotaractors from 8 participating and 6 collaborating clubs, including 3 international clubs. The programme showcased nine cultures, including those of Indore and Solapur, alongside an exchange of 76 club letterheads.' },
-  { slug: 'ai-career-blueprint', date: '2026-08-24', time: '7:30 PM - 9:30 PM', title: 'AI Career Blueprint: Build Smarter Careers with AI',
-    venue: 'Online · Google Meet', avenue: 'Professional Development', otherAvenues: ['International Service'],
-    partner: 'Rotaract Club of Pune City Fortune and 24 clubs',
-    summary: 'A multi-district masterclass on AI fundamentals, prompting, ATS-friendly resumes and interview strategy.',
-    outcomes: [{ label: 'Attendance', value: '140' }, { label: 'Partner clubs', value: '24' }],
-    report: '“AI Career Blueprint: Build Smarter Careers with AI” (ASCEND: Beyond Limits, Chapter 10) was a multi-district professional development initiative hosted by the Rotaract Club of Pune City Fortune (RID 3131) on 24 August 2026 via Google Meet, organised with 24 clubs including the Rotaract Club of Khopoli. Graced by District Governor Rtn. Nitin Dhamale and Rotary AI Seva leadership, the masterclass was conducted by Rtn. Rahul Shah, who covered AI fundamentals, prompt engineering, ATS-optimised resumes, interview strategies and using AI in Microsoft Office. It ended with a live Q&A.' },
-  { slug: 'rakhi-with-khakee', date: '2026-08-28', time: '10:00 AM - 2:00 PM', title: 'Rakhi With Khakee',
-    venue: 'Khopoli Police Station', avenue: 'Community Service', otherAvenues: ['Club Service'],
-    summary: 'On Raksha Bandhan, members tied rakhis for the police personnel who spend festivals on duty.',
-    outcomes: [{ label: 'Attendance', value: '20' }],
-    report: '“Rakhi With Khakee” was a community outreach initiative of the Rotaract Club of Khopoli on 28 August 2026 at Khopoli Police Station. On Raksha Bandhan, members celebrated with police personnel who dedicate their lives to community safety and often spend festivals on duty away from their families. Rotaractors tied rakhis, offered greetings and sweets, and spent time with the officers to thank them for their service.' },
-  { slug: 'acropolis-royals-exchange', date: '2026-09-01', time: '9:00 PM - 10:00 PM', title: 'Joint Meeting and Cultural Exchange with RAC Acropolis Royals',
-    venue: 'Online', avenue: 'International Service', partner: 'Rotaract Club of Acropolis Royals (RID 3040)',
-    summary: 'A joint general body meeting and cultural exchange, including talks on a proposed sister-club agreement.',
-    outcomes: [{ label: 'Attendance', value: '25' }],
-    report: 'The Rotaract Club of Khopoli held an online joint general body meeting and cultural exchange with the Rotaract Club of Acropolis Royals, RID 3040. Members of both clubs interacted, exchanged cultural perspectives and discussed possible joint initiatives. Event ideas and the completion criteria for a proposed sister-club agreement were also discussed.' },
-  { slug: 'teachers-day', date: '2026-09-06', time: '6:00 PM - 9:00 PM', title: 'Teachers’ Day Celebration',
-    venue: 'Rotary Hall, Khopoli', avenue: 'Rotary–Rotaract Relations', otherAvenues: ['Club Service', 'Professional Development'],
-    partner: 'Rotary Club of Khopoli',
-    summary: 'An evening honouring local educators, with an address by Chief Guest Dr. Kashinath, a former DRDO officer.',
-    outcomes: [{ label: 'Attendance', value: '80' }],
-    report: 'The Rotaract Club of Khopoli, with the Rotary Club of Khopoli, organised a Teachers’ Day celebration to recognise and honour the contribution of local educators. Chief Guest Dr. Kashinath, a former DRDO officer, spoke about scientific temperament, nation-building and the role of teachers in modern society. The evening also included a question-and-answer session, announcements and a vote of thanks.' },
-  { slug: 'mazha-bappa', date: '2026-09-13', endDate: '2026-09-26', title: 'Mazha Bappa',
-    venue: 'Khopoli', avenue: 'Public Relations', otherAvenues: ['Public Image'],
-    summary: 'A public relations initiative run by the club from 13 to 26 September.',
-    outcomes: [{ label: 'Attendance', value: '15' }] },
-  { slug: 'samyati', date: '2026-09-18', endDate: '2026-10-20', title: 'Samyati 4.0',
-    venue: 'Khopoli, Pune, Karjat and Neral', avenue: 'International Service', partner: 'Rotaract Club of KGRDCP',
-    summary: 'An international service activity with the Rotaract Club of KGRDCP across Khopoli, Pune, Karjat and Neral.',
-    outcomes: [{ label: 'Attendance', value: '25' }] },
-  { slug: 'gajsanskruti', date: '2026-09-26', title: 'Gajsanskruti 10.0',
-    venue: 'Pune and Khopoli', avenue: 'Community Service', partner: 'Rotaract Club of Pune Mideast',
-    summary: 'The club took part in Gajsanskruti 10.0, hosted by the Rotaract Club of Pune Mideast.',
-    outcomes: [{ label: 'Attendance', value: '150' }] },
-  { slug: 'visnagar-exchange', date: '2026-09-29', time: '9:00 PM - 10:00 PM', title: 'Joint Meeting and Cultural Exchange with RAC Visnagar',
-    venue: 'Online · Google Meet', avenue: 'International Service', partner: 'Rotaract Club of Visnagar (RID 3055)',
-    summary: 'Members presented Maharashtra’s culture, learnt about Gujarat’s heritage and discussed joint initiatives and youth exchanges.',
-    outcomes: [{ label: 'Attendance', value: '20' }],
-    report: 'The Rotaract Club of Khopoli hosted a virtual joint general body meeting and cultural exchange with the Rotaract Club of Visnagar, RID 3055, chaired by Vice President Rtr. Mihir Butala. Rtr. Gargi and International Service Director Rtr. Vageesh Baheti presented Maharashtra’s culture and traditions, while Rtr. Siddharth Patel highlighted Gujarat’s cultural heritage. Members also discussed upcoming joint initiatives and Inter Club Youth Exchange (ICYE) opportunities.' },
-  { slug: 'business-jobs-session', date: '2026-09-30', time: '10:00 PM - 11:00 PM', title: 'Business, Jobs and Challenges Faced',
-    venue: 'Online', avenue: 'Professional Development', partner: 'Rotaract Club of Visnagar (RID 3055)',
-    summary: 'A round-table for young professionals on careers, market obstacles and challenges at work.',
-    outcomes: [{ label: 'Attendance', value: '20' }],
-    report: 'The Rotaract Club of Khopoli and the Rotaract Club of Visnagar, RID 3055, jointly held a virtual professional development session titled “Business, Jobs and Challenges Faced”. It was co-chaired by Vice President Rtr. Mihir Butala and President Rtr. Arpit Patel, and facilitated by Professional Development Director Rtr. Khadija. The round-table covered career roles, market obstacles and operational challenges faced by young professionals, encouraging peer learning, mentorship and problem-solving.' },
-  { slug: 'icye-exchanges', date: '2026-10-01', title: 'Inter-Club Youth Exchange (ICYE)',
-    venue: 'Pune and Khopoli', avenue: 'International Service', partner: 'Rotaract Club of Kadi and RAC Ghaziabad (RID 3012)',
-    summary: 'The club took part in an ICYE with the Rotaract Club of Kadi and hosted an ICYE delegate from Delhi, RID 3012.' },
-  { slug: 'district-interact-assembly', date: '2026-10-04', time: '10:00 AM - 4:00 PM', title: 'District Interact Assembly 2026',
-    venue: 'Maharaja Hall, Khopoli', avenue: 'Rotary–Rotaract Relations', partner: 'Rotary Club of Khopoli and Rotaract Club of KGRDCP',
-    summary: 'More than 150 Interactors from 11 schools came together for leadership development, a treasure hunt and a dance competition.',
-    outcomes: [{ label: 'Interactors', value: '150+' }, { label: 'Schools', value: '11' }, { label: 'Attendance', value: '250' }],
-    report: 'On 4 October 2026, the Rotary Club of Khopoli, the Rotaract Club of Khopoli and the Rotaract Club of KGRDCP jointly conducted the District Interact Assembly 2026, with presiding presidents Rtn. Kavita Khopkar and Rtr. Vaishnav Phatak formally collared. Graced by District Governor Rtn. Nitin Dhamale and Rtn. Santosh Pardeshi, the assembly engaged more than 150 Interactors from 11 schools across the district in leadership development, an outdoor treasure hunt and a cultural dance competition. It concluded with felicitations, announcements and a vote of thanks.' },
-  { slug: 'ramparva', date: '2026-10-07', title: 'Ramparva – Ek Diwali Sandhya', image: '/images/hero-stage.jpg',
-    venue: 'Khopoli', avenue: 'Community Service', otherAvenues: ['Public Image', 'Rotary–Rotaract Relations'],
-    partner: 'Rotary Club of Khopoli',
-    summary: 'The sixth year of the club’s flagship Diwali evening welcomed more than 550 people for a community celebration.',
-    outcomes: [{ label: 'Attendees', value: '550+' }, { label: 'Edition', value: '6th' }],
-    report: [
-      'The Rotaract Club of Khopoli held the sixth year of its flagship event, Ramparva – Ek Diwali Sandhya, welcoming more than 550 people for a community celebration. The much-loved club tradition brings people together through the spirit of Diwali, shared cultural experiences and community participation.',
-      'The project brought three avenues together. Through Community Service it strengthened the club’s engagement with the public; through Public Image it presented the club’s identity, work and values; and through Rotary–Rotaract Relations it supported cooperation with the wider Rotary network.',
-      'With 550+ people in attendance, Ramparva is one of the club’s largest initiatives, and its sixth consecutive year reflects the planning, teamwork and dedication of members and volunteers.',
-    ] },
-  { slug: 'cyber-crime-awareness', date: '2026-10-07', title: 'Cyber Crime Awareness',
-    venue: 'Rotary Hall, Khopoli', avenue: 'Professional Development', otherAvenues: ['Rotary–Rotaract Relations'],
-    partner: 'Rotary Club of Khopoli',
-    summary: 'A joint session with Rotary Club of Khopoli where the head of the Cyber Crime Department, Khopoli Police Station, explained common cyber frauds and how to stay safe.',
-    outcomes: [{ label: 'Attendance', value: '30' }],
-    report: 'A joint event of Cyber Crime Awareness was conducted by Rotary and Rotaract Club of Khopoli, wherein the head of the Cyber Crime Department of Khopoli Police Station gave an overview of the types of cyber crime incidents and how to be safe from such frauds.' },
-  { slug: 'road-safety-drive', date: '2026-10-15', title: 'Road Safety Awareness Drive',
-    venue: 'Khopoli city', avenue: 'Community Service', otherAvenues: ['Rotary–Rotaract Relations'],
-    partner: 'Rotary Club of Khopoli, Interact Club of Khopoli and the Traffic Police Department',
-    summary: 'A drive with the Rotary and Interact clubs of Khopoli and the traffic police on traffic rules, helmets, lane discipline and accident prevention.',
-    outcomes: [{ label: 'Attendance', value: '55+' }],
-    report: [
-      'A road safety awareness drive was held on 15 October 2026 by the Rotary Club of Khopoli, the Rotaract Club of Khopoli and the Interact Club of Khopoli together with the Traffic Police Department.',
-      'It focused on educating the public and young people about traffic safety rules, helmet use, lane discipline and accident prevention.',
-      'Interactors from two local schools took part along with Rotary and Rotaract leadership and Khopoli Traffic Police personnel.',
-    ] },
-  { slug: 'project-bachpan', date: '2026-11-14', endDate: '2026-11-15', title: 'Project Bachpan 2.0',
-    venue: '16+ locations in 7 cities', avenue: 'Community Service', otherAvenues: ['International Service'],
-    partner: 'Rotaract, Rotary and Interact clubs across several districts',
-    summary: 'Over two days, education, sports and festive joy reached more than 1,000 underserved children at 16+ locations in seven cities.',
-    outcomes: [{ label: 'Children reached', value: '1,000+' }, { label: 'Locations', value: '16+' }, { label: 'Cities', value: '7' }],
-    report: [
-      'On 14 and 15 November 2026, the Rotaract Club of Khopoli (RID 3131) carried out Project Bachpan 2.0, bringing education, sports and festive joy to more than 1,000 underserved children. It reached orphaned children, young people living on the streets, and children from slum communities and financially constrained backgrounds at more than 16 locations in Pune, Khopoli, Karjat, Indore, Coimbatore, Hyderabad and Madurai.',
-      'The multi-district project brought together Rotaract, Rotary and Interact clubs, sponsors, community partners and volunteers. Collaborating Rotaract clubs in RID 3131 were KGRDCP, Pune City Fortune, Pune Westside, SCOP, Roar NIBM and Sancheti Healthcare Academy. International Service partners were the Rotaract Clubs of SSPC (RID 3000), OMC (RID 3150), SACS (RID 3000), Coimbatore Main (RID 3206), Mumbai Sky City (RID 3141) and SVVV (RID 3040). The Rotary Clubs of Khopoli and Nigdi and more than 10 Interact clubs supported the project.',
-      'The main sponsors were Weblution (Rtr. Vedant Buge) and Artist Duck – Media and Tech (Rtr. Rajas Uchgaokar). Saturday County Club organised the cricket tournament, Dada Chi Shala welcomed the team on Day 2, and the Rotaract Club of SCOP gave core support throughout. Special thanks to Rtr. Advait Dalal and Rtr. Aslam Dhanani for their on-ground contribution.',
-    ] },
-];
+export const events = eventList;
 
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 export function formatDate(iso) {
@@ -328,6 +155,9 @@ export function formatDateRange(event) {
 export function isPast(event, now = Date.now()) {
   return new Date(`${event.endDate ?? event.date}T23:59:59+05:30`).getTime() < now;
 }
+/** Photos on the Gallery page: [{ src, caption }] (data/content/gallery.json, edited on the admin page). */
+export const galleryPhotos = galleryList;
+
 export const eventsNewestFirst = [...events].sort((a, b) => b.date.localeCompare(a.date));
 
 /** Days the Rotary family marks every year (month-day). Shown on the club calendar. */
@@ -339,36 +169,13 @@ export const rotaryDays = [
   { date: '11-05', title: "Interact's anniversary", note: 'The first Interact club was chartered on 5 November 1962. World Interact Week is held in the week of this date.' },
 ];
 
-/* ---------------- Members ---------------- */
+/* ---------------- Members (data/content/team.json, edited on the admin page) ---------------- */
 
-export const coreMembers = [
-  { name: 'Rtr. Vageesh Baheti', photo: 'vageesh', roles: ['President'], bio: "Leads the club's service year, chairs board meetings and owns every commitment the club makes publicly." },
-  { name: 'Rtr. Srushti Sathe', photo: 'srushti-sathe', roles: ['Secretary'], bio: 'Keeps minutes, correspondence, membership records and the club calendar in order.' },
-  { name: 'Rtr. Mihir Butala', photo: 'mihir-butala', roles: ['President Elect'], bio: "Prepares to lead the club's next service year, deputises at meetings and shepherds cross-avenue projects." },
-  { name: 'Rtr. Anmay Narwekar', photo: 'anmay-narwekar', roles: ['Treasurer'], bio: 'Maintains club accounts, dues, project budgets and the annual statement placed before the general body.' },
-  { name: 'Rtr. Rohan Puri', roles: ['Club Mentor'], photo: 'rohan', bio: 'Guides the board through planning, protocol and district expectations.' },
-];
+export const coreMembers = team.coreMembers;
 
-export const boardOfDirectors = [
-  { name: 'Rtr. Vageesh Baheti', photo: 'vageesh', roles: ['Club Service Director (CSD)', 'International Service Director (ISD)'] },
-  { name: 'Rtr. Piyush Phatak', photo: 'piyush-phatak', roles: ['Club Service Director (CSD)'] },
-  { name: 'Rtr. Shreya Salunkhe', photo: 'shreya-salunkhe', roles: ['Community Service Director (CMD)', 'Sergeant-at-Arms (SAA)'] },
-  { name: 'Rtr. Khadija Bearingwala', photo: 'khadija-bearingwala', roles: ['Professional Development Director (PDD)', 'Diversity, Equity & Inclusion Director (DEID)'] },
-  { name: 'Rtr. Gargi Gaikwad', photo: 'gargi-gaikwad', roles: ['International Service Director (ISD)'] },
-  { name: 'Rtr. Mihir Butala', photo: 'mihir-butala', roles: ['Public Image Director (PID)', 'World Rotaract Week Chair (WRWC)'] },
-  { name: 'Rtr. Aniket Sardar', photo: 'aniket-sardar', roles: ['Immediate Past President (IPP)', 'Rotaract-Rotary Relations Officer (RRRO)'] },
-  { name: 'Rtr. Sarvesh', photo: 'sarvesh', roles: ['Club Public Relations Officer (PRO)'] },
-  { name: 'Rtr. Jayesh Dalvi', photo: 'jayesh-dalvi', roles: ['Club Advisor'] },
-];
+export const boardOfDirectors = team.boardOfDirectors;
 
-export const chairpersons = [
-  { name: 'Rtr. Gaurav', photo: 'gaurav', roles: ['Membership Development Director'] },
-  { name: 'Rtr. Rutika Zavar', photo: 'rutika-zavar', roles: ['Financial Chair'] },
-  { name: 'Rtr. Gargi Gaikwad', photo: 'gargi-gaikwad', roles: ['Creative Head'] },
-  { name: 'Rtr. Khadija Bearingwala', photo: 'khadija-bearingwala', roles: ['Creative Head'] },
-  { name: 'Rtr. Vageesh Baheti', photo: 'vageesh', roles: ['Social Media Chair'] },
-  { name: 'Rtr. Rohan Puri', photo: 'rohan', roles: ['Professional Assistance Officer (PAO)'] },
-];
+export const chairpersons = team.chairpersons;
 
 export const uniqueMemberCount = new Set(
   [...coreMembers, ...boardOfDirectors, ...chairpersons].map((m) => m.name),
