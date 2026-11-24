@@ -186,7 +186,7 @@ export default function AskPanel({ open, onClose }) {
 
       <form className="ask-form" onSubmit={(e) => { e.preventDefault(); ask(input); }}>
         <textarea
-          ref={field} rows={1} value={input} maxLength={500} placeholder="Ask anything about the club…" aria-label="Your question"
+          ref={field} rows={1} value={input} maxLength={500} placeholder="Ask Joey anything…" aria-label="Your question"
           onChange={(e) => { setInput(e.target.value); e.target.style.height = 'auto'; e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`; }}
           onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ask(input); } }}
         />
@@ -196,7 +196,7 @@ export default function AskPanel({ open, onClose }) {
           <button type="submit" className="ask-send" disabled={!input.trim()} aria-label="Send"><FaArrowUp size={14} /></button>
         )}
       </form>
-      <p className="ask-foot">AI answers can be wrong; check the linked pages. Please don’t share personal details.</p>
+      <p className="ask-foot">AI answers can be wrong. Please don’t share personal details.</p>
     </div>
   );
 }

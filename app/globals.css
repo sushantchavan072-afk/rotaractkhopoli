@@ -1587,10 +1587,11 @@ html.intro-on:not(.intro-copy) .home-hero-copy > * { opacity: 0; }
 .ask-send:disabled { opacity: .3; cursor: default; }
 .ask-send:not(:disabled):hover { transform: scale(1.06); }
 .ask-send.is-stop { background: var(--rotaract); }
-.ask-foot { margin: 8px 0 12px; text-align: center; font-size: 11.5px; color: var(--muted); }
+.ask-foot { margin: 8px 12px 12px; text-align: center; font-size: 11.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 @media (max-width: 600px) {
   .ask-panel { right: 0; bottom: 0; width: 100vw; height: 100dvh; border-radius: 0; border: 0; transform-origin: bottom center; padding-bottom: env(safe-area-inset-bottom); }
   .ask-form textarea { font-size: 16px; } /* no zoom-in on iPhone */
+  .ask-foot { margin: 8px 8px 12px; font-size: min(11.5px, 3.15vw); } /* stays on one line on the narrowest phones */
 }
 @media (prefers-reduced-motion: reduce) {
   .ask-fab, .ask-panel, .ask-welcome, .ask-msg { animation: none; }
