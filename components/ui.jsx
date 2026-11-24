@@ -331,7 +331,7 @@ export function Footer() {
           </div>
           <FooterCol title="Quick Links" items={[['Sponsorship', '/sponsorship'], ['About Us', '/about'], ['Events', '/events'], ['Avenues', '/avenues']]} />
           <FooterCol title="More" items={[['Blog', '/blog'], ['Our Team', '/teams'], ['Reviews', '/reviews'], ['Gallery', '/gallery']]} />
-          <FooterCol title="Legal & Policy Links" items={[['Privacy Policy', '/privacy-policy'], ['Terms & Conditions', '/terms-and-conditions'], ['Contact Us', '/contact']]} />
+          <FooterCol title="Legal & Policy Links" items={[['Privacy Policy', '/privacy-policy'], ['Terms & Conditions', '/terms-and-conditions'], ['Contact Us', '/contact'], ['Club admin', '/admin']]} />
         </div>
         <div className="footer-bottom">
           <span>© {new Date().getFullYear()} {club.name} · Club ID {club.clubId} · {club.district}</span>
