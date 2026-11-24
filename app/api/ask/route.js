@@ -77,7 +77,10 @@ function errorDetail(ai, err) {
   const raw = String(err?.message ?? err ?? '');
   let reason = raw;
   try {
-    const parsed = JSON.parse(raw.slice(raw.indexOf('{')));
+    let parsed = JSON.parse(raw.slice(raw.indexOf('{')));
+    // The Gemini library wraps Google's own error JSON inside its message.
+    const inner = String(parsed?.error?.message ?? '');
+    if (inner.trim().startsWith('{')) { try { parsed = JSON.parse(inner); } catch { /* keep outer */ } }
     const quota = (parsed?.error?.details ?? []).flatMap((d) => d?.violations ?? []).map((v) => v.quotaId || v.quotaMetric).filter(Boolean);
     const retry = (parsed?.error?.details ?? []).find((d) => d?.retryDelay)?.retryDelay;
     reason = [parsed?.error?.status, String(parsed?.error?.message ?? '').split('. For more')[0], quota.length && `quota: ${quota.join(', ')}`, retry && `retry in ${retry}`].filter(Boolean).join(' | ') || raw;
