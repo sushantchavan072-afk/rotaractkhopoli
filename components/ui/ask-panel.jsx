@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import RobotIcon from './robot-icon';
 import { FaXmark, FaArrowUp, FaStop, FaRotateLeft, FaArrowRight, FaGlobe, FaArrowUpRightFromSquare } from 'react-icons/fa6';
@@ -54,6 +54,60 @@ function SearchSuggestions({ html }) {
   return <iframe className="ask-suggest-frame" title="Related Google searches" srcDoc={doc} sandbox="allow-popups allow-popups-to-escape-sandbox" loading="lazy" />;
 }
 
+/* ---------- Opening and closing motion ----------
+ * The chat grows out of the button that opened it and shrinks back into it when closed: on desktop and
+ * tablets it flies out of the robot (in the menu, or the round button) with a soft spring, and on phones,
+ * where it fills the screen, it opens as a circle spreading out from the round button. Only transform,
+ * opacity and clip-path are animated, so it stays smooth. Skipped for visitors who prefer less motion.
+ */
+const SPRING = 'cubic-bezier(.22, 1.18, .36, 1)';
+const SETTLE = 'cubic-bezier(.2, .8, .2, 1)';
+const AWAY = 'cubic-bezier(.5, 0, .75, 0)';
+
+/** Centre of the button the chat belongs to: the robot in the desktop menu, else the round button. */
+function originPoint() {
+  for (const el of [document.querySelector('.nav-ask'), document.querySelector('.ask-fab')]) {
+    if (!el) continue;
+    const b = el.getBoundingClientRect();
+    if (b.width && getComputedStyle(el).display !== 'none') return { x: b.left + b.width / 2, y: b.top + b.height / 2, r: 28 };
+  }
+  return { x: window.innerWidth - 46, y: window.innerHeight - 46, r: 28 };
+}
+
+function shape(el) {
+  const o = originPoint();
+  const b = el.getBoundingClientRect();
+  const fullScreen = b.width >= window.innerWidth - 1 && b.height >= window.innerHeight - 1;
+  if (fullScreen) {
+    const R = Math.hypot(Math.max(o.x, window.innerWidth - o.x), Math.max(o.y, window.innerHeight - o.y));
+    return { fullScreen, small: `circle(${o.r}px at ${o.x}px ${o.y}px)`, big: `circle(${Math.ceil(R)}px at ${o.x}px ${o.y}px)` };
+  }
+  const dx = o.x - (b.left + b.width / 2);
+  const dy = o.y - (b.top + b.height / 2);
+  const scale = Math.max(0.06, (o.r * 2) / Math.max(b.width, b.height));
+  return { fullScreen, small: `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px) scale(${scale.toFixed(3)})` };
+}
+
+function openMotion(el) {
+  const f = shape(el);
+  const main = f.fullScreen
+    ? el.animate([{ clipPath: f.small }, { clipPath: f.big }], { duration: 560, easing: SETTLE })
+    : el.animate([{ transform: f.small, opacity: 0 }, { opacity: 1, offset: 0.3 }, { transform: 'none', opacity: 1 }], { duration: 560, easing: SPRING });
+  // The header, conversation, question box and note follow, one after another.
+  const parts = [...el.querySelectorAll(':scope > .ask-head, :scope > .ask-body, :scope > .ask-form, :scope > .ask-foot')].map((part, i) => part.animate(
+    [{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }],
+    { duration: 420, delay: (f.fullScreen ? 160 : 120) + i * 55, easing: SETTLE, fill: 'backwards' },
+  ));
+  return [main, ...parts];
+}
+
+function closeMotion(el) {
+  const f = shape(el);
+  return f.fullScreen
+    ? el.animate([{ clipPath: f.big }, { clipPath: f.small }], { duration: 380, easing: 'cubic-bezier(.55, 0, .7, .3)', fill: 'forwards' })
+    : el.animate([{ transform: 'none', opacity: 1 }, { opacity: 1, offset: 0.55 }, { transform: f.small, opacity: 0 }], { duration: 340, easing: AWAY, fill: 'forwards' });
+}
+
 export default function AskPanel({ open, onClose }) {
   const [messages, setMessages] = useState(() => {
     try { return JSON.parse(sessionStorage.getItem(STORE)) ?? []; } catch { return []; }
@@ -64,6 +118,33 @@ export default function AskPanel({ open, onClose }) {
   const list = useRef(null);
   const field = useRef(null);
   const panel = useRef(null);
+  const motion = useRef([]);
+  const opener = useRef(null);
+  const [reduceMotion] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  // The panel stays on screen while its closing motion plays, then hides.
+  const [visible, setVisible] = useState(open);
+  if (open && !visible) setVisible(true);
+  if (!open && visible && reduceMotion) setVisible(false);
+
+  useLayoutEffect(() => {
+    const el = panel.current;
+    if (!el || !visible) return;
+    motion.current.forEach((a) => a.cancel());
+    motion.current = [];
+    if (open) {
+      el.style.pointerEvents = '';
+      if (!reduceMotion) motion.current = openMotion(el);
+      return;
+    }
+    el.style.pointerEvents = 'none'; // no stray clicks while it shrinks away
+    const away = closeMotion(el);
+    motion.current = [away];
+    away.onfinish = () => {
+      setVisible(false);
+      if (el.contains(document.activeElement)) opener.current?.focus?.({ preventScroll: true });
+    };
+  }, [open, visible, reduceMotion]);
+  useEffect(() => () => motion.current.forEach((a) => a.cancel()), []);
 
   useEffect(() => {
     try { sessionStorage.setItem(STORE, JSON.stringify(messages.slice(-20))); } catch { /* storage unavailable */ }
@@ -71,6 +152,7 @@ export default function AskPanel({ open, onClose }) {
   }, [messages]);
   useEffect(() => {
     if (!open) return undefined;
+    if (!panel.current?.contains(document.activeElement)) opener.current = document.activeElement;
     field.current?.focus({ preventScroll: true });
     const onKey = (e) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', onKey);
@@ -129,7 +211,7 @@ export default function AskPanel({ open, onClose }) {
   const reset = () => { controller.current?.abort(); setMessages([]); field.current?.focus(); };
 
   return (
-    <div ref={panel} className={`ask-panel ${open ? 'is-open' : ''}`} role="dialog" aria-modal="false" aria-label="Chat with Joey, the club’s assistant" hidden={!open}>
+    <div ref={panel} className={`ask-panel ${open ? 'is-open' : ''}`} role="dialog" aria-modal="false" aria-label="Chat with Joey, the club’s assistant" hidden={!visible}>
       <header className="ask-head">
         <span className="ask-avatar" aria-hidden="true"><RobotIcon size={24} /></span>
         <div className="ask-title">
