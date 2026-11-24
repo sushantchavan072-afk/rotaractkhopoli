@@ -16,9 +16,10 @@ export default function AskLauncher() {
   const [open, setOpen] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [opened, setOpened] = useState(false); // after the first opening, the round button pops back in on close
+  const [prefill, setPrefill] = useState(null); // a question handed over by the right-click menu
   if (open && !opened) setOpened(true);
   useEffect(() => {
-    const onAsk = () => { setLoaded(true); setOpen(true); };
+    const onAsk = (e) => { if (e.detail?.question) setPrefill({ text: e.detail.question, at: Date.now() }); setLoaded(true); setOpen(true); };
     window.addEventListener('rck:ask', onAsk);
     return () => window.removeEventListener('rck:ask', onAsk);
   }, []);
@@ -48,7 +49,7 @@ export default function AskLauncher() {
       >
         <RobotIcon size={30} />
       </button>
-      {loaded && <AskPanel open={open} onClose={() => setOpen(false)} />}
+      {loaded && <AskPanel open={open} prefill={prefill} onClose={() => setOpen(false)} />}
     </>
   );
 }

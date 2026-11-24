@@ -5,6 +5,7 @@ import {Header, Footer, ScrollReveal} from '../components/ui';
 import MouseTrail from '@/components/ui/mouse-trail';
 import CustomCursor from '@/components/ui/custom-cursor';
 import AskLauncher from '@/components/ui/ask-launcher';
+import ContextMenu from '@/components/ui/context-menu';
 import {club, SITE_URL} from '../data/club';
 import {siteJsonLd} from '../lib/seo';
 
@@ -39,6 +40,7 @@ export default function RootLayout({ children }){
         <main id="main" tabIndex={-1}>{children}</main>
         <Footer/>
         <AskLauncher/>
+        <ContextMenu/>
         <ScrollReveal/>
         <CustomCursor/>
         {process.env.VERCEL && <Analytics/>}

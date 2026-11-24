@@ -111,11 +111,14 @@ function closeMotion(el) {
 /** A device with a fine pointer and hover (a computer), where focusing a text box doesn't pop up a keyboard. */
 const typesFreely = () => window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
-export default function AskPanel({ open, onClose }) {
+export default function AskPanel({ open, prefill, onClose }) {
   const [messages, setMessages] = useState(() => {
     try { return JSON.parse(sessionStorage.getItem(STORE)) ?? []; } catch { return []; }
   });
   const [input, setInput] = useState('');
+  // A question handed over by the right-click menu goes into the box, ready to send or edit.
+  const [lastPrefill, setLastPrefill] = useState(null);
+  if (prefill && prefill !== lastPrefill) { setLastPrefill(prefill); setInput(prefill.text); }
   const [busy, setBusy] = useState(false);
   const controller = useRef(null);
   const list = useRef(null);
