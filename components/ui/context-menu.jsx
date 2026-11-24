@@ -15,6 +15,7 @@ import { usePathname, useRouter } from 'next/navigation';
  * - Arrow keys move through it, Right/Left open and close a side menu, Enter chooses, Escape closes.
  */
 
+const SUB_GAP = 6; // space between a menu and the side menu it opens
 const PAGES = [['Home', '/'], ['About Us', '/about'], ['Our Team', '/teams'], ['Events', '/events'], ['Blog', '/blog'], ['Gallery', '/gallery'], ['Contact', '/contact']];
 
 const isMac = () => /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
@@ -123,7 +124,10 @@ function Menu({ items, at, onPick, onClose, depth = 0, onLeave, labelledBy }) {
     subTimer.current = window.setTimeout(() => {
       if (!items[i]?.submenu) { setSub(null); return; }
       const row = box.current?.querySelector(`[data-i="${i}"]`)?.getBoundingClientRect();
-      if (row) setSub({ index: i, at: { x: row.right + 2, y: row.top - 6, altX: row.left - 2 } });
+      // A small gap from the menu's edge, with the side menu's first item level with the hovered row
+      // (the side menu has 6px of padding above its first item).
+      const menu = box.current?.getBoundingClientRect();
+      if (row && menu) setSub({ index: i, at: { x: menu.right + SUB_GAP, y: row.top - 6, altX: menu.left - SUB_GAP } });
     }, delay);
   };
   const choose = (i) => {
