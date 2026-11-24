@@ -16,6 +16,9 @@ import { usePathname, useRouter } from 'next/navigation';
  */
 
 const SUB_GAP = 6; // space between a menu and the side menu it opens
+const PAD = 8; // the menu's padding (globals.css .ctx)
+// The highlighted row takes a different strong colour each time it moves (all keep white text readable).
+const HUES = ['#d41367', '#17458f', '#c2410c', '#15803d', '#7a3db8', '#0067c8', '#b45309', '#0e7490'];
 const PAGES = [['Home', '/'], ['About Us', '/about'], ['Our Team', '/teams'], ['Events', '/events'], ['Blog', '/blog'], ['Gallery', '/gallery'], ['Contact', '/contact']];
 
 const isMac = () => /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
@@ -102,10 +105,15 @@ function place(x, y, w, h, altX = x) {
   return { left, top, origin: `${originX} ${originY}` };
 }
 
-function Menu({ items, at, onPick, onClose, depth = 0, onLeave, labelledBy }) {
+function Menu({ items, at, onPick, onClose, depth = 0, onLeave, labelledBy, hueRef }) {
   const box = useRef(null);
   const [pos, setPos] = useState(null);
-  const [active, setActive] = useState(-1);
+  const [active, setActiveIndex] = useState(-1);
+  const [hue, setHue] = useState(HUES[0]);
+  const setActive = (i) => {
+    if (i !== active) { hueRef.current = (hueRef.current + 1) % HUES.length; setHue(HUES[hueRef.current]); }
+    setActiveIndex(i);
+  };
   const [sub, setSub] = useState(null); // { index, at: { x, y, altX } }
   const subTimer = useRef(0);
   const usable = items.map((it, i) => (it.type === 'sep' || it.disabled ? -1 : i)).filter((i) => i >= 0);
@@ -124,10 +132,9 @@ function Menu({ items, at, onPick, onClose, depth = 0, onLeave, labelledBy }) {
     subTimer.current = window.setTimeout(() => {
       if (!items[i]?.submenu) { setSub(null); return; }
       const row = box.current?.querySelector(`[data-i="${i}"]`)?.getBoundingClientRect();
-      // A small gap from the menu's edge, with the side menu's first item level with the hovered row
-      // (the side menu has 6px of padding above its first item).
+      // A small gap from the menu's edge, with the side menu's first item level with the hovered row.
       const menu = box.current?.getBoundingClientRect();
-      if (row && menu) setSub({ index: i, at: { x: menu.right + SUB_GAP, y: row.top - 6, altX: menu.left - SUB_GAP } });
+      if (row && menu) setSub({ index: i, at: { x: menu.right + SUB_GAP, y: row.top - PAD, altX: menu.left - SUB_GAP } });
     }, delay);
   };
   const choose = (i) => {
@@ -177,17 +184,20 @@ function Menu({ items, at, onPick, onClose, depth = 0, onLeave, labelledBy }) {
             key={it.label} id={`ctx-${depth}-${i}`} data-i={i} role="menuitem" aria-disabled={it.disabled || undefined}
             aria-haspopup={it.submenu ? 'menu' : undefined} aria-expanded={it.submenu ? sub?.index === i : undefined}
             className={`ctx-item ${active === i ? 'is-active' : ''} ${it.current ? 'is-current' : ''}`}
+            style={active === i ? { '--ctx-hl': hue } : undefined}
             onPointerEnter={() => { if (!it.disabled) setActive(i); openSub(i, it.submenu ? 90 : 160); }}
             onClick={() => choose(i)}
           >
             <span className="ctx-label">{it.label}</span>
-            {it.submenu ? <span className="ctx-arrow" aria-hidden="true">&rsaquo;</span> : it.key && <span className="ctx-key">{it.key}</span>}
+            {it.submenu ? (
+              <svg className="ctx-arrow" width="8" height="8" viewBox="0 0 8 8" aria-hidden="true"><path d="M2.5 1.5 5.5 4l-3 2.5" fill="none" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            ) : it.key && <span className="ctx-key">{it.key}</span>}
           </div>
         )))}
       </div>
       {sub && (
         <Menu
-          items={items[sub.index].submenu} at={sub.at} depth={depth + 1} onPick={onPick} onClose={onClose} labelledBy={`ctx-${depth}-${sub.index}`}
+          items={items[sub.index].submenu} at={sub.at} depth={depth + 1} onPick={onPick} onClose={onClose} labelledBy={`ctx-${depth}-${sub.index}`} hueRef={hueRef}
           onLeave={() => { setSub(null); box.current?.focus({ preventScroll: true }); setActive(sub.index); }}
         />
       )}
@@ -200,6 +210,7 @@ export default function ContextMenu() {
   const router = useRouter();
   const pathname = usePathname();
   const close = useCallback(() => setMenu(null), []);
+  const hueRef = useRef(0); // shared by the menu and its side menus, so the colours keep moving on
 
   // Close whenever the page changes.
   const [lastPath, setLastPath] = useState(pathname);
@@ -226,6 +237,7 @@ export default function ContextMenu() {
       const r = fromKeys ? t.getBoundingClientRect() : null;
       const x = fromKeys ? r.left + 12 : e.clientX;
       const y = fromKeys ? r.top + Math.min(r.height, 40) : e.clientY;
+      hueRef.current = Math.floor(Math.random() * HUES.length); // a different starting colour for each opening
       setMenu({ items: buildItems({ selection, link, image, router }), at: { x, y, altX: x }, key: Date.now() });
     };
     document.addEventListener('contextmenu', onContext);
@@ -256,7 +268,7 @@ export default function ContextMenu() {
   if (!menu) return null;
   return (
     <Menu
-      key={menu.key} items={menu.items} at={menu.at} onClose={close}
+      key={menu.key} items={menu.items} at={menu.at} onClose={close} hueRef={hueRef}
       onPick={(it) => { close(); it.run?.(); }}
     />
   );
