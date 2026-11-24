@@ -183,30 +183,13 @@ function MetricCards() {
 }
 
 /** Small bar chart card overlaid on a photo, built from real club data. */
-function ChartCard({ title, caption, bars }) {
-  const max = Math.max(...bars.map((b) => b.value), 1);
-  return (
-    <div className="chart-card">
-      <strong>{title}</strong>
-      <small>{caption}</small>
-      <div className="chart-bars" role="img" aria-label={`${title}: ${bars.map((b) => `${b.label} ${b.value}`).join(', ')}`}>
-        {bars.map((b) => <div key={b.label}><span style={{ height: `${Math.max(14, (b.value / max) * 100)}%` }} /><em>{b.label}</em></div>)}
-      </div>
-    </div>
-  );
-}
-
 function ResultsBlocks({ tone = 'plain' }) {
-  const byAvenue = [['Community Service', 'Comm.'], ['International Service', 'Intl.'], ['Professional Development', 'PD'], ['Diversity, Equity & Inclusion', 'DEI'], ['Club Service', 'Club']]
-    .map(([a, label]) => ({ label, value: events.filter((e) => e.avenue === a).length }));
-  const byMonth = ['06', '07', '08', '09', '10'].map((m) => ({ label: MONTHS[Number(m) - 1], value: events.filter((e) => e.date.slice(5, 7) === m).length }));
   return (
     <Section tone={tone}>
       <Intro center label="Our results" title="Results that inspire change" description="Young people, local problems, real follow-through." />
       <div className="story-block">
         <div className="story-photo">
           <Photo src="/images/hero-stage.jpg" alt="Members on stage at Ramparva, the club\u2019s community Diwali evening" label="Community Service" sizes="(max-width: 900px) 100vw, 45vw" />
-          <ChartCard title="Projects by avenue" caption="This Rotaract year" bars={byAvenue} />
         </div>
         <div className="story-copy">
           <span className="chip">Community Service</span>
@@ -221,7 +204,6 @@ function ResultsBlocks({ tone = 'plain' }) {
       <div className="story-block is-flipped">
         <div className="story-photo">
           <Photo src="/images/events/cyber-crime-awareness.jpg" alt="Members at the cyber crime awareness session" label="Professional Development" sizes="(max-width: 900px) 100vw, 45vw" />
-          <ChartCard title="Projects per month" caption="June to October" bars={byMonth} />
         </div>
         <div className="story-copy">
           <span className="chip">Professional & International</span>
@@ -475,7 +457,6 @@ export function About() {
         <div className="story-block">
           <div className="story-photo">
             <Photo src="/images/cta-team.jpg" alt="Members of Rotaract Club of Khopoli" label="Our story" sizes="(max-width: 900px) 100vw, 45vw" />
-            <ChartCard title="Projects per month" caption="This Rotaract year" bars={['06', '07', '08', '09', '10'].map((m) => ({ label: MONTHS[Number(m) - 1], value: events.filter((e) => e.date.slice(5, 7) === m).length }))} />
           </div>
           <div className="story-copy prose">
             <Eyebrow>Our story</Eyebrow>
