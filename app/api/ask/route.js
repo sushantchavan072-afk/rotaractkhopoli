@@ -146,7 +146,7 @@ export async function POST(request) {
       const ai = provider();
       send({ type: 'sources', sources, mode: ai === 'search' ? 'search' : 'ai' });
       const listPages = (lead) => send({ type: 'text', text: passages.length
-        ? `${lead}\n\n${sources.slice(0, 4).map((src, i) => `- **${src.title}** [${i + 1}]`).join('\n')}`
+        ? `${lead}\n\n${sources.map((src, i) => ({ src, n: i + 1 })).filter(({ src }, i) => sources.findIndex((x) => x.url === src.url && x.title === src.title) === i).slice(0, 4).map(({ src, n }) => `- **${src.title}** [${n}]`).join('\n')}`
         : `${lead.replace(/,? so here are.*$/, '.')} Nothing on the site matched that question; try the Contact page to ask the club directly.` });
 
       if (ai === 'search') {
