@@ -54,7 +54,14 @@ Good to know:
 ### 1b. Switch on the admin page (add events, photos and the team yourself)
 - [ ] Done
 
-**What it is:** a password-protected page at **/admin** (for example `rotaractkhopoli.vercel.app/admin`) where the board can add, edit and delete events (with photos and results), change the Team page (office bearers, board, chairpersons, their photos, the Rotaract year and the contact people) and manage the Gallery. Pressing **Save changes** saves everything as one update in the website's GitHub repository; Vercel then publishes the site again and the change is live in about two minutes. Every save is kept in GitHub's history, so any mistake can be undone.
+**What it is:** a password-protected page at **/admin** (for example `rotaractkhopoli.vercel.app/admin`, also linked as **Club admin** in every page's footer) where the board can:
+- see an **Overview**: upcoming events, what needs attention (events without photos or reports, missing club email or social links), quick actions and recent saves, with **Go back to this** to undo a mistake;
+- add, edit, duplicate and delete **events**, with a main photo, extra photos, results and a report;
+- change the **Team** page (office bearers, board, chairpersons, their photos, the Rotaract year and the President and Secretary contacts);
+- manage the **Gallery** and **Reviews**;
+- set the **Club details**: club email, social media links, meeting place and map link.
+
+It works on phones (tab bar at the bottom) and computers (side menu); **Ctrl+S** (⌘+S on a Mac) saves. Pressing **Save changes** saves everything as one update in the website's GitHub repository; Vercel then publishes the site again and the change is live in about two minutes. Every save is kept in GitHub's history, so any mistake can be undone.
 
 **It needs two settings in Vercel:**
 
@@ -115,7 +122,7 @@ The website now works out its own address: on Vercel it uses the project's produ
 - the new email address;
 - which account should own the Google Sheet from item 1.
 
-**Where it goes:** `data/club.js` → `contact.email`. The forms and the footer use it automatically.
+**Where it goes:** on the admin page (item 1b): **Club details → Club email**, then **Save changes**. The forms and the footer use it automatically.
 
 ### 5. Social media links
 - [ ] Received
@@ -128,7 +135,7 @@ The website now works out its own address: on Vercel it uses the project's produ
 - YouTube
 - Facebook
 
-**Where it goes:** `data/club.js` → `contact.social`.
+**Where it goes:** on the admin page (item 1b): **Club details → Social media**, then **Save changes**.
 
 **Optional:** members' personal Instagram or LinkedIn links. They appear as small icons when someone hovers over that member's card on the Teams page.
 
@@ -221,6 +228,8 @@ Attendance from the reports is now shown on every event page, along with figures
 - the quote;
 - the person's name and role (for example "Headmistress, ZP School, Vavoshi");
 - **their permission** to publish it.
+
+**Where it goes:** on the admin page (item 1b): **Reviews → Add a review**, then **Save changes**. The section appears on the site as soon as there is one.
 
 The "Leave a note" wall on the Reviews page lets visitors send notes to the club. Good ones (with permission) can become testimonials.
 

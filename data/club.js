@@ -2,12 +2,15 @@
  * Single source of truth for the Rotaract Club of Khopoli website.
  * Content carried over from the club's original site (rotaractkhopoli repo, src/data/*).
  *
- * Events, the team and the gallery live in data/content/*.json so the club can edit them on the
- * password-protected admin page (/admin) without touching code. Everything else is edited here.
+ * Events, the team, the gallery, reviews and the club's contact details live in data/content/*.json so the
+ * club can edit them on the password-protected admin page (/admin) without touching code. Everything else is
+ * edited here.
  */
 import team from './content/team.json';
 import eventList from './content/events.json';
 import galleryList from './content/gallery.json';
+import site from './content/site.json';
+import reviews from './content/reviews.json';
 
 export const club = {
   name: 'Rotaract Club of Khopoli',
@@ -27,17 +30,10 @@ export const club = {
 export const officers = team.officers;
 
 /**
- * Public contact settings. TODO(club): create a shared club inbox (e.g. a club Gmail) and put it in `email`
- * so forms stop going to a personal address.
+ * Public contact settings: club inbox, social links, meeting place (data/content/site.json, edited on the admin
+ * page under Club details). Forms go to `email` when set, else to the Secretary, else the President.
  */
-export const contact = {
-  email: '', // club inbox, e.g. 'rotaractkhopoli@gmail.com'
-  showPresidentPhone: true, // only shown on the Contact page, never in the header/footer
-  meetingPlace: 'Rotary Bhavan, Khopoli, Maharashtra',
-  mapUrl: 'https://www.google.com/maps/search/?api=1&query=Rotary+Bhavan+Khopoli',
-  /** Fill these in to show social icons in the footer and contact page. */
-  social: { instagram: '', facebook: '', linkedin: '', youtube: '' },
-};
+export const contact = site;
 
 /** Where website forms are sent: the club inbox, else the secretary, else the president. */
 export const clubEmail = contact.email || officers[1].email || officers[0].email;
@@ -187,10 +183,10 @@ export function initials(name) {
 
 /* ---------------- Testimonials ---------------- */
 /**
- * Only real, consented quotes belong here. The testimonials section is hidden while this list is empty.
- * Format: { quote: '...', name: 'Full name', role: 'Role / organisation' }
+ * Only real, consented quotes belong here (data/content/reviews.json, edited on the admin page). The testimonials
+ * section is hidden while this list is empty. Format: { quote, name, role }
  */
-export const testimonials = [];
+export const testimonials = reviews;
 
 
 /* ---------------- FAQs ---------------- */

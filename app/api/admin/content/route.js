@@ -1,22 +1,20 @@
 import { isAdmin, sameOrigin, json } from '../../../../lib/admin/auth';
 import { githubConfigured, readJson, listFiles, commitFiles, ConflictError, GitHubError } from '../../../../lib/admin/github';
-import { cleanEvents, cleanTeam, cleanGallery, cleanUploads, InvalidError } from '../../../../lib/admin/validate';
+import { cleanUploads, InvalidError } from '../../../../lib/admin/validate';
+import { FILES, CLEAN, LABEL, toFile } from '../../../../lib/admin/content';
 import { avenues } from '../../../../data/club';
 
 /**
  * The admin page's content.
- * GET: events, team and gallery as they are in the repository now (not just as last published, so two
+ * GET: events, team, gallery, club details and reviews as they are in the repository now (not just as last published, so two
  *      saves in a row never undo each other), with each file's version for conflict checks.
- * POST { events?, team?, gallery?, base: { events?, team?, gallery? }, uploads?: [{ path, data }] }:
+ * POST { events?, team?, gallery?, site?, reviews?, base: { …file versions }, uploads?: [{ path, data }] }:
  *      checks everything and commits it as one change; Vercel then publishes the site again.
  */
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
-const FILES = { events: 'data/content/events.json', team: 'data/content/team.json', gallery: 'data/content/gallery.json' };
-const CLEAN = { events: cleanEvents, team: cleanTeam, gallery: cleanGallery };
-const LABEL = { events: 'events', team: 'team', gallery: 'gallery' };
 const MAX_BODY = 4.2 * 1024 * 1024; // Vercel accepts up to 4.5 MB per request
 
 const notReady = () => json({ error: 'Saving is not switched on yet: GITHUB_TOKEN is not set in Vercel.' }, 503);
@@ -35,12 +33,13 @@ export async function GET(request) {
   if (!isAdmin(request)) return json({ error: 'Please sign in again.' }, 401);
   if (!githubConfigured()) return notReady();
   try {
-    const [events, team, gallery, memberFiles, eventFiles] = await Promise.all([
-      readJson(FILES.events), readJson(FILES.team), readJson(FILES.gallery), listFiles('public/images/members'), listFiles('public/images/events'),
+    const kinds = Object.keys(FILES);
+    const [files, memberFiles, eventFiles] = await Promise.all([
+      Promise.all(kinds.map((k) => readJson(FILES[k]))), listFiles('public/images/members'), listFiles('public/images/events'),
     ]);
     return json({
-      events: events.data, team: team.data, gallery: gallery.data,
-      base: { events: events.sha, team: team.sha, gallery: gallery.sha },
+      ...Object.fromEntries(kinds.map((k, i) => [k, files[i].data])),
+      base: Object.fromEntries(kinds.map((k, i) => [k, files[i].sha])),
       memberPhotos: memberFiles.filter((f) => /\.(webp|png|jpe?g)$/i.test(f)),
       eventPhotos: eventFiles.filter((f) => /\.jpg$/i.test(f)),
       avenues: avenues.flatMap((a) => a.eventAvenues),
@@ -67,7 +66,7 @@ export async function POST(request) {
       const data = CLEAN[kind](body[kind]);
       if (typeof body.base?.[kind] !== 'string') return json({ error: 'Please reload the admin page and try again.' }, 400);
       expected[FILES[kind]] = body.base[kind];
-      files.push({ path: FILES[kind], content: Buffer.from(`${JSON.stringify(data, null, 2)}\n`) });
+      files.push({ path: FILES[kind], content: toFile(data) });
       parts.push(LABEL[kind]);
     }
     const uploads = cleanUploads(body.uploads);
