@@ -17,6 +17,7 @@ import { usePathname, useRouter } from 'next/navigation';
 
 const SUB_GAP = 6; // space between a menu and the side menu it opens
 const PAD = 8; // the menu's padding (globals.css .ctx)
+const ROW_RADIUS = 8; // corners of the hovered row's highlight: a softly rounded rectangle
 // The highlighted row takes a different strong colour each time it moves (all keep white text readable).
 const HUES = ['#d41367', '#17458f', '#c2410c', '#15803d', '#7a3db8', '#0067c8', '#b45309', '#0e7490'];
 const PAGES = [['Home', '/'], ['About Us', '/about'], ['Our Team', '/teams'], ['Events', '/events'], ['Blog', '/blog'], ['Gallery', '/gallery'], ['Contact', '/contact']];
@@ -173,7 +174,7 @@ function Menu({ items, at, onPick, onClose, depth = 0, onLeave, onEnter, labelle
     const right = el.clientWidth - left - row.offsetWidth;
     const bottom = el.clientHeight - top - row.offsetHeight;
     el.style.setProperty('--ctx-hl', hue);
-    el.style.clipPath = `inset(${top}px ${right}px ${bottom}px ${left}px round ${row.offsetHeight / 2}px)`;
+    el.style.clipPath = `inset(${top}px ${right}px ${bottom}px ${left}px round ${ROW_RADIUS}px)`;
     if (fresh) {
       el.getBoundingClientRect();
       el.style.transition = '';
