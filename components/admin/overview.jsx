@@ -125,23 +125,28 @@ function CalendarCard({ events, photoOf, go }) {
   );
 }
 
+/** A role's short code, e.g. "Club Service Director (CSD)" -> "CSD". */
+const roleCode = (role) => role.match(/\(([A-Z]{2,6})\)/)?.[1] ?? '';
+const roleName = (role) => role.replace(/\s*\([A-Z]{2,6}\)\s*$/, '');
+
 function BoardCard({ team, memberPhoto, go }) {
   const core = team.coreMembers;
   const holder = (re) => core.find((p) => p.roles.some((r) => re.test(r.trim())));
-  const podium = [holder(/^secretary$/i), holder(/^president$/i), holder(/^treasurer$/i)];
-  const shown = podium.every(Boolean) ? podium : [core[1], core[0], core[2]].filter(Boolean);
+  const trio = [holder(/^president$/i), holder(/^secretary$/i), holder(/^treasurer$/i)];
+  const shown = trio.every(Boolean) ? trio : core.slice(0, 3);
   const others = [...core, ...team.boardOfDirectors].filter((p, i, all) => !shown.some((x) => x.name === p.name) && all.findIndex((y) => y.name === p.name) === i);
-  const rest = others.slice(0, 4);
-  const roleCount = (name) => new Set(LISTS.flatMap(([k]) => team[k].filter((p) => p.name === name).flatMap((p) => p.roles))).size;
+  const rest = others.slice(0, 7);
   return (
     <section className="adm-card adm-board">
-      <div className="adm-card-top"><h3>Office bearers</h3><span className="adm-hint">{team.rotaractYear}</span></div>
-      <div className="adm-podium">
-        {shown.map((p, i) => (
-          <button key={p.name} type="button" className={`adm-podium-person${i === 1 ? ' is-lead' : ''}`} onClick={() => go('team')}>
-            <span className="adm-podium-photo"><Thumb src={memberPhoto(p)} fallback={initials(p.name)} round /><i>{i === 1 ? '★' : i === 0 ? '2' : '3'}</i></span>
-            <strong>{p.name.replace(/^Rtr\.?\s*/i, '').split(' ')[0]}</strong>
-            <span>{p.roles[0]}</span>
+      <div className="adm-card-top"><h3>Office bearers</h3><span className="adm-chip-num is-green">{team.rotaractYear}</span></div>
+      <div className="adm-officers">
+        {shown.map((p) => (
+          <button key={p.name} type="button" className="adm-officer-tile" onClick={() => go('team')}>
+            <Thumb src={memberPhoto(p)} fallback={initials(p.name)} />
+            <span className="adm-officer-caption">
+              <strong>{p.name.replace(/^Rtr\.?\s*/i, '').split(' ')[0]}</strong>
+              <span>{roleName(p.roles[0])}</span>
+            </span>
           </button>
         ))}
       </div>
@@ -149,11 +154,12 @@ function BoardCard({ team, memberPhoto, go }) {
         {rest.map((p) => (
           <li key={p.name}>
             <Thumb src={memberPhoto(p)} fallback={initials(p.name)} round />
-            <span className="adm-next-text"><strong>{p.name}</strong><span>{p.roles.join(' · ')}</span></span>
-            <span className="adm-board-roles">{plural(roleCount(p.name), 'role')}</span>
+            <span className="adm-next-text"><strong>{p.name.replace(/^Rtr\.?\s*/i, '')}</strong><span>{roleName(p.roles[0])}</span></span>
+            {roleCode(p.roles[0]) && <span className="adm-role-code">{roleCode(p.roles[0])}</span>}
           </li>
         ))}
       </ul>
+      <button type="button" className="adm-link adm-card-foot" onClick={() => go('team')}>See the full team</button>
     </section>
   );
 }
