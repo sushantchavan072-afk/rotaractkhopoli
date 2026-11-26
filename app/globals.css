@@ -2609,3 +2609,48 @@ body:has(.admin):not(:has(.adm-gate)) {
 .admin .adm-budget .adm-budget-name { height: auto; padding: 4px 8px; border: 1px solid transparent; border-radius: 10px; background: transparent; box-shadow: none; font: 600 16px var(--font); }
 .admin .adm-budget .adm-budget-name:hover, .admin .adm-budget .adm-budget-name:focus { border-color: var(--line-strong); background: var(--surface); }
 .adm-budget-foot-end { display: inline-flex; align-items: center; gap: 10px; }
+
+/* Admin background: soft green with Rotary yellow (no peach or pink) */
+body:has(.admin):not(:has(.adm-gate)) {
+  background-color: #eff0ea;
+  background-image: radial-gradient(1100px 700px at -10% -10%, #d6edc9 0%, transparent 60%), radial-gradient(1000px 800px at 110% 20%, rgba(247, 168, 27, .26) 0%, transparent 60%), radial-gradient(900px 700px at 50% 110%, rgba(247, 168, 27, .14) 0%, transparent 60%);
+}
+
+/* Home: month filter */
+.adm-month-filter { min-width: 190px; }
+.adm-chart-focus { fill: rgba(247, 168, 27, .18); }
+.adm-chart-months button { flex: 1 1 0; min-width: 0; padding: 4px 0; border: 0; border-radius: 8px; background: none; color: inherit; font: inherit; cursor: pointer; transition: background-color .2s ease, color .2s ease; }
+.adm-chart-months button:hover { color: var(--ink); }
+.adm-chart-months button.is-on { background: var(--ink); color: #fff; font-weight: 600; }
+
+/* Phone navbar: a solid black bar fixed to the bottom edge (not floating), black all the way down.
+   The content above appears to round into it at the top corners. Line icons; the current section is a white pill. */
+@media (max-width: 960px) {
+  .adm-dock, .adm-dock:not(:root) {
+    left: 0; right: 0; bottom: 0; width: auto; max-width: none; translate: none; transform: none;
+    justify-content: space-between; gap: 0; padding: 12px 14px calc(14px + env(safe-area-inset-bottom));
+    border-radius: 0; background: #000; box-shadow: none; animation: none; will-change: auto;
+  }
+  .adm-dock::before, .adm-dock::after { content: ''; position: absolute; bottom: 100%; width: 28px; height: 28px; pointer-events: none; }
+  .adm-dock::before { left: 0; background: radial-gradient(circle at 100% 0, transparent 27.5px, #000 28px); }
+  .adm-dock::after { right: 0; background: radial-gradient(circle at 0 0, transparent 27.5px, #000 28px); }
+  .adm-dock button, .adm-dock button[aria-current='page'] { height: 56px; border-radius: 999px; }
+  .adm-dock button { flex: 1 1 0; min-width: 0; padding: 0; color: #fff; }
+  .adm-dock button:hover { color: #fff; }
+  .adm-dock button:active { transform: scale(.94); }
+  .adm-dock button[aria-current='page'] { flex: 0 0 auto; padding: 0 22px 0 18px; background: #fff; color: #000; }
+  .adm-dock button[aria-current='page'] .adm-dock-label > span { padding-left: 8px; }
+  .adm-dock-label > span { font: 500 16px var(--font); letter-spacing: -.01em; }
+  .adm-savebar, .adm-savebar.is-error { bottom: calc(96px + env(safe-area-inset-bottom)); }
+  .admin { padding-bottom: calc(160px + env(safe-area-inset-bottom)); }
+}
+@media (max-width: 400px) {
+  .adm-dock, .adm-dock:not(:root) { padding: 10px 10px calc(12px + env(safe-area-inset-bottom)); }
+  .adm-dock button[aria-current='page'] { padding: 0 16px 0 14px; }
+  .adm-dock button[aria-current='page'] .adm-dock-label > span { padding-left: 6px; }
+  .adm-dock-label > span { font-size: 15px; }
+}
+@media (max-width: 340px) {
+  .adm-dock button[aria-current='page'] { padding: 0 16px; }
+  .adm-dock button[aria-current='page'] .adm-dock-label > span { padding-left: 0; }
+}

@@ -12,6 +12,7 @@ import OverviewTab from './overview';
 import FinanceTab from './finance';
 import { Field, api, whenSaved } from './shared';
 import { tidyDraft } from './tidy';
+import { LuCalendarDays, LuHouse, LuIdCard, LuImages, LuIndianRupee, LuQuote, LuUsers } from 'react-icons/lu';
 
 /**
  * The club's admin page (/admin): events, team, gallery, reviews and club details, without code.
@@ -31,6 +32,8 @@ const SECTIONS = [
   ['finance', 'Finance', 'Finance', FaIndianRupeeSign],
   ['site', 'Club details', 'Details', FaAddressCard],
 ];
+// The phone navbar uses line icons (in the same order as SECTIONS).
+const DOCK_ICONS = { overview: LuHouse, events: LuCalendarDays, team: LuUsers, gallery: LuImages, reviews: LuQuote, finance: LuIndianRupee, site: LuIdCard };
 // The current section's name and icon take one of the club colours, a different one each time.
 const ACTIVE_HUES = ['#d41367', '#17458f', '#c2410c', '#15803d', '#7a3db8', '#0067c8', '#b45309', '#0e7490'];
 const UPLOAD_BUDGET = 3.4 * 1024 * 1024; // base64 photo data per save (Vercel's request limit is 4.5 MB)
@@ -477,12 +480,15 @@ export default function AdminApp() {
           page's top level so nothing on the page can cover it. */}
       {client && createPortal(
         <nav className="adm-dock" aria-label="Admin sections">
-          {SECTIONS.map(([k, label, short, Icon]) => (
+          {SECTIONS.map(([k, label, short]) => {
+            const Icon = DOCK_ICONS[k];
+            return (
             <button key={k} type="button" aria-current={tab === k ? 'page' : undefined} title={label} onClick={() => go(k)}>
-              <Icon size={17} aria-hidden="true" />
+              <Icon size={22} strokeWidth={1.8} aria-hidden="true" />
               <span className="adm-dock-label"><span>{short}</span></span>
             </button>
-          ))}
+            );
+          })}
         </nav>,
         document.body,
       )}

@@ -1,6 +1,7 @@
 'use client';
 
-import { useId } from 'react';
+import { useId, useState } from 'react';
+import { PillSelect } from '../ui';
 import { FaBell, FaCircleCheck, FaClockRotateLeft, FaPlus, FaTriangleExclamation } from 'react-icons/fa6';
 import { eventGaps } from './events';
 import { LISTS } from './team';
@@ -77,7 +78,7 @@ function smooth(points) {
 }
 
 /** Projects per month across the Rotaract year, drawn as a striped, colour-graded area. */
-function ProjectsChart({ events, yearStart, label }) {
+function ProjectsChart({ events, yearStart, label, month, onMonth }) {
   const id = useId().replace(/:/g, '');
   const months = Array.from({ length: 12 }, (_, i) => { const m = (6 + i) % 12; return { y: m >= 6 ? yearStart : yearStart + 1, m }; });
   const counts = months.map(({ y, m }) => events.filter((e) => e.date.startsWith(`${y}-${String(m + 1).padStart(2, '0')}`)).length);
@@ -87,13 +88,17 @@ function ProjectsChart({ events, yearStart, label }) {
   const pts = counts.map((c, i) => [(i / 11) * W, H - 18 - ((c / max) * (H - top - 30)) - 6]);
   const area = `${smooth(pts)} L${W},${H} L0,${H} Z`;
   const busiest = counts.indexOf(Math.max(...counts));
+  const key = ({ y, m }) => `${y}-${String(m + 1).padStart(2, '0')}`;
+  const focus = month ? months.findIndex((x) => key(x) === month) : -1;
   return (
     <section className="adm-card adm-chart-card">
       <div className="adm-card-top">
         <h3>Projects over time</h3>
         <span className="adm-chip-num is-green">{total} in {label}</span>
       </div>
-      <div className="adm-legend">Busiest month: {MONTHS_LONG[months[busiest].m]} · {counts[busiest]} {counts[busiest] === 1 ? 'project' : 'projects'}</div>
+      <div className="adm-legend">{focus >= 0
+        ? `${MONTHS_LONG[months[focus].m]}: ${plural(counts[focus], 'project')}`
+        : `Busiest month: ${MONTHS_LONG[months[busiest].m]} · ${plural(counts[busiest], 'project')}`}</div>
       <svg className="adm-chart" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" role="img" aria-label={`Projects each month: ${months.map(({ m }, i) => `${MONTHS[m]} ${counts[i]}`).join(', ')}`}>
         <defs>
           <linearGradient id={`${id}g`} x1="0" x2="0" y1="0" y2="1" gradientUnits="objectBoundingBox">
@@ -105,26 +110,32 @@ function ProjectsChart({ events, yearStart, label }) {
           <pattern id={`${id}p`} width="4.6" height="10" patternUnits="userSpaceOnUse"><rect width="1.8" height="10" fill="#fff" /></pattern>
           <mask id={`${id}m`}><rect width={W} height={H} fill={`url(#${id}p)`} /></mask>
         </defs>
+        {focus >= 0 && <rect className="adm-chart-focus" x={Math.max(0, (focus / 11) * W - W / 24)} width={W / 12} y="0" height={H} rx="10" />}
         <g mask={`url(#${id}m)`}><path d={area} fill={`url(#${id}h)`} /></g>
       </svg>
-      <div className="adm-chart-months" aria-hidden="true">{months.map(({ m }, i) => <span key={i}>{MONTHS[m][0]}</span>)}</div>
+      <div className="adm-chart-months">
+        {months.map((x, i) => (
+          <button key={i} type="button" className={i === focus ? 'is-on' : ''} aria-pressed={i === focus} aria-label={`${MONTHS_LONG[x.m]} ${x.y}`} onClick={() => onMonth(i === focus ? '' : key(x))}>{MONTHS[x.m][0]}</button>
+        ))}
+      </div>
     </section>
   );
 }
 
-function CalendarCard({ events, photoOf, go }) {
+function CalendarCard({ events, photoOf, go, month }) {
   const now = new Date();
-  const [y, m] = [now.getFullYear(), now.getMonth()];
+  const [y, m] = month ? [Number(month.slice(0, 4)), Number(month.slice(5, 7)) - 1] : [now.getFullYear(), now.getMonth()];
   const first = (new Date(y, m, 1).getDay() + 6) % 7; // Monday first
   const days = new Date(y, m + 1, 0).getDate();
   const today = todayIso();
   const iso = (d) => `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
   const on = (d) => events.filter((e) => e.date <= iso(d) && (e.endDate || e.date) >= iso(d));
   const upcoming = events.filter((e) => !isCompleted(e, today)).sort((a, b) => a.date.localeCompare(b.date));
-  const list = (upcoming.length ? upcoming : [...events].sort((a, b) => b.date.localeCompare(a.date))).slice(0, 2);
+  const inMonth = month ? events.filter((e) => e.date.startsWith(month)).sort((a, b) => a.date.localeCompare(b.date)) : null;
+  const list = (inMonth ?? (upcoming.length ? upcoming : [...events].sort((a, b) => b.date.localeCompare(a.date)))).slice(0, month ? 3 : 2);
   return (
     <section className="adm-card adm-cal">
-      <div className="adm-card-top"><h3>{MONTHS_LONG[m]} {y}</h3><span className="adm-hint">This month</span></div>
+      <div className="adm-card-top"><h3>{MONTHS_LONG[m]} {y}</h3><span className="adm-hint">{month ? 'Chosen month' : 'This month'}</span></div>
       <div className="adm-cal-grid" role="grid" aria-label={`${MONTHS_LONG[m]} ${y}`}>
         {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => <span key={i} className="adm-cal-dow">{d}</span>)}
         {Array.from({ length: first }, (_, i) => <span key={`b${i}`} />)}
@@ -141,11 +152,12 @@ function CalendarCard({ events, photoOf, go }) {
           );
         })}
       </div>
-      <div className="adm-card-top adm-cal-next"><h3>{upcoming.length ? 'Up next' : 'Latest'}</h3><span className="adm-hint">{plural(upcoming.length, 'upcoming event')}</span></div>
+      <div className="adm-card-top adm-cal-next"><h3>{inMonth ? `In ${MONTHS_LONG[m]}` : upcoming.length ? 'Up next' : 'Latest'}</h3><span className="adm-hint">{inMonth ? plural(inMonth.length, 'event') : plural(upcoming.length, 'upcoming event')}</span></div>
+      {inMonth && !inMonth.length && <p className="adm-hint">No events in {MONTHS_LONG[m]}.</p>}
       <ul className="adm-next">
         {list.map((e) => (
           <li key={e.slug}>
-            <button type="button" onClick={() => go('events', upcoming.length ? 'upcoming' : 'all')}>
+            <button type="button" onClick={() => go('events', !inMonth && upcoming.length ? 'upcoming' : 'all')}>
               <Thumb src={photoOf(e)} fallback={e.title.slice(0, 1)} round />
               <span className="adm-next-text"><strong>{e.title}</strong><span>{e.venue}</span></span>
               <span className="adm-time-pill">{shortDate(e.date)}</span>
@@ -204,20 +216,39 @@ export default function OverviewTab({ draft, hasPhoto, photoOf, memberPhoto, mem
   const thisMonth = draft.events.filter((e) => e.date.startsWith(today.slice(0, 7))).length;
   const people = new Set(LISTS.flatMap(([k]) => draft.team[k].map((p) => p.name).filter(Boolean))).size;
   const withPhotos = LISTS.flatMap(([k]) => draft.team[k]).filter((p) => p.name && memberHasPhoto(p)).length;
-  const done = draft.events.filter((e) => isCompleted(e, today));
+  // Month filter: '' for the whole Rotaract year, or 'YYYY-MM'.
+  const [month, setMonth] = useState('');
+  const monthOptions = Array.from({ length: 12 }, (_, i) => { const m = (6 + i) % 12; const y = m >= 6 ? yearStart : yearStart + 1; return [`${y}-${String(m + 1).padStart(2, '0')}`, `${MONTHS_LONG[m]} ${y}`]; });
+  const monthName = month ? MONTHS_LONG[Number(month.slice(5, 7)) - 1] : '';
+  const monthEvents = month ? draft.events.filter((e) => e.date.startsWith(month)).sort((a, b) => a.date.localeCompare(b.date)) : null;
+  const done = (monthEvents ?? draft.events).filter((e) => isCompleted(e, today));
   const complete = done.filter((e) => !eventGaps(e, hasPhoto, today).length).length;
   const pct = done.length ? Math.round((complete / done.length) * 100) : 100;
   const items = attentionItems({ draft, hasPhoto, memberHasPhoto });
   const lower = useNextFrame(); // the calendar, team and to-do cards follow a frame after the top of the page
-  const stats = [
+  const monthUpcoming = monthEvents?.filter((e) => !isCompleted(e, today)) ?? [];
+  const stats = month ? [
+    { label: `Events in ${monthName}`, value: monthEvents.length, chip: monthUpcoming.length ? `${monthUpcoming.length} ahead` : null, tone: 'green', sub: monthEvents[0] ? `First: ${monthEvents[0].title}` : 'None in this month', go: () => go('events', 'all') },
+    { label: `Completed in ${monthName}`, value: done.length, chip: done.length ? `${pct}%` : null, tone: 'green', sub: `${complete} with a photo and report`, go: () => go('events', 'completed') },
+  ] : [
     { label: 'Upcoming events', value: upcoming.length, chip: upcoming[0] ? shortDate(upcoming[0].date) : null, tone: 'green', sub: upcoming[0] ? `Next: ${upcoming[0].title}` : 'None planned yet', go: () => go('events', 'upcoming') },
     { label: `Projects in ${draft.team.rotaractYear}`, value: inYear.length, chip: thisMonth ? `+${thisMonth}` : null, tone: 'green', sub: thisMonth ? `${plural(thisMonth, 'project')} this month` : `${draft.events.length} on the website in all`, go: () => go('events', 'all') },
+  ];
+  stats.push(
     { label: 'Team members', value: people, chip: `${Math.round((withPhotos / Math.max(1, LISTS.flatMap(([k]) => draft.team[k]).length)) * 100)}%`, tone: 'green', sub: 'have a photo', go: () => go('team') },
     { label: 'Gallery photos', value: draft.gallery.length, chip: draft.reviews.length ? `${draft.reviews.length} ★` : null, tone: 'green', sub: plural(draft.reviews.length, 'review'), go: () => go('gallery') },
-  ];
+  );
   return (
     <div className="adm-tab">
-      <SectionHead title="Overview" desc="The club website at a glance." />
+      <SectionHead title="Overview" desc={month ? `${monthName} at a glance.` : 'The club website at a glance.'}>
+        <div className="adm-month-filter">
+          <PillSelect
+            options={['Whole year', ...monthOptions.map(([, l]) => l)]} ariaLabel="Month"
+            value={month ? monthOptions.find(([k]) => k === month)[1] : 'Whole year'}
+            onChange={(v) => setMonth(monthOptions.find(([, l]) => l === v)?.[0] ?? '')}
+          />
+        </div>
+      </SectionHead>
       <div className="adm-stats">
         {stats.map(({ label, value, chip, tone, sub, go: onClick }) => (
           <button key={label} type="button" className="adm-stat" onClick={onClick}>
@@ -229,9 +260,9 @@ export default function OverviewTab({ draft, hasPhoto, photoOf, memberPhoto, mem
       </div>
 
       <div className="adm-ov-grid">
-        <ProjectsChart events={draft.events} yearStart={yearStart} label={draft.team.rotaractYear} />
+        <ProjectsChart events={draft.events} yearStart={yearStart} label={draft.team.rotaractYear} month={month} onMonth={setMonth} />
         <section className="adm-card adm-progress-card">
-          <div className="adm-card-top"><span className="adm-hint">Completed projects</span><span className={`adm-chip-text ${pct >= 60 ? 'is-green' : 'is-red'}`}>{pct}%</span></div>
+          <div className="adm-card-top"><span className="adm-hint">{month ? `Completed in ${monthName}` : 'Completed projects'}</span><span className={`adm-chip-text ${pct >= 60 ? 'is-green' : 'is-red'}`}>{pct}%</span></div>
           <strong className="adm-big">{done.length}</strong>
           <div className="adm-progress">
             <span className="adm-progress-fill" style={{ width: `max(${pct}%, 150px)` }}>Photo and report</span>
@@ -240,11 +271,11 @@ export default function OverviewTab({ draft, hasPhoto, photoOf, memberPhoto, mem
           <ul className="adm-mini">
             <li><span>With a photo</span><strong>{done.filter(hasPhoto).length} / {done.length}</strong></li>
             <li><span>With a report or results</span><strong>{done.filter((e) => !eventGaps(e, hasPhoto, today).includes('No report')).length} / {done.length}</strong></li>
-            <li><span>Upcoming</span><strong>{upcoming.length}</strong></li>
+            <li><span>Upcoming</span><strong>{month ? monthUpcoming.length : upcoming.length}</strong></li>
           </ul>
           <button type="button" className="adm-link adm-card-foot" onClick={() => go('events', 'needs')}>Finish them</button>
         </section>
-        {lower && <CalendarCard events={draft.events} photoOf={photoOf} go={go} />}
+        {lower && <CalendarCard events={draft.events} photoOf={photoOf} go={go} month={month} />}
         {lower && <BoardCard team={draft.team} memberPhoto={memberPhoto} go={go} />}
         {lower && (
         <section className="adm-card adm-attention">
