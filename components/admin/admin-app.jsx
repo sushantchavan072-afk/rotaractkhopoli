@@ -406,7 +406,7 @@ export default function AdminApp() {
             <strong className="adm-side-text">Club admin</strong>
             <button type="button" className="adm-side-toggle" aria-label={collapsed ? 'Expand the menu' : 'Collapse the menu'} title={collapsed ? 'Expand the menu' : 'Collapse the menu'} onClick={() => setCollapsed((c) => !c)}><FaTableColumns size={15} /></button>
           </div>
-          <span className="adm-side-label adm-side-text">Menu</span>
+          <span className="adm-side-label"><span className="adm-side-letter" aria-hidden="true">M</span><span className="adm-side-text">Menu</span></span>
           <nav className="adm-side-nav" aria-label="Admin sections">
             {SECTIONS.map(([k, label, , Icon]) => (
               <button key={k} type="button" className="adm-side-item" aria-current={tab === k ? 'page' : undefined} title={label} onClick={() => go(k)}>
@@ -416,7 +416,7 @@ export default function AdminApp() {
               </button>
             ))}
           </nav>
-          <span className="adm-side-label adm-side-text">Quick add</span>
+          <span className="adm-side-label"><span className="adm-side-letter" aria-hidden="true">Q</span><span className="adm-side-text">Quick add</span></span>
           <div className="adm-side-nav">
             <button type="button" className="adm-side-item" title="New event" onClick={addEvent}><FaPlus size={14} aria-hidden="true" /><span className="adm-side-text">New event</span></button>
             <button type="button" className="adm-side-item" title="Income or expense" onClick={() => go('finance')}><FaIndianRupeeSign size={14} aria-hidden="true" /><span className="adm-side-text">Income or expense</span></button>

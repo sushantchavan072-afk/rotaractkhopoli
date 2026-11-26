@@ -2550,3 +2550,11 @@ body:has(.admin):not(:has(.adm-gate)) {
   .adm-shot, .adm-shot > * { min-width: 0; }
   .adm-shot textarea { width: 100%; min-width: 0; box-sizing: border-box; }
 }
+/* Collapsed side menu: the "Menu" and "Quick add" headings become M and Q, centred over the icons */
+.adm-side-letter { display: none; }
+@media (min-width: 961px) {
+  .adm-side-label { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .adm-side-label > * { grid-area: 1 / 1; }
+  .adm-side-letter { display: block; justify-self: start; width: 20px; text-align: center; font-weight: 600; opacity: 0; transition: opacity .15s ease; }
+  .adm-app.is-collapsed .adm-side-letter { opacity: 1; transition: opacity .3s ease .18s; }
+}
