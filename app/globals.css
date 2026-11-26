@@ -2516,3 +2516,37 @@ body:has(.admin):not(:has(.adm-gate)) {
 /* Sign-in art: the headline sits at the top left, padded */
 .adm-login-art { padding: clamp(48px, 9vh, 88px) clamp(48px, 5vw, 72px) 0; }
 .adm-login-art .adm-login-hero { margin-top: 0; }
+
+/* Phone dock: a fixed-width bar (it never shifts while the label grows), short names so it always fits */
+@media (max-width: 960px) {
+  .adm-dock { left: 12px; right: 12px; width: auto; max-width: none; translate: none; justify-content: space-between; gap: 0; padding: 6px; }
+  .adm-dock button, .adm-dock button[aria-current='page'] { flex: 0 0 auto; min-width: 42px; height: 48px; }
+  .adm-dock button { padding: 0 11px; }
+  .adm-dock button[aria-current='page'] { padding: 0 16px 0 14px; }
+  .adm-dock button[aria-current='page'] .adm-dock-label { grid-template-columns: 1fr; opacity: 1; }
+  .adm-dock button[aria-current='page'] .adm-dock-label > span { padding-left: 8px; }
+  .adm-dock-label > span { font-size: 14px; }
+}
+@media (max-width: 400px) {
+  .adm-dock { left: 10px; right: 10px; padding: 5px; }
+  .adm-dock button { min-width: 36px; padding: 0 9px; }
+  .adm-dock button[aria-current='page'] { padding: 0 14px 0 12px; }
+  .adm-dock-label > span { font-size: 13.5px; }
+}
+/* Top bar on phones: the status tick is the same size as the round buttons */
+@media (max-width: 430px) {
+  .adm-topbar .adm-status { width: 46px; height: 46px; justify-content: center; padding: 0; gap: 0; border-radius: 50%; font-size: 0; }
+}
+/* Very small phones (under 340px): icons only, so seven buttons still fit */
+@media (max-width: 340px) {
+  .adm-dock { left: 8px; right: 8px; padding: 4px; }
+  .adm-dock button, .adm-dock button[aria-current='page'] { min-width: 38px; padding: 0; justify-content: center; }
+  .adm-dock button[aria-current='page'] .adm-dock-label { grid-template-columns: 0fr; opacity: 0; }
+  .adm-dock button[aria-current='page'] .adm-dock-label > span { padding-left: 0; }
+}
+/* Gallery on small phones: the two columns can shrink, so nothing pushes past the screen edge */
+@media (max-width: 960px) {
+  .adm-gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .adm-shot, .adm-shot > * { min-width: 0; }
+  .adm-shot textarea { width: 100%; min-width: 0; box-sizing: border-box; }
+}

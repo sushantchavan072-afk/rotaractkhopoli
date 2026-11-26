@@ -470,10 +470,10 @@ export default function AdminApp() {
           page's top level so nothing on the page can cover it. */}
       {client && createPortal(
         <nav className="adm-dock" aria-label="Admin sections">
-          {SECTIONS.map(([k, label, , Icon]) => (
+          {SECTIONS.map(([k, label, short, Icon]) => (
             <button key={k} type="button" aria-current={tab === k ? 'page' : undefined} title={label} onClick={() => go(k)}>
               <Icon size={17} aria-hidden="true" />
-              <span className="adm-dock-label"><span>{label}</span></span>
+              <span className="adm-dock-label"><span>{short}</span></span>
             </button>
           ))}
         </nav>,
