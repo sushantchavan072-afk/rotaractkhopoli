@@ -2225,38 +2225,34 @@ body:has(.admin) .footer { display: none; }
 .adm-board .adm-card-foot { padding-top: 14px; }
 @media (max-width: 960px) { .adm-board-list li:nth-child(n+5) { display: none; } }
 
-/* ---------- Admin on computers, like the reference: clear frosted side menu over a colourful page ---------- */
+/* ---------- Admin on computers: the original soft green and peach page, a clear frosted side menu, white panel ---------- */
 @media (min-width: 961px) {
-  body:has(.admin) {
-    background-color: #6b5aa6;
-    background-image:
-      radial-gradient(900px 520px at 100% -5%, rgba(74, 150, 205, .85), transparent 62%),
-      radial-gradient(800px 700px at -10% 110%, rgba(236, 162, 120, .9), transparent 60%),
-      linear-gradient(160deg, #4c3f9c 0%, #7b5aa9 32%, #c76e96 62%, #e3a183 85%, #e7cfc2 100%);
-  }
   .adm-side {
-    border: 1px solid rgba(255, 255, 255, .3);
-    background: rgba(255, 255, 255, .14);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28), 0 30px 60px -32px rgba(30, 10, 60, .45);
-    -webkit-backdrop-filter: blur(22px) saturate(1.15); backdrop-filter: blur(22px) saturate(1.15);
+    border: 1px solid rgba(255, 255, 255, .85);
+    background: rgba(255, 255, 255, .42);
+    color: var(--ink);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), 0 30px 60px -36px rgba(40, 40, 20, .35);
+    -webkit-backdrop-filter: blur(22px) saturate(1.2); backdrop-filter: blur(22px) saturate(1.2);
   }
   .adm-side::before { display: none; }
-  .adm-side-head strong { font-weight: 500; }
-  .adm-side-toggle { width: 34px; height: 34px; border: 0; background: transparent; color: rgba(255, 255, 255, .85); }
-  .adm-side-toggle:hover { background: rgba(255, 255, 255, .14); color: #fff; }
-  .adm-side-label { color: rgba(255, 255, 255, .55); }
-  .adm-side-item { color: rgba(255, 255, 255, .9); }
-  .adm-side-item:hover { background: rgba(255, 255, 255, .1); }
-  .adm-side-item[aria-current='page'] { background: rgba(255, 255, 255, .22); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .2); }
-  .adm-side-count { color: rgba(255, 255, 255, .7); }
-  .adm-side-foot { border-top-color: rgba(255, 255, 255, .25); }
-  .adm-side-who span { color: rgba(255, 255, 255, .65); }
-  .adm-side-out { background: transparent; color: rgba(255, 255, 255, .8); }
-  .adm-side-out:hover { background: rgba(255, 255, 255, .14); color: #fff; }
+  .adm-side-head strong { color: var(--ink); font-weight: 500; }
+  .adm-side-toggle { width: 34px; height: 34px; border: 0; background: transparent; color: var(--text-2); }
+  .adm-side-toggle:hover { background: rgba(255, 255, 255, .7); color: var(--ink); }
+  .adm-side-label { color: var(--muted); }
+  .adm-side-item { color: var(--text-2); }
+  .adm-side-item:hover { background: rgba(255, 255, 255, .55); color: var(--ink); }
+  .adm-side-item[aria-current='page'] { background: rgba(255, 255, 255, .9); color: var(--ink); box-shadow: 0 1px 2px rgba(16, 24, 40, .05), 0 10px 24px -16px rgba(16, 24, 40, .3); }
+  .adm-side-count { color: var(--muted); }
+  .adm-side-foot { border-top-color: rgba(0, 0, 0, .07); }
+  .adm-side-who strong { color: var(--ink); }
+  .adm-side-who span { color: var(--muted); }
+  .adm-side-out { background: transparent; color: var(--text-2); }
+  .adm-side-out:hover { background: rgba(255, 255, 255, .7); color: var(--ink); }
+  .adm-app.is-collapsed .adm-side-nav + .adm-side-nav { border-top-color: rgba(0, 0, 0, .07); }
   /* The content: a white panel */
-  .adm-panel { border-color: rgba(255, 255, 255, .9); background: rgba(255, 255, 255, .95); box-shadow: 0 30px 70px -40px rgba(30, 10, 60, .5); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .adm-panel { border-color: rgba(255, 255, 255, .9); background: rgba(255, 255, 255, .9); box-shadow: 0 30px 70px -44px rgba(40, 40, 20, .4); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); }
   .admin .adm-panel .adm-card, .admin .adm-panel .adm-stat, .admin .adm-panel .adm-row { border-color: #eceef2; background: #fff; box-shadow: 0 1px 2px rgba(16, 24, 40, .04), 0 12px 28px -22px rgba(16, 24, 40, .25); }
-  .admin .adm-panel .adm-segmented button, .admin .adm-panel .segmented button:not(.is-active) { border-color: #eceef2; background: #fff; }
+  .admin .adm-panel .segmented button:not(.is-active) { border-color: #eceef2; background: #fff; }
   .adm-panel .adm-progress, .adm-panel .adm-podium, .adm-panel .adm-next button, .adm-panel .adm-cal-day:not(.has-event):not(.is-today) { background: #f5f6f8; }
   .adm-panel .adm-topbar .adm-status, .adm-panel .adm-round { border-color: #eceef2; background: #fff; }
 }
