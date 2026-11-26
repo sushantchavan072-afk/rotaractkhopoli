@@ -2270,3 +2270,10 @@ body:has(.admin) { background: #fff; background-image: none; }
   .admin .segmented button:not(.is-active), .adm-topbar .adm-status, .adm-round { border-color: #eceef2; background: #fff; }
   .adm-progress, .adm-podium, .adm-next button, .adm-cal-day:not(.has-event):not(.is-today) { background: #f5f6f8; }
 }
+
+/* Side menu foot: just Sign out */
+@media (min-width: 961px) {
+  .adm-side-foot { display: block; padding: 12px 0 0; }
+  .adm-app.is-collapsed .adm-side-foot { display: block; }
+  .adm-side-signout:hover { color: #b42318; }
+}

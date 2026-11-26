@@ -370,10 +370,7 @@ export default function AdminApp() {
             <a className="adm-side-item" href="/" target="_blank" rel="noreferrer" title="View website"><FaArrowUpRightFromSquare size={14} aria-hidden="true" /><span className="adm-side-text">View website</span></a>
           </div>
           <div className="adm-side-foot">
-            {/* eslint-disable-next-line @next/next/no-img-element -- a small fixed icon */}
-            <img className="adm-side-avatar" src="/icon.png" alt="" width="44" height="44" />
-            <span className="adm-side-who adm-side-text"><strong>Rotaract Khopoli</strong><span>{state[1]}</span></span>
-            <button type="button" className="adm-side-out" aria-label="Sign out" title="Sign out" onClick={signOut}><FaRightFromBracket size={14} /></button>
+            <button type="button" className="adm-side-item adm-side-signout" title="Sign out" onClick={signOut}><FaRightFromBracket size={15} aria-hidden="true" /><span className="adm-side-text">Sign out</span></button>
           </div>
         </aside>
         <div className="adm-panel">
