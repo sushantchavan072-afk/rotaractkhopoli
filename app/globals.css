@@ -2457,3 +2457,17 @@ body:has(.admin) {
 @media (min-width: 961px) and (max-height: 820px) {
   .adm-side-item, .adm-app.is-collapsed .adm-side-item { min-height: 38px; }
 }
+
+/* Sign-in fills the screen: no background colours around it */
+body:has(.adm-gate) { background: #fff; background-image: none; }
+.adm-gate .adm-gate-blobs { display: none; }
+.admin.adm-gate { padding: 0; place-items: stretch; }
+.adm-login { width: 100%; min-height: 100vh; min-height: 100dvh; border-radius: 0; box-shadow: none; animation: none; }
+.adm-login-main { border-radius: 40px 0 0 40px; animation: adm-login-in .7s var(--adm-spring) both; }
+@keyframes adm-login-in { from { opacity: 0; transform: translateX(28px); } }
+.adm-login-art { animation: adm-view-in .7s var(--adm-spring) both; }
+@media (max-width: 860px) {
+  .adm-login { min-height: 100dvh; border-radius: 0; background: #fff; }
+  .adm-login-main { border-radius: 0; padding: 28px 22px 22px; }
+}
+@media (prefers-reduced-motion: reduce) { .adm-login-main, .adm-login-art { animation: none; } }
