@@ -3,7 +3,7 @@
 import { useCallback, useDeferredValue, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
-import { FaAddressCard, FaArrowLeft, FaArrowUpRightFromSquare, FaCalendarDays, FaHouse, FaImages, FaIndianRupeeSign, FaQuoteLeft, FaRightFromBracket, FaUsers, FaXmark, FaCircleCheck, FaPenToSquare, FaArrowsRotate, FaTableColumns, FaPlus } from 'react-icons/fa6';
+import { FaAddressCard, FaArrowLeft, FaArrowUpRightFromSquare, FaCalendarDays, FaHouse, FaImages, FaIndianRupeeSign, FaQuoteLeft, FaRightFromBracket, FaUsers, FaXmark, FaRegEye, FaRegEyeSlash, FaArrowRightToBracket, FaRegCircleUser, FaCircleCheck, FaPenToSquare, FaArrowsRotate, FaTableColumns, FaPlus } from 'react-icons/fa6';
 import EventsTab, { blankEvent } from './events';
 import TeamTab, { LISTS } from './team';
 import { GalleryTab, ReviewsTab, DetailsTab } from './more';
@@ -53,6 +53,8 @@ function SignIn({ onDone, notConfigured }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [show, setShow] = useState(false);
+  const [forgot, setForgot] = useState(false);
   const submit = async (e) => {
     e.preventDefault();
     setBusy(true);
@@ -62,16 +64,23 @@ function SignIn({ onDone, notConfigured }) {
   if (notConfigured) {
     return (
       <div className="adm-signin">
-        <h2>Admin page not switched on yet</h2>
-        <p className="adm-hint">Add <code>ADMIN_PASSWORD</code> (and <code>GITHUB_TOKEN</code> for saving) in Vercel’s environment variables, then redeploy. The steps are in REMAINING-TASKS.md.</p>
+        <p className="adm-hint">The admin page isn’t switched on yet. Add <code>ADMIN_PASSWORD</code> (and <code>GITHUB_TOKEN</code> for saving) in Vercel, then redeploy.</p>
       </div>
     );
   }
   return (
     <form className="adm-signin" onSubmit={submit}>
-      <input type="password" aria-label="Password" placeholder="Password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+      <div className="adm-pass">
+        <input type={show ? 'text' : 'password'} aria-label="Password" placeholder="Password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+        <button type="button" className="adm-pass-eye" aria-label={show ? 'Hide the password' : 'Show the password'} onClick={() => setShow((v) => !v)}>{show ? <FaRegEye size={17} /> : <FaRegEyeSlash size={17} />}</button>
+      </div>
+      <button type="button" className="adm-forgot" onClick={() => setForgot((v) => !v)}>Forgot password?</button>
+      {forgot && <p className="adm-forgot-hint">Ask the club President or Secretary. The password is set in Vercel, under ADMIN_PASSWORD.</p>}
       {error && <p className="adm-error" role="alert">{error}</p>}
-      <button type="submit" className="adm-btn adm-signin-btn" disabled={busy || !password}>{busy ? <><span className="adm-spinner" aria-hidden="true" /> Signing in…</> : 'Sign in'}</button>
+      <button type="submit" className="adm-login-btn" disabled={busy}>
+        {busy ? <span className="adm-spinner" aria-hidden="true" /> : <FaArrowRightToBracket size={16} aria-hidden="true" />}
+        {busy ? 'Signing in…' : 'Sign in'}
+      </button>
     </form>
   );
 }
@@ -353,12 +362,37 @@ export default function AdminApp() {
     return (
       <section className="admin adm-gate">
         <div className="adm-gate-blobs" aria-hidden="true"><i /><i /><i /></div>
-        <div className="adm-gate-card">
-          <h1>Club admin</h1>
-          {!status && <Loader text="Opening…" />}
-          {status && !status.signedIn && <SignIn notConfigured={!status.configured} onDone={() => { setMessage(null); load(); }} />}
-          {status?.signedIn && !draft && !message && <Loader text="Loading…" />}
-          {message && <p className="adm-error" role="alert">{message.text}</p>}
+        <div className="adm-login">
+          <div className="adm-login-art" aria-hidden="true">
+            <p className="adm-login-tag">Rotaract Club of Khopoli · events, team and finance in one place.</p>
+            <div className="adm-login-hero">
+              <span className="adm-login-rings"><i /><i /></span>
+              <h2>Run your<br />club</h2>
+            </div>
+            <div className="adm-login-preview">
+              <span className="adm-login-preview-label">Projects this year</span>
+              <strong>29</strong>
+              <span className="adm-login-bars">{[78, 52, 64, 40, 70, 88, 58].map((h, i) => <i key={i} style={{ '--h': `${h}%` }} />)}</span>
+              <span className="adm-login-days"><b>Jul</b><b>Aug</b><b>Sep</b><b>Oct</b><b>Nov</b><b>Dec</b><b>Jan</b></span>
+            </div>
+          </div>
+          <div className="adm-login-main">
+            <header className="adm-login-top">
+              <span className="adm-login-brand">Club admin</span>
+              <Link className="adm-login-link" href="/"><FaRegCircleUser size={16} aria-hidden="true" /> Website</Link>
+            </header>
+            <div className="adm-login-body">
+              <h1>Sign in</h1>
+              {!status && <Loader text="Opening…" />}
+              {status && !status.signedIn && <SignIn notConfigured={!status.configured} onDone={() => { setMessage(null); load(); }} />}
+              {status?.signedIn && !draft && !message && <Loader text="Loading…" />}
+              {message && <p className="adm-error" role="alert">{message.text}</p>}
+            </div>
+            <footer className="adm-login-foot">
+              <span>© {new Date().getFullYear()} Rotaract Club of Khopoli</span>
+              <Link href="/contact">Contact us</Link>
+            </footer>
+          </div>
         </div>
       </section>
     );
