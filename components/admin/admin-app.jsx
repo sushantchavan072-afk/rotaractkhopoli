@@ -2,11 +2,13 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { FaAddressCard, FaArrowUpRightFromSquare, FaCalendarDays, FaHouse, FaImages, FaQuoteLeft, FaRightFromBracket, FaUsers } from 'react-icons/fa6';
+import Link from 'next/link';
+import { FaAddressCard, FaArrowLeft, FaArrowUpRightFromSquare, FaCalendarDays, FaHouse, FaImages, FaIndianRupeeSign, FaQuoteLeft, FaRightFromBracket, FaUsers } from 'react-icons/fa6';
 import EventsTab, { blankEvent } from './events';
 import TeamTab, { LISTS } from './team';
 import { GalleryTab, ReviewsTab, DetailsTab } from './more';
 import OverviewTab from './overview';
+import FinanceTab from './finance';
 import { Field, api, whenSaved } from './shared';
 
 /**
@@ -16,19 +18,22 @@ import { Field, api, whenSaved } from './shared';
  * Desktop: a side menu. Phones: a tab bar at the bottom.
  */
 
-const KINDS = { events: 'Events', team: 'Team', gallery: 'Gallery', reviews: 'Reviews', site: 'Club details' };
+const KINDS = { events: 'Events', team: 'Team', gallery: 'Gallery', reviews: 'Reviews', site: 'Club details', finance: 'Finance' };
+const CONTENT = ['events', 'team', 'gallery', 'reviews', 'site']; // saved through /api/admin/content; finance has its own
 const SECTIONS = [
   ['overview', 'Overview', 'Home', FaHouse],
   ['events', 'Events', 'Events', FaCalendarDays],
   ['team', 'Team', 'Team', FaUsers],
   ['gallery', 'Gallery', 'Gallery', FaImages],
   ['reviews', 'Reviews', 'Reviews', FaQuoteLeft],
+  ['finance', 'Finance', 'Finance', FaIndianRupeeSign],
   ['site', 'Club details', 'Details', FaAddressCard],
 ];
 const UPLOAD_BUDGET = 3.4 * 1024 * 1024; // base64 photo data per save (Vercel's request limit is 4.5 MB)
 
 /* Events are edited with the report as plain text (a blank line between paragraphs) and saved as paragraphs. */
-const forEditing = (c) => ({
+const forEditing = (c, finance) => ({
+  finance,
   events: c.events.map((e) => ({ ...e, report: [].concat(e.report ?? []).join('\n\n'), outcomes: e.outcomes ?? [] })),
   team: c.team, gallery: c.gallery, reviews: c.reviews, site: c.site,
 });
@@ -93,14 +98,22 @@ export default function AdminApp() {
   const [published, setPublished] = useState(null); // { commit, live, dismissed }
   const [history, setHistory] = useState(null); // recent saves
   const [restoring, setRestoring] = useState(null);
+  const [financeBase, setFinanceBase] = useState(null);
+  const [financeReady, setFinanceReady] = useState(true);
 
   const loadHistory = useCallback(() => {
     api('GET', '/api/admin/history').then((h) => setHistory(h.saves)).catch(() => setHistory([]));
   }, []);
   const loadContent = useCallback(async (s) => {
     try {
-      const c = await api('GET', '/api/admin/content');
-      const data = forEditing(c);
+      const [c, f] = await Promise.all([
+        api('GET', '/api/admin/content'),
+        api('GET', '/api/admin/finance').catch((err) => ({ error: err })),
+      ]);
+      if (f.error) setMessage({ kind: 'error', text: f.error.message });
+      setFinanceBase(f.base ?? null);
+      setFinanceReady(!f.error && f.ready !== false);
+      const data = forEditing(c, f.error ? null : f.finance);
       setDraft(data);
       setSaved(snapshot(data));
       setBase(c.base);
@@ -185,6 +198,9 @@ export default function AdminApp() {
     if (draft.reviews.some((r) => !r.quote.trim() || !r.name.trim())) return ['Every review needs the words and a name.', 'reviews'];
     const links = [draft.site.mapUrl, ...Object.values(draft.site.social)].filter(Boolean);
     if (links.some((l) => !/^https:\/\/\S+$/.test(l))) return ['Links in Club details should start with https://', 'site'];
+    for (const e of draft.finance?.entries ?? []) {
+      if (!e.date || !(Number(e.amount) > 0) || !e.description.trim()) return ['Every finance entry needs a date, an amount and what it was for.', 'finance'];
+    }
     return null;
   };
 
@@ -195,20 +211,32 @@ export default function AdminApp() {
     setMessage(null);
     const text = JSON.stringify(draft);
     const used = Object.entries(uploads).filter(([src]) => text.includes(src.replace(/^\/images\/members\/|\.jpg$/g, '')));
-    const body = { base, uploads: used.map(([src, u]) => ({ path: `public${src}`, data: u.data })) };
-    for (const k of dirty) body[k] = forSaving(k, draft[k]);
+    const contentDirty = dirty.filter((k) => CONTENT.includes(k));
     try {
-      const res = await api('POST', '/api/admin/content', body);
-      // Saved events are no longer new (their web address is now fixed).
-      const settled = { ...draft, events: draft.events.map(({ _new, ...e }) => e) };
-      setDraft((d) => ({ ...d, events: d.events.map(({ _new, ...e }) => e) }));
-      setBase((b) => ({ ...b, ...res.base }));
-      setSaved((s) => ({ ...s, ...Object.fromEntries(dirty.map((k) => [k, JSON.stringify(settled[k])])) }));
-      setMemberPhotos((m) => [...m, ...used.filter(([src]) => src.startsWith('/images/members/')).map(([src]) => src.split('/').pop())]);
-      setEventPhotos((m) => [...m, ...used.filter(([src]) => src.startsWith('/images/events/')).map(([src]) => src.split('/').pop())]);
-      setUploads({});
-      setPublished({ commit: res.commit, live: false });
-      loadHistory();
+      let commit = null;
+      if (contentDirty.length || used.length) {
+        const body = { base, uploads: used.map(([src, u]) => ({ path: `public${src}`, data: u.data })) };
+        for (const k of contentDirty) body[k] = forSaving(k, draft[k]);
+        const res = await api('POST', '/api/admin/content', body);
+        commit = res.commit;
+        // Saved events are no longer new (their web address is now fixed).
+        const settled = { ...draft, events: draft.events.map(({ _new, ...e }) => e) };
+        setDraft((d) => ({ ...d, events: d.events.map(({ _new, ...e }) => e) }));
+        setBase((b) => ({ ...b, ...res.base }));
+        setSaved((s) => ({ ...s, ...Object.fromEntries(contentDirty.map((k) => [k, JSON.stringify(settled[k])])) }));
+        setMemberPhotos((m) => [...m, ...used.filter(([src]) => src.startsWith('/images/members/')).map(([src]) => src.split('/').pop())]);
+        setEventPhotos((m) => [...m, ...used.filter(([src]) => src.startsWith('/images/events/')).map(([src]) => src.split('/').pop())]);
+        setUploads({});
+        loadHistory();
+      }
+      if (dirty.includes('finance')) {
+        const res = await api('POST', '/api/admin/finance', { finance: draft.finance, base: financeBase });
+        commit = res.commit;
+        setFinanceBase(res.base);
+        setSaved((s) => ({ ...s, finance: JSON.stringify(draft.finance) }));
+      }
+      // Finance is only on the admin page, so a finance-only save has nothing new to show on the website.
+      setPublished(contentDirty.length || used.length ? { commit, live: false } : { commit, live: true, private: true });
     } catch (err) {
       notify(err.message);
       if (err.status === 401) setStatus((s) => ({ ...s, signedIn: false }));
@@ -274,6 +302,7 @@ export default function AdminApp() {
       <section className="admin">
         <div className="container adm-wrap is-narrow">
           <header className="adm-head">
+            <Link className="adm-back-site" href="/"><FaArrowLeft size={12} aria-hidden="true" /> Back to the website</Link>
             <h1>Club admin</h1>
             <p className="adm-hint">Add and edit events, photos, the team and the club’s details. Changes appear on the website about two minutes after you save.</p>
           </header>
@@ -333,6 +362,9 @@ export default function AdminApp() {
             {tab === 'gallery' && <GalleryTab gallery={draft.gallery} photoUrl={photoUrl} update={update('gallery')} addUpload={addUpload} notify={notify} />}
             {tab === 'reviews' && <ReviewsTab reviews={draft.reviews} update={update('reviews')} />}
             {tab === 'site' && <DetailsTab site={draft.site} update={update('site')} />}
+            {tab === 'finance' && (draft.finance
+              ? <FinanceTab finance={draft.finance} events={draft.events} update={update('finance')} ready={financeReady && status.canSave} />
+              : <p className="adm-notice">The finance sheet couldn’t be opened. {message?.text}</p>)}
           </div>
         </div>
       </div>
@@ -356,7 +388,8 @@ export default function AdminApp() {
             {message ? message.text
               : saving ? 'Saving…'
                 : unsaved ? `Unsaved changes: ${[...dirty.map((k) => KINDS[k]), ...(pending && !dirty.length ? [`${pending} photo${pending > 1 ? 's' : ''}`] : [])].join(', ')}`
-                  : published?.live ? 'Saved and live on the website.'
+                  : published?.private ? 'Saved. The finance sheet is up to date.'
+                    : published?.live ? 'Saved and live on the website.'
                     : 'Saved. The website will show it in about two minutes.'}
           </span>
           {unsaved && !saving && (

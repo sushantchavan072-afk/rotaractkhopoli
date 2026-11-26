@@ -77,7 +77,8 @@ It works on phones (tab bar at the bottom) and computers (side menu); **Ctrl+S**
 3. Go to **Deployments → ⋯ → Redeploy**, then open **/admin** on the site and sign in.
 
 Good to know:
-- **Changing the password:** edit `ADMIN_PASSWORD` in Vercel and redeploy. Everyone is signed out.
+- **Finance sheet:** the Finance tab keeps the club's income and expenses **encrypted** in the repository, so nobody can read them outside the admin page. Recommended: add one more variable, `FINANCE_KEY`, with a long phrase only the treasurer and president know, and keep a copy somewhere safe. Without it the admin password is used as the key.
+- **Changing the password:** edit `ADMIN_PASSWORD` in Vercel and redeploy. Everyone is signed out. If `FINANCE_KEY` is not set, first add `FINANCE_KEY` with the **old** password as its value, or the finance sheet can't be opened any more.
 - **When the GitHub key expires,** saving shows “the GitHub key is wrong or has expired”: make a new key (step 1) and replace `GITHUB_TOKEN` in Vercel.
 - **Each July:** open **Team**, press **Change to 2027–28** (it always offers the next year), update the three lists and the President and Secretary under **Contact people**, then **Save changes**. Photos stay with each person; add new ones with **Add photo**.
 - Photos are resized automatically in the browser before they are uploaded. A save can carry a few photos at a time; the page says when to save before adding more.
