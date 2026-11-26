@@ -318,64 +318,50 @@ export default function AdminApp() {
   return (
     <section className="admin">
       <div className="container adm-wrap">
-        <div className="adm-app">
-          <aside className="adm-side" aria-label="Admin">
-            <div className="adm-side-head">
-              <strong>Club admin</strong>
-              <span>Rotaract Club of Khopoli</span>
-            </div>
-            <nav className="adm-nav" aria-label="Admin sections">
-              {SECTIONS.map(([k, label, , Icon]) => (
-                <button key={k} type="button" className="adm-nav-item" aria-current={tab === k ? 'page' : undefined} onClick={() => go(k)}>
-                  <Icon size={15} aria-hidden="true" /><span>{label}</span>
-                  {dirty.includes(k) && <i className="adm-dot" title="Unsaved changes" />}
-                </button>
-              ))}
-            </nav>
-            <div className="adm-side-foot">
-              <StatusChip state={state} />
-              <a className="adm-side-link" href="/" target="_blank" rel="noreferrer"><FaArrowUpRightFromSquare size={12} aria-hidden="true" /> View website</a>
-              <button type="button" className="adm-side-link" onClick={signOut}><FaRightFromBracket size={12} aria-hidden="true" /> Sign out</button>
-            </div>
-          </aside>
-
-          <div className="adm-main">
-            <div className="adm-mobile-head">
-              <strong>Club admin</strong>
-              <StatusChip state={state} />
-              <button type="button" className="adm-icon" aria-label="Sign out" onClick={signOut}><FaRightFromBracket size={13} /></button>
-            </div>
-            {!status.canSave && <p className="adm-notice">Saving isn’t switched on yet: add <code>GITHUB_TOKEN</code> in Vercel (see REMAINING-TASKS.md).</p>}
-            {tab === 'overview' && (
-              <OverviewTab
-                draft={draft} hasPhoto={hasPhoto} memberHasPhoto={(p) => Boolean(memberPhoto(p))} go={go} addEvent={addEvent}
-                history={history} onRestore={restore} restoring={restoring} canSave={status.canSave} unsaved={unsaved}
-              />
-            )}
-            {tab === 'events' && (
-              <EventsTab
-                events={draft.events} editing={editing} setEditing={setEditing} filter={filter} setFilter={setFilter}
-                hasPhoto={hasPhoto} photoOf={photoOf} photoUrl={photoUrl} avenueOptions={avenueOptions} update={update('events')} addUpload={addUpload} notify={notify}
-              />
-            )}
-            {tab === 'team' && <TeamTab team={draft.team} photoOf={memberPhoto} update={update('team')} addUpload={addUpload} notify={notify} />}
-            {tab === 'gallery' && <GalleryTab gallery={draft.gallery} photoUrl={photoUrl} update={update('gallery')} addUpload={addUpload} notify={notify} />}
-            {tab === 'reviews' && <ReviewsTab reviews={draft.reviews} update={update('reviews')} />}
-            {tab === 'site' && <DetailsTab site={draft.site} update={update('site')} />}
-            {tab === 'finance' && (draft.finance
-              ? <FinanceTab finance={draft.finance} events={draft.events} update={update('finance')} ready={financeReady && status.canSave} />
-              : <p className="adm-notice">The finance sheet couldn’t be opened. {message?.text}</p>)}
+        <header className="adm-topbar">
+          <div className="adm-brand">
+            <strong>Club admin</strong>
+            <span>Rotaract Club of Khopoli</span>
           </div>
+          <div className="adm-topbar-tools">
+            <StatusChip state={state} />
+            <a className="adm-round" href="/" target="_blank" rel="noreferrer" aria-label="View website" title="View website"><FaArrowUpRightFromSquare size={15} /></a>
+            <button type="button" className="adm-round" aria-label="Sign out" title="Sign out" onClick={signOut}><FaRightFromBracket size={15} /></button>
+          </div>
+        </header>
+        <div className="adm-main">
+          {!status.canSave && <p className="adm-notice">Saving isn’t switched on yet: add <code>GITHUB_TOKEN</code> in Vercel (see REMAINING-TASKS.md).</p>}
+          {tab === 'overview' && (
+            <OverviewTab
+              draft={draft} hasPhoto={hasPhoto} photoOf={photoOf} memberPhoto={memberPhoto} memberHasPhoto={(p) => Boolean(memberPhoto(p))} go={go} addEvent={addEvent}
+              history={history} onRestore={restore} restoring={restoring} canSave={status.canSave} unsaved={unsaved}
+            />
+          )}
+          {tab === 'events' && (
+            <EventsTab
+              events={draft.events} editing={editing} setEditing={setEditing} filter={filter} setFilter={setFilter}
+              hasPhoto={hasPhoto} photoOf={photoOf} photoUrl={photoUrl} avenueOptions={avenueOptions} update={update('events')} addUpload={addUpload} notify={notify}
+            />
+          )}
+          {tab === 'team' && <TeamTab team={draft.team} photoOf={memberPhoto} update={update('team')} addUpload={addUpload} notify={notify} />}
+          {tab === 'gallery' && <GalleryTab gallery={draft.gallery} photoUrl={photoUrl} update={update('gallery')} addUpload={addUpload} notify={notify} />}
+          {tab === 'reviews' && <ReviewsTab reviews={draft.reviews} update={update('reviews')} />}
+          {tab === 'site' && <DetailsTab site={draft.site} update={update('site')} />}
+          {tab === 'finance' && (draft.finance
+            ? <FinanceTab finance={draft.finance} events={draft.events} update={update('finance')} ready={financeReady && status.canSave} />
+            : <p className="adm-notice">The finance sheet couldn’t be opened. {message?.text}</p>)}
         </div>
       </div>
 
-      {/* Phones: a tab bar along the bottom. Drawn at the page's top level so the footer never covers it. */}
+      {/* A floating dark bar along the bottom: the current section is a white pill with its name. Drawn at the
+          page's top level so nothing on the page can cover it. */}
       {client && createPortal(
-        <nav className="adm-tabbar" aria-label="Admin sections">
-          {SECTIONS.map(([k, , short, Icon]) => (
-            <button key={k} type="button" aria-current={tab === k ? 'page' : undefined} onClick={() => go(k)}>
-              <span className="adm-tabbar-icon"><Icon size={17} aria-hidden="true" />{dirty.includes(k) && <i className="adm-dot" />}</span>
-              <span>{short}</span>
+        <nav className="adm-dock" aria-label="Admin sections">
+          {SECTIONS.map(([k, label, , Icon]) => (
+            <button key={k} type="button" aria-current={tab === k ? 'page' : undefined} title={label} onClick={() => go(k)}>
+              <Icon size={17} aria-hidden="true" />
+              <span className="adm-dock-label">{label}</span>
+              {dirty.includes(k) && <i className="adm-dot" />}
             </button>
           ))}
         </nav>,

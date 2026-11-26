@@ -1,12 +1,17 @@
 'use client';
 
-import { FaCalendarDays, FaCircleCheck, FaClockRotateLeft, FaImages, FaPlus, FaTriangleExclamation, FaUsers } from 'react-icons/fa6';
+import { useId } from 'react';
+import { FaCircleCheck, FaClockRotateLeft, FaPlus, FaTriangleExclamation } from 'react-icons/fa6';
 import { eventGaps } from './events';
 import { LISTS } from './team';
-import { SectionHead, isCompleted, niceDate, plural, todayIso, whenSaved } from './shared';
+import { SectionHead, Thumb, initials, isCompleted, niceDate, plural, todayIso, whenSaved } from './shared';
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const MONTHS_LONG = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 /** The Rotaract year that runs now (1 July to 30 June), as its first calendar year. */
 const currentRotaryStart = () => { const d = new Date(); return d.getMonth() >= 6 ? d.getFullYear() : d.getFullYear() - 1; };
+const shortDate = (iso) => { const [, m, d] = iso.split('-').map(Number); return `${d} ${MONTHS[m - 1]}`; };
 
 /** Things on the website that are missing or out of date, each with where to fix it. */
 export function attentionItems({ draft, hasPhoto, memberHasPhoto }) {
@@ -28,36 +33,176 @@ export function attentionItems({ draft, hasPhoto, memberHasPhoto }) {
   return items;
 }
 
-export default function OverviewTab({ draft, hasPhoto, memberHasPhoto, go, addEvent, history, onRestore, restoring, canSave, unsaved }) {
+/** Smooth line through points (Catmull-Rom turned into Bézier curves). */
+function smooth(points) {
+  let d = `M${points[0][0]},${points[0][1]}`;
+  for (let i = 0; i < points.length - 1; i++) {
+    const [p0, p1, p2, p3] = [points[i - 1] ?? points[i], points[i], points[i + 1], points[i + 2] ?? points[i + 1]];
+    d += ` C${p1[0] + (p2[0] - p0[0]) / 6},${p1[1] + (p2[1] - p0[1]) / 6} ${p2[0] - (p3[0] - p1[0]) / 6},${p2[1] - (p3[1] - p1[1]) / 6} ${p2[0]},${p2[1]}`;
+  }
+  return d;
+}
+
+/** Projects per month across the Rotaract year, drawn as a striped, colour-graded area. */
+function ProjectsChart({ events, yearStart, label }) {
+  const id = useId().replace(/:/g, '');
+  const months = Array.from({ length: 12 }, (_, i) => { const m = (6 + i) % 12; return { y: m >= 6 ? yearStart : yearStart + 1, m }; });
+  const counts = months.map(({ y, m }) => events.filter((e) => e.date.startsWith(`${y}-${String(m + 1).padStart(2, '0')}`)).length);
+  const total = counts.reduce((a, b) => a + b, 0);
+  const max = Math.max(...counts, 1);
+  const [W, H, top] = [600, 190, 24];
+  const pts = counts.map((c, i) => [(i / 11) * W, H - 18 - ((c / max) * (H - top - 30)) - 6]);
+  const area = `${smooth(pts)} L${W},${H} L0,${H} Z`;
+  const busiest = counts.indexOf(Math.max(...counts));
+  return (
+    <section className="adm-card adm-chart-card">
+      <div className="adm-card-top">
+        <h3>Projects over time</h3>
+        <span className="adm-chip-num is-green">{total} in {label}</span>
+      </div>
+      <div className="adm-legend"><i className="is-coral" />Quiet month<i className="is-sun" />Busy<i className="is-green" />Busiest: {MONTHS_LONG[months[busiest].m]}</div>
+      <svg className="adm-chart" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" role="img" aria-label={`Projects each month: ${months.map(({ m }, i) => `${MONTHS[m]} ${counts[i]}`).join(', ')}`}>
+        <defs>
+          <linearGradient id={`${id}g`} x1="0" x2="0" y1="0" y2="1" gradientUnits="objectBoundingBox">
+            <stop offset="0" stopColor="#f4a261" /><stop offset=".45" stopColor="#e9c46a" /><stop offset="1" stopColor="#8bd17c" />
+          </linearGradient>
+          <linearGradient id={`${id}h`} x1="0" x2={W} y1="0" y2="0" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stopColor="#8bd17c" /><stop offset=".35" stopColor="#f28b82" /><stop offset=".7" stopColor="#f6c453" /><stop offset="1" stopColor="#8bd17c" />
+          </linearGradient>
+          <clipPath id={`${id}c`}><path d={area} /></clipPath>
+        </defs>
+        <g clipPath={`url(#${id}c)`}>
+          {Array.from({ length: Math.floor(W / 4.6) }, (_, i) => <rect key={i} x={i * 4.6} y="0" width="1.8" height={H} fill={`url(#${id}h)`} />)}
+        </g>
+      </svg>
+      <div className="adm-chart-months" aria-hidden="true">{months.map(({ m }, i) => <span key={i}>{MONTHS[m][0]}</span>)}</div>
+    </section>
+  );
+}
+
+function CalendarCard({ events, photoOf, go }) {
+  const now = new Date();
+  const [y, m] = [now.getFullYear(), now.getMonth()];
+  const first = (new Date(y, m, 1).getDay() + 6) % 7; // Monday first
+  const days = new Date(y, m + 1, 0).getDate();
+  const today = todayIso();
+  const iso = (d) => `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+  const on = (d) => events.filter((e) => e.date <= iso(d) && (e.endDate || e.date) >= iso(d));
+  const upcoming = events.filter((e) => !isCompleted(e, today)).sort((a, b) => a.date.localeCompare(b.date));
+  const list = (upcoming.length ? upcoming : [...events].sort((a, b) => b.date.localeCompare(a.date))).slice(0, 3);
+  return (
+    <section className="adm-card adm-cal">
+      <div className="adm-card-top"><h3>{MONTHS_LONG[m]} {y}</h3><span className="adm-hint">This month</span></div>
+      <div className="adm-cal-grid" role="grid" aria-label={`${MONTHS_LONG[m]} ${y}`}>
+        {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => <span key={i} className="adm-cal-dow">{d}</span>)}
+        {Array.from({ length: first }, (_, i) => <span key={`b${i}`} />)}
+        {Array.from({ length: days }, (_, i) => {
+          const d = i + 1;
+          const evs = on(d);
+          const photo = evs.map(photoOf).find(Boolean);
+          const cls = `adm-cal-day${iso(d) === today ? ' is-today' : ''}${evs.length ? ' has-event' : ''}${photo ? ' has-photo' : ''}`;
+          return (
+            <button key={d} type="button" className={cls} title={evs.map((e) => e.title).join(', ') || undefined} onClick={evs.length ? () => go('events', 'all') : undefined} tabIndex={evs.length ? 0 : -1}
+              style={photo ? { backgroundImage: `linear-gradient(rgba(0,0,0,.28), rgba(0,0,0,.28)), url("${photo}")` } : undefined}>
+              {d}
+            </button>
+          );
+        })}
+      </div>
+      <div className="adm-card-top adm-cal-next"><h3>{upcoming.length ? 'Up next' : 'Latest'}</h3><span className="adm-hint">{plural(upcoming.length, 'upcoming event')}</span></div>
+      <ul className="adm-next">
+        {list.map((e) => (
+          <li key={e.slug}>
+            <button type="button" onClick={() => go('events', upcoming.length ? 'upcoming' : 'all')}>
+              <Thumb src={photoOf(e)} fallback={e.title.slice(0, 1)} round />
+              <span className="adm-next-text"><strong>{e.title}</strong><span>{e.venue}</span></span>
+              <span className="adm-time-pill">{shortDate(e.date)}</span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+function BoardCard({ team, memberPhoto, go }) {
+  const core = team.coreMembers;
+  const holder = (re) => core.find((p) => p.roles.some((r) => re.test(r.trim())));
+  const podium = [holder(/^secretary$/i), holder(/^president$/i), holder(/^treasurer$/i)];
+  const shown = podium.every(Boolean) ? podium : [core[1], core[0], core[2]].filter(Boolean);
+  const rest = core.filter((p) => !shown.includes(p)).slice(0, 3);
+  const roleCount = (name) => new Set(LISTS.flatMap(([k]) => team[k].filter((p) => p.name === name).flatMap((p) => p.roles))).size;
+  return (
+    <section className="adm-card adm-board">
+      <div className="adm-card-top"><h3>Office bearers</h3><span className="adm-hint">{team.rotaractYear}</span></div>
+      <div className="adm-podium">
+        {shown.map((p, i) => (
+          <button key={p.name} type="button" className={`adm-podium-person${i === 1 ? ' is-lead' : ''}`} onClick={() => go('team')}>
+            <span className="adm-podium-photo"><Thumb src={memberPhoto(p)} fallback={initials(p.name)} round /><i>{i === 1 ? '★' : i === 0 ? '2' : '3'}</i></span>
+            <strong>{p.name.replace(/^Rtr\.?\s*/i, '').split(' ')[0]}</strong>
+            <span>{p.roles[0]}</span>
+          </button>
+        ))}
+      </div>
+      <ul className="adm-board-list">
+        {rest.map((p) => (
+          <li key={p.name}>
+            <Thumb src={memberPhoto(p)} fallback={initials(p.name)} round />
+            <span className="adm-next-text"><strong>{p.name}</strong><span>{p.roles.join(' · ')}</span></span>
+            <span className="adm-board-roles">{plural(roleCount(p.name), 'role')}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+export default function OverviewTab({ draft, hasPhoto, photoOf, memberPhoto, memberHasPhoto, go, addEvent, history, onRestore, restoring, canSave, unsaved }) {
   const today = todayIso();
   const upcoming = draft.events.filter((e) => !isCompleted(e, today)).sort((a, b) => a.date.localeCompare(b.date));
-  const yearStart = Number.parseInt(draft.team.rotaractYear, 10);
-  const thisYear = yearStart ? draft.events.filter((e) => e.date >= `${yearStart}-07-01` && e.date < `${yearStart + 1}-07-01`).length : draft.events.length;
+  const yearStart = Number.parseInt(draft.team.rotaractYear, 10) || currentRotaryStart();
+  const inYear = draft.events.filter((e) => e.date >= `${yearStart}-07-01` && e.date < `${yearStart + 1}-07-01`);
+  const thisMonth = draft.events.filter((e) => e.date.startsWith(today.slice(0, 7))).length;
   const people = new Set(LISTS.flatMap(([k]) => draft.team[k].map((p) => p.name).filter(Boolean))).size;
+  const withPhotos = LISTS.flatMap(([k]) => draft.team[k]).filter((p) => p.name && memberHasPhoto(p)).length;
+  const done = draft.events.filter((e) => isCompleted(e, today));
+  const complete = done.filter((e) => !eventGaps(e, hasPhoto, today).length).length;
+  const pct = done.length ? Math.round((complete / done.length) * 100) : 100;
   const items = attentionItems({ draft, hasPhoto, memberHasPhoto });
   const stats = [
-    { label: 'Upcoming events', value: upcoming.length, sub: upcoming[0] ? `Next: ${upcoming[0].title}, ${niceDate(upcoming[0].date)}` : 'None planned yet', Icon: FaCalendarDays, tone: 'coral', go: () => go('events', 'upcoming') },
-    { label: `Events in ${draft.team.rotaractYear}`, value: thisYear, sub: `${draft.events.length} on the website in all`, Icon: FaCircleCheck, tone: 'mint', go: () => go('events', 'all') },
-    { label: 'Team members', value: people, sub: `Rotaract year ${draft.team.rotaractYear}`, Icon: FaUsers, tone: 'blue', go: () => go('team') },
-    { label: 'Gallery photos', value: draft.gallery.length, sub: `${plural(draft.reviews.length, 'review')}`, Icon: FaImages, tone: 'sun', go: () => go('gallery') },
+    { label: 'Upcoming events', value: upcoming.length, chip: upcoming[0] ? shortDate(upcoming[0].date) : null, tone: 'green', sub: upcoming[0] ? `Next: ${upcoming[0].title}` : 'None planned yet', go: () => go('events', 'upcoming') },
+    { label: `Projects in ${draft.team.rotaractYear}`, value: inYear.length, chip: thisMonth ? `+${thisMonth}` : null, tone: 'green', sub: thisMonth ? `${plural(thisMonth, 'project')} this month` : `${draft.events.length} on the website in all`, go: () => go('events', 'all') },
+    { label: 'Team members', value: people, chip: `${Math.round((withPhotos / Math.max(1, LISTS.flatMap(([k]) => draft.team[k]).length)) * 100)}%`, tone: 'green', sub: 'have a photo', go: () => go('team') },
+    { label: 'Gallery photos', value: draft.gallery.length, chip: draft.reviews.length ? `${draft.reviews.length} ★` : null, tone: 'green', sub: plural(draft.reviews.length, 'review'), go: () => go('gallery') },
   ];
   return (
     <div className="adm-tab">
       <SectionHead title="Overview" desc="The club website at a glance." />
       <div className="adm-stats">
-        {stats.map(({ label, value, sub, Icon, tone, go: onClick }) => (
+        {stats.map(({ label, value, chip, tone, sub, go: onClick }) => (
           <button key={label} type="button" className="adm-stat" onClick={onClick}>
-            <span className={`adm-stat-icon is-${tone}`} aria-hidden="true"><Icon size={15} /></span>
-            <strong>{value}</strong>
             <span className="adm-stat-label">{label}</span>
+            <span className="adm-stat-row"><strong>{value}</strong>{chip && <span className={`adm-chip-num is-${tone}`}>{chip}</span>}</span>
             <span className="adm-stat-sub">{sub}</span>
           </button>
         ))}
       </div>
 
-      <div className="adm-two">
-        <section className="adm-card">
-          <h3>Needs attention</h3>
+      <div className="adm-ov-grid">
+        <ProjectsChart events={draft.events} yearStart={yearStart} label={draft.team.rotaractYear} />
+        <section className="adm-card adm-progress-card">
+          <div className="adm-card-top"><span className="adm-hint">Completed projects</span><span className={`adm-chip-text ${pct >= 60 ? 'is-green' : 'is-red'}`}>{pct}%</span></div>
+          <strong className="adm-big">{done.length}</strong>
+          <div className="adm-progress">
+            <span className="adm-progress-fill" style={{ width: `max(${pct}%, 150px)` }}>Photo and report</span>
+            <span className="adm-progress-rest">{done.length - complete} to finish</span>
+          </div>
+          <button type="button" className="adm-link" onClick={() => go('events', 'needs')}>Finish them</button>
+        </section>
+        <CalendarCard events={draft.events} photoOf={photoOf} go={go} />
+        <BoardCard team={draft.team} memberPhoto={memberPhoto} go={go} />
+        <section className="adm-card adm-attention">
+          <div className="adm-card-top"><h3>Needs attention</h3><span className="adm-hint">{items.length || ''}</span></div>
           {items.length ? (
             <ul className="adm-todo">
               {items.map((it) => (
@@ -72,44 +217,42 @@ export default function OverviewTab({ draft, hasPhoto, memberHasPhoto, go, addEv
             <p className="adm-allgood"><FaCircleCheck aria-hidden="true" /> Everything looks complete.</p>
           )}
         </section>
+      </div>
+
+      <div className="adm-two">
         <section className="adm-card">
           <h3>Quick actions</h3>
           <div className="adm-quick">
             <button type="button" className="adm-btn" onClick={addEvent}><FaPlus size={12} aria-hidden="true" /> Add an event</button>
             <button type="button" className="adm-btn is-ghost" onClick={() => go('gallery')}>Add gallery photos</button>
+            <button type="button" className="adm-btn is-ghost" onClick={() => go('finance')}>Record income or expense</button>
             <button type="button" className="adm-btn is-ghost" onClick={() => go('team')}>Edit the team</button>
-            <a className="adm-btn is-ghost" href="/" target="_blank" rel="noreferrer">Open the website</a>
           </div>
         </section>
+        {canSave && (
+          <section className="adm-card">
+            <h3><FaClockRotateLeft size={15} aria-hidden="true" /> Recent saves</h3>
+            <p className="adm-hint">Made a mistake? Go back to how the content was after an earlier save. Photos are never deleted.</p>
+            {history === null && <p className="adm-hint">Loading…</p>}
+            {history?.length === 0 && <p className="adm-hint">No saves yet.</p>}
+            {history?.length > 0 && (
+              <ol className="adm-history">
+                {history.slice(0, 6).map((h, i) => (
+                  <li key={h.sha}>
+                    <span className="adm-history-when">{whenSaved(h.date)}</span>
+                    <span className="adm-history-what">{h.message.replace(/^Admin page: /, '').replace(/^update /, 'Updated ').replace(/^go back/, 'Went back')}</span>
+                    {i === 0 ? <span className="adm-badge is-green">Current</span> : (
+                      <button type="button" className="adm-btn is-ghost is-small" disabled={Boolean(restoring) || unsaved} title={unsaved ? 'Save or undo your changes first' : undefined} onClick={() => onRestore(h)}>
+                        {restoring === h.sha ? 'Going back…' : 'Go back'}
+                      </button>
+                    )}
+                  </li>
+                ))}
+              </ol>
+            )}
+          </section>
+        )}
       </div>
-
-      {canSave && (
-        <section className="adm-card">
-          <div className="adm-card-head">
-            <div>
-              <h3><FaClockRotateLeft size={15} aria-hidden="true" /> Recent saves</h3>
-              <p className="adm-hint">Made a mistake? Go back to how the website’s content was after an earlier save. Photos are never deleted, and going back can be undone the same way.</p>
-            </div>
-          </div>
-          {history === null && <p className="adm-hint">Loading…</p>}
-          {history?.length === 0 && <p className="adm-hint">No saves yet.</p>}
-          {history?.length > 0 && (
-            <ol className="adm-history">
-              {history.map((h, i) => (
-                <li key={h.sha}>
-                  <span className="adm-history-when">{whenSaved(h.date)}</span>
-                  <span className="adm-history-what">{h.message.replace(/^Admin page: /, '').replace(/^update /, 'Updated ').replace(/^go back/, 'Went back')}{h.author ? <small> · {h.author}</small> : null}</span>
-                  {i === 0 ? <span className="adm-badge is-green">Current</span> : (
-                    <button type="button" className="adm-btn is-ghost is-small" disabled={Boolean(restoring) || unsaved} title={unsaved ? 'Save or undo your changes first' : undefined} onClick={() => onRestore(h)}>
-                      {restoring === h.sha ? 'Going back…' : 'Go back to this'}
-                    </button>
-                  )}
-                </li>
-              ))}
-            </ol>
-          )}
-        </section>
-      )}
     </div>
   );
 }
