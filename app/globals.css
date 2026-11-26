@@ -2715,3 +2715,11 @@ body:has(.admin):not(:has(.adm-gate)) {
 .adm-tiles > li:nth-child(n+9) { animation: none; }
 @media (prefers-reduced-motion: reduce) { .adm-tiles > li { animation: none; } }
 .adm-tile-btn:disabled { display: none; }
+
+/* Dropdown lists everywhere: they still scroll (wheel, swipe, keyboard) but never show a scrollbar */
+.pill-select-list, .adm-role-suggest { scrollbar-width: none; -ms-overflow-style: none; }
+.pill-select-list::-webkit-scrollbar, .adm-role-suggest::-webkit-scrollbar { display: none; width: 0; height: 0; }
+
+/* Team: role suggestions under the role field, in the same style as the other dropdowns */
+.adm-roles { position: relative; }
+.pill-select-list.adm-role-suggest { max-height: 280px; }

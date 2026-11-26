@@ -1,6 +1,7 @@
 'use client';
 
-import { useId, useMemo, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { FaArrowDown, FaArrowUp, FaPlus, FaWandMagicSparkles, FaXmark } from 'react-icons/fa6';
 import { PhotoTap, SectionHead, initials, plural, preparePhoto, slugify, tag, useNextFrame } from './shared';
 
@@ -13,24 +14,61 @@ export const LISTS = [
 /** The next Rotaract year after "2026–27": "2027–28". */
 export const nextYear = (y) => { const m = /^(\d{4})\D+(\d{2,4})$/.exec(y || ''); return m ? `${Number(m[1]) + 1}–${String(Number(m[2].slice(-2)) + 1).padStart(2, '0')}` : ''; };
 
-function RolesInput({ roles, onChange, listId }) {
+/** Roles as chips, with a field to add one. Matching roles already used in the team are suggested below it. */
+function RolesInput({ roles, onChange, suggestions }) {
   const [text, setText] = useState('');
-  const add = () => { const r = text.trim(); if (r && !roles.includes(r)) onChange([...roles, r]); setText(''); };
+  const [open, setOpen] = useState(false);
+  const [active, setActive] = useState(-1);
+  const listId = useId();
+  const q = text.trim().toLowerCase();
+  const matches = suggestions.filter((r) => !roles.includes(r) && (!q || r.toLowerCase().includes(q))).slice(0, 8);
+  const shown = open && matches.length > 0;
+  // The list is drawn at the page's top level (cards clip what overflows them), just under the field.
+  const wrap = useRef(null);
+  const [pos, setPos] = useState(null);
+  const place = () => { const r = wrap.current?.getBoundingClientRect(); if (r) setPos({ left: r.left, top: r.bottom + 6, width: r.width }); };
+  useEffect(() => {
+    if (!open) return undefined;
+    const on = () => place();
+    window.addEventListener('scroll', on, true);
+    window.addEventListener('resize', on);
+    return () => { window.removeEventListener('scroll', on, true); window.removeEventListener('resize', on); };
+  }, [open]);
+  const add = (value = text) => { const r = value.trim(); if (r && !roles.includes(r)) onChange([...roles, r]); setText(''); setActive(-1); };
   return (
-    <div className="adm-roles">
+    <div className="adm-roles" ref={wrap}>
       {roles.map((r) => (
         <span key={r} className="adm-chip is-on">{r}<button type="button" aria-label={`Remove the role ${r}`} onClick={() => onChange(roles.filter((x) => x !== r))}><FaXmark size={10} /></button></span>
       ))}
       <input
-        list={listId} value={text} placeholder={roles.length ? 'Add another role' : 'Add a role, e.g. Secretary'} aria-label="Add a role" enterKeyHint="done"
-        onChange={(e) => setText(e.target.value)} onBlur={add}
-        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); add(); } }}
+        value={text} placeholder={roles.length ? 'Add another role' : 'Add a role, e.g. Secretary'} aria-label="Add a role" enterKeyHint="done"
+        role="combobox" aria-expanded={shown} aria-controls={listId} aria-autocomplete="list" aria-activedescendant={shown && active >= 0 ? `${listId}-${active}` : undefined}
+        onChange={(e) => { setText(e.target.value); setOpen(true); setActive(-1); place(); }}
+        onFocus={() => { setOpen(true); place(); }}
+        onBlur={() => { setOpen(false); add(); }}
+        onKeyDown={(e) => {
+          if (e.key === 'ArrowDown' && matches.length) { e.preventDefault(); setOpen(true); setActive((i) => (i + 1) % matches.length); }
+          else if (e.key === 'ArrowUp' && matches.length) { e.preventDefault(); setActive((i) => (i <= 0 ? matches.length - 1 : i - 1)); }
+          else if (e.key === 'Escape') setOpen(false);
+          else if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); add(shown && active >= 0 ? matches[active] : text); }
+        }}
       />
+      {shown && pos && createPortal(
+        <ul id={listId} className="pill-select-list adm-role-suggest" role="listbox" aria-label="Roles used in the team" style={{ left: pos.left, top: pos.top, width: pos.width }}>
+          {matches.map((r, i) => (
+            <li
+              key={r} id={`${listId}-${i}`} role="option" aria-selected={i === active} className={`pill-select-option${i === active ? ' is-active' : ''}`}
+              onMouseDown={(e) => { e.preventDefault(); add(r); }} onMouseEnter={() => setActive(i)}
+            >{r}</li>
+          ))}
+        </ul>,
+        document.body,
+      )}
     </div>
   );
 }
 
-function PeopleList({ title, desc, people, withBio, photoOf, onChange, onPhoto, busy, roleList }) {
+function PeopleList({ title, desc, people, withBio, photoOf, onChange, onPhoto, busy, roleSuggestions }) {
   const set = (i, patch) => onChange(people.map((p, j) => (j === i ? { ...p, ...patch } : p)));
   const move = (i, d) => { const next = [...people]; [next[i], next[i + d]] = [next[i + d], next[i]]; onChange(next); };
   return (
@@ -47,7 +85,7 @@ function PeopleList({ title, desc, people, withBio, photoOf, onChange, onPhoto, 
             <PhotoTap src={photoOf(p)} fallback={initials(p.name)} busy={busy === p.name} label={`${photoOf(p) ? 'Change' : 'Add'} ${p.name || 'this person'}'s photo`} onFile={(f) => onPhoto(p.name, f)} />
             <div className="adm-person-fields">
               <input className="adm-person-name" aria-label="Name" placeholder="Rtr. Full Name" maxLength={80} value={p.name} onChange={(e) => set(i, { name: e.target.value })} />
-              <RolesInput roles={p.roles} listId={roleList} onChange={(roles) => set(i, { roles })} />
+              <RolesInput roles={p.roles} suggestions={roleSuggestions} onChange={(roles) => set(i, { roles })} />
               {withBio && <textarea aria-label="Short bio" placeholder="One or two sentences about what they look after (optional)" rows={2} maxLength={300} value={p.bio ?? ''} onChange={(e) => set(i, { bio: e.target.value || undefined })} />}
             </div>
             <div className="adm-person-tools">
@@ -69,7 +107,6 @@ export default function TeamTab({ team, photoOf, update, addUpload, notify }) {
   const officer = (role) => team.officers.find((o) => o.role === role) ?? { role, name: '', email: '', phone: '' };
   const setOfficer = (role, patch) => set({ officers: ['President', 'Secretary'].map((r) => (r === role ? { ...officer(r), ...patch } : officer(r))) });
   const roleSuggestions = useMemo(() => [...new Set(LISTS.flatMap(([k]) => team[k].flatMap((p) => p.roles)))].sort(), [team]);
-  const roleList = useId(); // one list of role suggestions shared by every person's role field
   const rest = useNextFrame(); // the board and chairpersons follow a frame after the office bearers
   const people = new Set(LISTS.flatMap(([k]) => team[k].map((p) => p.name).filter(Boolean))).size;
 
@@ -130,9 +167,8 @@ export default function TeamTab({ team, photoOf, update, addUpload, notify }) {
           </div>
         ))}
       </section>
-      <datalist id={roleList}>{roleSuggestions.map((r) => <option key={r} value={r} />)}</datalist>
       {LISTS.filter(([k]) => rest || k === 'coreMembers').map(([k, title, desc]) => (
-        <PeopleList key={k} title={title} desc={desc} people={team[k]} withBio={k === 'coreMembers'} photoOf={photoOf} busy={busy} roleList={roleList} onPhoto={onPhoto} onChange={(v) => set({ [k]: v })} />
+        <PeopleList key={k} title={title} desc={desc} people={team[k]} withBio={k === 'coreMembers'} photoOf={photoOf} busy={busy} roleSuggestions={roleSuggestions} onPhoto={onPhoto} onChange={(v) => set({ [k]: v })} />
       ))}
     </div>
   );
