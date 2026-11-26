@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
-import { FaAddressCard, FaArrowLeft, FaArrowUpRightFromSquare, FaCalendarDays, FaHouse, FaImages, FaIndianRupeeSign, FaQuoteLeft, FaRightFromBracket, FaUsers } from 'react-icons/fa6';
+import { FaAddressCard, FaArrowLeft, FaArrowUpRightFromSquare, FaCalendarDays, FaHouse, FaImages, FaIndianRupeeSign, FaQuoteLeft, FaRightFromBracket, FaUsers, FaXmark } from 'react-icons/fa6';
 import EventsTab, { blankEvent } from './events';
 import TeamTab, { LISTS } from './team';
 import { GalleryTab, ReviewsTab, DetailsTab } from './more';
@@ -294,6 +294,24 @@ export default function AdminApp() {
     : unsaved ? ['warn', 'Unsaved changes']
       : published && !published.live ? ['busy', 'Publishing…']
         : published?.live ? ['ok', 'Live on the website'] : ['ok', 'All changes saved'];
+  // The save bar: what it says now, kept on screen for a moment after it is no longer needed so it can slide away.
+  const barNow = !(status?.signedIn && draft) ? null
+    : message ? { text: message.text, tone: message.kind === 'error' ? 'error' : 'info', actions: unsaved && !saving ? 'save' : 'close' }
+      : saving ? { text: 'Saving your changes…', tone: 'busy', actions: null }
+        : unsaved ? { text: `Not saved · ${[...dirty.map((k) => KINDS[k]), ...(pending && !dirty.length ? [`${pending} photo${pending > 1 ? 's' : ''}`] : [])].join(', ')}`, tone: 'warn', actions: 'save' }
+          : published && !published.dismissed ? {
+            text: published.private ? 'Saved. The finance sheet is up to date.' : published.live ? 'Saved and live on the website.' : 'Saved. Live on the website in about two minutes.',
+            tone: published.live ? 'ok' : 'busy', actions: 'close',
+          } : null;
+  const [bar, setBar] = useState({ on: false, leaving: false, text: '', tone: 'ok', actions: null });
+  if (barNow && (!bar.on || bar.leaving || bar.text !== barNow.text || bar.tone !== barNow.tone || bar.actions !== barNow.actions)) setBar({ on: true, leaving: false, ...barNow });
+  if (!barNow && bar.on && !bar.leaving) setBar({ ...bar, leaving: true });
+  useEffect(() => {
+    if (!bar.leaving) return undefined;
+    const t = window.setTimeout(() => setBar((b) => (b.leaving ? { ...b, on: false, leaving: false } : b)), 320);
+    return () => window.clearTimeout(t);
+  }, [bar.leaving]);
+
   const ready = status?.signedIn && draft;
   const client = typeof document !== 'undefined';
 
@@ -330,6 +348,7 @@ export default function AdminApp() {
           </div>
         </header>
         <div className="adm-main">
+          <div key={`${tab}-${tab === 'events' ? editing ?? 'list' : ''}`} className="adm-view">
           {!status.canSave && <p className="adm-notice">Saving isn’t switched on yet: add <code>GITHUB_TOKEN</code> in Vercel (see REMAINING-TASKS.md).</p>}
           {tab === 'overview' && (
             <OverviewTab
@@ -350,6 +369,7 @@ export default function AdminApp() {
           {tab === 'finance' && (draft.finance
             ? <FinanceTab finance={draft.finance} events={draft.events} update={update('finance')} ready={financeReady && status.canSave} />
             : <p className="adm-notice">The finance sheet couldn’t be opened. {message?.text}</p>)}
+          </div>
         </div>
       </div>
 
@@ -360,7 +380,7 @@ export default function AdminApp() {
           {SECTIONS.map(([k, label, , Icon]) => (
             <button key={k} type="button" aria-current={tab === k ? 'page' : undefined} title={label} onClick={() => go(k)}>
               <Icon size={17} aria-hidden="true" />
-              <span className="adm-dock-label">{label}</span>
+              <span className="adm-dock-label"><span>{label}</span></span>
               {dirty.includes(k) && <i className="adm-dot" />}
             </button>
           ))}
@@ -368,24 +388,18 @@ export default function AdminApp() {
         document.body,
       )}
 
-      {client && (unsaved || saving || message || (published && !published.dismissed)) && createPortal(
-        <div className={`adm-savebar${message?.kind === 'error' ? ' is-error' : ''}`} role="status" aria-live="polite">
-          <span className="adm-savebar-text">
-            {message ? message.text
-              : saving ? 'Saving…'
-                : unsaved ? `Unsaved changes: ${[...dirty.map((k) => KINDS[k]), ...(pending && !dirty.length ? [`${pending} photo${pending > 1 ? 's' : ''}`] : [])].join(', ')}`
-                  : published?.private ? 'Saved. The finance sheet is up to date.'
-                    : published?.live ? 'Saved and live on the website.'
-                    : 'Saved. The website will show it in about two minutes.'}
-          </span>
-          {unsaved && !saving && (
+      {client && bar.on && createPortal(
+        <div className={`adm-savebar is-${bar.tone}${bar.leaving ? ' is-leaving' : ''}`} role="status" aria-live="polite">
+          <span className="adm-savebar-dot" aria-hidden="true" />
+          <span key={bar.text} className="adm-savebar-text">{bar.text}</span>
+          {bar.actions === 'save' && (
             <span className="adm-savebar-actions">
               <button type="button" className="adm-link" onClick={discard}>Undo</button>
               <button type="button" className="adm-btn" onClick={save} disabled={!status.canSave}>Save changes</button>
             </span>
           )}
-          {!unsaved && !saving && (
-            <button type="button" className="adm-link" onClick={() => { setMessage(null); setPublished((p) => (p ? { ...p, dismissed: true } : p)); }}>Close</button>
+          {bar.actions === 'close' && (
+            <button type="button" className="adm-savebar-close" aria-label="Close" onClick={() => { setMessage(null); setPublished((p) => (p ? { ...p, dismissed: true } : p)); }}><FaXmark size={13} /></button>
           )}
         </div>,
         document.body,

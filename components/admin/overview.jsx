@@ -89,7 +89,7 @@ function CalendarCard({ events, photoOf, go }) {
   const iso = (d) => `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
   const on = (d) => events.filter((e) => e.date <= iso(d) && (e.endDate || e.date) >= iso(d));
   const upcoming = events.filter((e) => !isCompleted(e, today)).sort((a, b) => a.date.localeCompare(b.date));
-  const list = (upcoming.length ? upcoming : [...events].sort((a, b) => b.date.localeCompare(a.date))).slice(0, 3);
+  const list = (upcoming.length ? upcoming : [...events].sort((a, b) => b.date.localeCompare(a.date))).slice(0, 2);
   return (
     <section className="adm-card adm-cal">
       <div className="adm-card-top"><h3>{MONTHS_LONG[m]} {y}</h3><span className="adm-hint">This month</span></div>
@@ -130,7 +130,8 @@ function BoardCard({ team, memberPhoto, go }) {
   const holder = (re) => core.find((p) => p.roles.some((r) => re.test(r.trim())));
   const podium = [holder(/^secretary$/i), holder(/^president$/i), holder(/^treasurer$/i)];
   const shown = podium.every(Boolean) ? podium : [core[1], core[0], core[2]].filter(Boolean);
-  const rest = core.filter((p) => !shown.includes(p)).slice(0, 3);
+  const others = [...core, ...team.boardOfDirectors].filter((p, i, all) => !shown.some((x) => x.name === p.name) && all.findIndex((y) => y.name === p.name) === i);
+  const rest = others.slice(0, 4);
   const roleCount = (name) => new Set(LISTS.flatMap(([k]) => team[k].filter((p) => p.name === name).flatMap((p) => p.roles))).size;
   return (
     <section className="adm-card adm-board">
@@ -197,7 +198,12 @@ export default function OverviewTab({ draft, hasPhoto, photoOf, memberPhoto, mem
             <span className="adm-progress-fill" style={{ width: `max(${pct}%, 150px)` }}>Photo and report</span>
             <span className="adm-progress-rest">{done.length - complete} to finish</span>
           </div>
-          <button type="button" className="adm-link" onClick={() => go('events', 'needs')}>Finish them</button>
+          <ul className="adm-mini">
+            <li><span>With a photo</span><strong>{done.filter(hasPhoto).length} / {done.length}</strong></li>
+            <li><span>With a report or results</span><strong>{done.filter((e) => !eventGaps(e, hasPhoto, today).includes('No report')).length} / {done.length}</strong></li>
+            <li><span>Upcoming</span><strong>{upcoming.length}</strong></li>
+          </ul>
+          <button type="button" className="adm-link adm-card-foot" onClick={() => go('events', 'needs')}>Finish them</button>
         </section>
         <CalendarCard events={draft.events} photoOf={photoOf} go={go} />
         <BoardCard team={draft.team} memberPhoto={memberPhoto} go={go} />
@@ -216,19 +222,19 @@ export default function OverviewTab({ draft, hasPhoto, photoOf, memberPhoto, mem
           ) : (
             <p className="adm-allgood"><FaCircleCheck aria-hidden="true" /> Everything looks complete.</p>
           )}
+          <div className="adm-card-foot adm-quick-wrap">
+            <h3>Quick actions</h3>
+            <div className="adm-quick">
+              <button type="button" className="adm-btn is-small" onClick={addEvent}><FaPlus size={11} aria-hidden="true" /> Add an event</button>
+              <button type="button" className="adm-btn is-ghost is-small" onClick={() => go('gallery')}>Gallery photos</button>
+              <button type="button" className="adm-btn is-ghost is-small" onClick={() => go('finance')}>Income or expense</button>
+              <button type="button" className="adm-btn is-ghost is-small" onClick={() => go('team')}>Edit the team</button>
+            </div>
+          </div>
         </section>
       </div>
 
-      <div className="adm-two">
-        <section className="adm-card">
-          <h3>Quick actions</h3>
-          <div className="adm-quick">
-            <button type="button" className="adm-btn" onClick={addEvent}><FaPlus size={12} aria-hidden="true" /> Add an event</button>
-            <button type="button" className="adm-btn is-ghost" onClick={() => go('gallery')}>Add gallery photos</button>
-            <button type="button" className="adm-btn is-ghost" onClick={() => go('finance')}>Record income or expense</button>
-            <button type="button" className="adm-btn is-ghost" onClick={() => go('team')}>Edit the team</button>
-          </div>
-        </section>
+      <div>
         {canSave && (
           <section className="adm-card">
             <h3><FaClockRotateLeft size={15} aria-hidden="true" /> Recent saves</h3>

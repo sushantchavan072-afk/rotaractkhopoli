@@ -2039,3 +2039,109 @@ body:has(.admin) .footer { display: none; }
   .adm-dock button[aria-current='page'] .adm-dock-label { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { .adm-dock button { transition: none; } }
+
+/* ---------- Admin: motion, the pill dock, the save bar, aligned overview ---------- */
+:root { --adm-spring: cubic-bezier(.22, 1, .36, 1); --adm-bounce: cubic-bezier(.34, 1.45, .55, 1); }
+
+/* Each section (and each opened event) arrives: the view rises in, then its cards follow one after another */
+.adm-view { animation: adm-view-in .5s var(--adm-spring) both; }
+@keyframes adm-view-in { from { opacity: 0; transform: translateY(14px); } }
+.adm-view > .adm-tab > *, .adm-view > .adm-editor > *, .adm-ov-grid > * { animation: adm-rise .6s var(--adm-spring) both; }
+.adm-view > .adm-tab > :nth-child(2), .adm-view > .adm-editor > :nth-child(2), .adm-ov-grid > :nth-child(1) { animation-delay: .04s; }
+.adm-view > .adm-tab > :nth-child(3), .adm-view > .adm-editor > :nth-child(3), .adm-ov-grid > :nth-child(2) { animation-delay: .08s; }
+.adm-view > .adm-tab > :nth-child(4), .adm-view > .adm-editor > :nth-child(4), .adm-ov-grid > :nth-child(3) { animation-delay: .12s; }
+.adm-view > .adm-tab > :nth-child(5), .adm-view > .adm-editor > :nth-child(5), .adm-ov-grid > :nth-child(4) { animation-delay: .16s; }
+.adm-view > .adm-tab > :nth-child(n+6), .adm-view > .adm-editor > :nth-child(n+6), .adm-ov-grid > :nth-child(5) { animation-delay: .2s; }
+@keyframes adm-rise { from { opacity: 0; transform: translateY(18px) scale(.985); } }
+.adm-list > li, .adm-people > li, .adm-gallery > li, .adm-todo > li, .adm-next > li { animation: adm-rise .5s var(--adm-spring) both; }
+.adm-list > li:nth-child(2), .adm-people > li:nth-child(2), .adm-gallery > li:nth-child(2), .adm-todo > li:nth-child(2), .adm-next > li:nth-child(2) { animation-delay: .04s; }
+.adm-list > li:nth-child(3), .adm-people > li:nth-child(3), .adm-gallery > li:nth-child(3), .adm-todo > li:nth-child(3) { animation-delay: .08s; }
+.adm-list > li:nth-child(4), .adm-people > li:nth-child(4), .adm-gallery > li:nth-child(4), .adm-todo > li:nth-child(4) { animation-delay: .12s; }
+.adm-list > li:nth-child(n+5), .adm-people > li:nth-child(n+5), .adm-gallery > li:nth-child(n+5), .adm-todo > li:nth-child(n+5) { animation-delay: .16s; }
+
+/* Gentle lift on hover; buttons press in */
+.admin .adm-stat, .admin .adm-row, .adm-next button, .adm-podium-person, .adm-round, .admin .adm-btn, .adm-cal-day { transition: transform .35s var(--adm-spring), box-shadow .35s var(--adm-spring), border-color .2s, background-color .25s, color .25s; }
+.admin .adm-stat:hover, .admin .adm-row:hover, .adm-next button:hover { transform: translateY(-3px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), 0 30px 50px -34px rgba(40, 40, 20, .55); }
+.adm-podium-person:hover { transform: translateY(-4px); }
+.adm-cal-day.has-event:hover { transform: scale(1.12); }
+.admin .adm-btn:active, .adm-round:active, .admin .adm-stat:active, .admin .adm-row:active { transform: scale(.97); transition-duration: .12s; }
+.adm-progress-fill { animation: adm-grow 1.1s var(--adm-spring) .25s both; transform-origin: left center; }
+@keyframes adm-grow { from { clip-path: inset(0 100% 0 0 round 26px); } }
+.adm-chart g { animation: adm-chart-in 1.2s var(--adm-spring) .15s both; }
+@keyframes adm-chart-in { from { clip-path: inset(0 100% 0 0); } }
+
+/* The dock: one black pill, sized to its contents; the current section opens into a white pill with its name */
+.adm-dock, .adm-dock { left: 50%; right: auto; translate: -50% 0; width: max-content; max-width: calc(100% - 20px); justify-content: center; gap: 2px; padding: 7px; border-radius: 999px; animation: adm-dock-in .7s var(--adm-bounce) .1s both; }
+@keyframes adm-dock-in { from { opacity: 0; transform: translateY(30px) scale(.9); } }
+.adm-dock button, .adm-dock button[aria-current='page'] { flex: none; gap: 0; min-width: 48px; height: 48px; padding: 0 15px; border-radius: 999px; transition: background-color .45s var(--adm-spring), color .3s ease, padding .45s var(--adm-spring), transform .2s ease; }
+.adm-dock button:active { transform: scale(.92); }
+.adm-dock-label, .adm-dock button[aria-current='page'] .adm-dock-label { display: grid; grid-template-columns: 0fr; opacity: 0; transition: grid-template-columns .5s var(--adm-spring), opacity .3s ease; }
+.adm-dock-label > span { overflow: hidden; padding-left: 0; white-space: nowrap; transition: padding .5s var(--adm-spring); }
+.adm-dock button[aria-current='page'] { padding: 0 20px 0 18px; background: #fff; color: var(--ink); }
+.adm-dock button[aria-current='page'] .adm-dock-label { grid-template-columns: 1fr; opacity: 1; }
+.adm-dock button[aria-current='page'] .adm-dock-label > span { padding-left: 8px; }
+
+/* The save bar: one pill, status dot, centred text, actions on the right; springs up, slides away */
+.adm-savebar, .adm-savebar.is-error { left: 50%; right: auto; translate: -50% 0; width: max-content; max-width: min(680px, calc(100% - 20px)); display: flex; flex-wrap: nowrap; align-items: center; gap: 12px; min-height: 58px; padding: 7px 7px 7px 20px; border-radius: 999px; background: #151515; color: #fff; box-shadow: 0 22px 44px -18px rgba(0, 0, 0, .55); animation: adm-bar-up .55s var(--adm-bounce) both; }
+.adm-savebar.is-error { background: #7a1712; }
+.adm-savebar.is-leaving { animation: adm-bar-down .3s cubic-bezier(.4, 0, 1, 1) both; pointer-events: none; }
+@keyframes adm-bar-up { from { opacity: 0; transform: translateY(26px) scale(.92); } }
+@keyframes adm-bar-down { to { opacity: 0; transform: translateY(22px) scale(.95); } }
+.adm-savebar-dot { flex: none; width: 9px; height: 9px; border-radius: 50%; background: #6fdc8c; box-shadow: 0 0 0 4px rgba(111, 220, 140, .18); transition: background-color .3s, box-shadow .3s; }
+.adm-savebar.is-warn .adm-savebar-dot { background: #f6c453; box-shadow: 0 0 0 4px rgba(246, 196, 83, .18); }
+.adm-savebar.is-busy .adm-savebar-dot { background: #7fb2ff; box-shadow: 0 0 0 4px rgba(127, 178, 255, .2); animation: adm-pulse 1.1s ease-in-out infinite; }
+.adm-savebar.is-error .adm-savebar-dot { background: #ffb4a8; box-shadow: 0 0 0 4px rgba(255, 180, 168, .2); }
+.adm-savebar.is-info .adm-savebar-dot { background: #fff; box-shadow: 0 0 0 4px rgba(255, 255, 255, .15); }
+.adm-savebar-text, .adm-savebar .adm-savebar-text { flex: 1 1 auto; min-width: 0; min-height: 0; display: block; overflow: hidden; font-size: 14.5px; line-height: 1.35; text-overflow: ellipsis; white-space: nowrap; animation: adm-text-in .35s var(--adm-spring) both; }
+@keyframes adm-text-in { from { opacity: 0; transform: translateY(6px); } }
+.adm-savebar.is-error .adm-savebar-text, .adm-savebar.is-info .adm-savebar-text { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; white-space: normal; }
+.adm-savebar-actions, .adm-savebar .adm-savebar-actions { width: auto; flex: none; display: flex; align-items: center; gap: 6px; }
+.adm-savebar .adm-link { padding: 10px 12px; color: rgba(255, 255, 255, .85); text-decoration: none; border-radius: 999px; }
+.adm-savebar .adm-link:hover { background: rgba(255, 255, 255, .1); color: #fff; }
+.adm-savebar .adm-btn { min-height: 44px; padding: 0 20px; border-radius: 999px; }
+.adm-savebar-close { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border: 0; border-radius: 50%; background: rgba(255, 255, 255, .12); color: #fff; cursor: pointer; transition: background-color .2s; }
+.adm-savebar-close:hover { background: rgba(255, 255, 255, .22); }
+
+/* Overview: cards in a row share their height, and their content fills it */
+.adm-ov-grid { align-items: stretch; }
+.adm-ov-grid > .adm-card { display: flex; flex-direction: column; }
+.adm-card-foot { margin-top: auto; }
+.adm-progress-card .adm-card-foot { padding-top: 12px; }
+.adm-mini { display: grid; gap: 0; margin: 10px 0 0; padding: 0; list-style: none; }
+.adm-mini li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 2px; border-top: 1px solid rgba(0, 0, 0, .06); font-size: 14px; }
+.adm-mini span { color: var(--text-2); }
+.adm-board .adm-board-list { flex: 1; align-content: start; }
+.adm-attention .adm-todo { margin-bottom: 14px; }
+.adm-quick-wrap { padding-top: 16px; border-top: 1px solid rgba(0, 0, 0, .06); }
+.adm-quick-wrap h3 { margin-bottom: 10px; font-size: 1.05rem !important; }
+.adm-quick-wrap .adm-quick { margin-top: 0; gap: 8px; }
+.adm-cal .adm-next { flex: 1; align-content: start; }
+.admin .adm-two { align-items: stretch; }
+.admin .adm-two > .adm-card { display: flex; flex-direction: column; }
+@media (max-width: 960px) {
+  .adm-ov-grid > .adm-chart-card { order: 0; }
+}
+@media (max-width: 700px) {
+  .adm-dock { gap: 0; padding: 6px; }
+  .adm-dock button { min-width: 42px; height: 46px; padding: 0 11px; }
+  .adm-dock button[aria-current='page'] { padding: 0 14px 0 13px; }
+  .adm-savebar, .adm-savebar.is-error { width: calc(100% - 20px); padding-left: 16px; gap: 10px; }
+  .adm-savebar-text, .adm-savebar .adm-savebar-text { font-size: 13.5px; }
+  .adm-savebar .adm-link { padding: 10px 8px; }
+  .adm-savebar .adm-btn { padding: 0 16px; }
+}
+@media (max-width: 380px) {
+  .adm-dock button { min-width: 38px; padding: 0 9px; }
+  .adm-dock button[aria-current='page'] .adm-dock-label { grid-template-columns: 0fr; opacity: 0; }
+  .adm-dock button[aria-current='page'] .adm-dock-label > span { padding-left: 0; }
+  .adm-dock button[aria-current='page'] { padding: 0 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .adm-view, .adm-view > .adm-tab > *, .adm-view > .adm-editor > *, .adm-ov-grid > *, .adm-list > li, .adm-people > li, .adm-gallery > li, .adm-todo > li, .adm-next > li,
+  .adm-progress-fill, .adm-chart g, .adm-dock, .adm-savebar, .adm-savebar.is-leaving, .adm-savebar-text, .adm-savebar-dot { animation: none !important; }
+  .adm-dock button, .adm-dock-label, .adm-dock-label > span { transition: none; }
+}
+
+.adm-chart-card .adm-chart { flex: 1; height: auto; min-height: 190px; }
+.adm-savebar .adm-link { align-self: center; }
+.adm-dock button[aria-current='page'] .adm-dot { top: 7px; right: 10px; }
