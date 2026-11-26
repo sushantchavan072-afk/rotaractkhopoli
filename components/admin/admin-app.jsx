@@ -330,6 +330,15 @@ export default function AdminApp() {
   const view = useDeferredValue(tab);
   const [collapsed, setCollapsed] = useState(false);
   const [hue, setHue] = useState(0);
+  // Hovering a menu item colours its words: the next club colour each time the pointer moves to another item.
+  const hover = useRef({ item: null, n: 3 });
+  const tintHover = (e) => {
+    const item = e.target instanceof Element ? e.target.closest('.adm-side-item') : null;
+    if (!item || item === hover.current.item) return;
+    hover.current.item = item;
+    hover.current.n = (hover.current.n + 1) % ACTIVE_HUES.length;
+    item.style.setProperty('--adm-hover', ACTIVE_HUES[hover.current.n]);
+  };
   const counts = draft ? {
     events: draft.events.length,
     team: new Set(LISTS.flatMap(([k]) => draft.team[k].map((p) => p.name).filter(Boolean))).size,
@@ -360,7 +369,7 @@ export default function AdminApp() {
       <div className="container adm-wrap">
         <div className={`adm-app${collapsed ? ' is-collapsed' : ''}`}>
         {/* Computers: a translucent side menu on the left. Phones use the dark dock at the bottom instead. */}
-        <aside className="adm-side" aria-label="Admin" style={{ '--adm-active': ACTIVE_HUES[hue] }}>
+        <aside className="adm-side" aria-label="Admin" style={{ '--adm-active': ACTIVE_HUES[hue] }} onPointerOver={tintHover}>
           <div className="adm-side-head">
             <strong className="adm-side-text">Club admin</strong>
             <button type="button" className="adm-side-toggle" aria-label={collapsed ? 'Expand the menu' : 'Collapse the menu'} title={collapsed ? 'Expand the menu' : 'Collapse the menu'} onClick={() => setCollapsed((c) => !c)}><FaTableColumns size={15} /></button>

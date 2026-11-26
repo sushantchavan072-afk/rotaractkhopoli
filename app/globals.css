@@ -2384,3 +2384,9 @@ body:has(.admin) {
 .adm-gate .adm-signin { gap: 12px; }
 .adm-gate .adm-signin input { text-align: center; }
 .adm-gate .adm-error { text-align: center; }
+
+/* Side menu hover: no white box, just the words in a club colour (a different one each time) */
+@media (min-width: 961px) {
+  .adm-side-item:hover, .adm-side-signout:hover { background: transparent; color: var(--adm-hover, var(--ink)); }
+  .adm-side-item:hover svg { transform: translateX(2px); transition: transform .3s var(--adm-spring); }
+}
