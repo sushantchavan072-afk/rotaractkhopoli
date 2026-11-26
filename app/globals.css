@@ -2513,3 +2513,6 @@ body:has(.admin):not(:has(.adm-gate)) {
 }
 .adm-login-art .adm-login-hero { display: block; place-items: start; justify-items: start; align-self: stretch; text-align: left; }
 .adm-login-art .adm-login-hero h2, .adm-login-art .adm-login-hero p { margin-left: 0; margin-right: 0; text-align: left; }
+/* Sign-in art: the headline sits at the top left, padded */
+.adm-login-art { padding: clamp(48px, 9vh, 88px) clamp(48px, 5vw, 72px) 0; }
+.adm-login-art .adm-login-hero { margin-top: 0; }

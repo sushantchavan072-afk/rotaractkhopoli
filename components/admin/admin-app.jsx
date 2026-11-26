@@ -365,7 +365,6 @@ export default function AdminApp() {
         <div className="adm-gate-blobs" aria-hidden="true"><i /><i /><i /></div>
         <div className="adm-login">
           <div className="adm-login-art" aria-hidden="true">
-            <p className="adm-login-tag">Rotaract Club of Khopoli</p>
             <div className="adm-login-hero">
               <h2>Manage<br /><span>your club</span></h2>
               <p>Events, the team, photos and finance, in one place for the board.</p>
