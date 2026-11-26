@@ -60,7 +60,7 @@ function ProjectsChart({ events, yearStart, label }) {
         <h3>Projects over time</h3>
         <span className="adm-chip-num is-green">{total} in {label}</span>
       </div>
-      <div className="adm-legend"><i className="is-coral" />Quiet month<i className="is-sun" />Busy<i className="is-green" />Busiest: {MONTHS_LONG[months[busiest].m]}</div>
+      <div className="adm-legend">Busiest month: {MONTHS_LONG[months[busiest].m]} · {counts[busiest]} {counts[busiest] === 1 ? 'project' : 'projects'}</div>
       <svg className="adm-chart" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" role="img" aria-label={`Projects each month: ${months.map(({ m }, i) => `${MONTHS[m]} ${counts[i]}`).join(', ')}`}>
         <defs>
           <linearGradient id={`${id}g`} x1="0" x2="0" y1="0" y2="1" gradientUnits="objectBoundingBox">

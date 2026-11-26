@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
-import { FaAddressCard, FaArrowLeft, FaArrowUpRightFromSquare, FaCalendarDays, FaHouse, FaImages, FaIndianRupeeSign, FaQuoteLeft, FaRightFromBracket, FaUsers, FaXmark } from 'react-icons/fa6';
+import { FaAddressCard, FaArrowLeft, FaArrowUpRightFromSquare, FaCalendarDays, FaHouse, FaImages, FaIndianRupeeSign, FaQuoteLeft, FaRightFromBracket, FaUsers, FaXmark, FaCircleCheck, FaPenToSquare, FaArrowsRotate, FaTableColumns, FaPlus } from 'react-icons/fa6';
 import EventsTab, { blankEvent } from './events';
 import TeamTab, { LISTS } from './team';
 import { GalleryTab, ReviewsTab, DetailsTab } from './more';
@@ -76,8 +76,10 @@ function SignIn({ onDone, notConfigured }) {
   );
 }
 
+const STATUS_ICON = { ok: FaCircleCheck, warn: FaPenToSquare, busy: FaArrowsRotate };
 function StatusChip({ state }) {
-  return <span className={`adm-status is-${state[0]}`} role="status"><i aria-hidden="true" />{state[1]}</span>;
+  const Icon = STATUS_ICON[state[0]] ?? FaCircleCheck;
+  return <span className={`adm-status is-${state[0]}`} role="status"><Icon size={13} aria-hidden="true" />{state[1]}</span>;
 }
 
 export default function AdminApp() {
@@ -312,6 +314,14 @@ export default function AdminApp() {
     return () => window.clearTimeout(t);
   }, [bar.leaving]);
 
+  const [collapsed, setCollapsed] = useState(false);
+  const counts = draft ? {
+    events: draft.events.length,
+    team: new Set(LISTS.flatMap(([k]) => draft.team[k].map((p) => p.name).filter(Boolean))).size,
+    gallery: draft.gallery.length,
+    reviews: draft.reviews.length,
+    finance: draft.finance?.entries.length,
+  } : {};
   const ready = status?.signedIn && draft;
   const client = typeof document !== 'undefined';
 
@@ -336,6 +346,37 @@ export default function AdminApp() {
   return (
     <section className="admin">
       <div className="container adm-wrap">
+        <div className={`adm-app${collapsed ? ' is-collapsed' : ''}`}>
+        {/* Computers: a translucent side menu on the left. Phones use the dark dock at the bottom instead. */}
+        <aside className="adm-side" aria-label="Admin">
+          <div className="adm-side-head">
+            <strong className="adm-side-text">Club admin</strong>
+            <button type="button" className="adm-side-toggle" aria-label={collapsed ? 'Expand the menu' : 'Collapse the menu'} title={collapsed ? 'Expand the menu' : 'Collapse the menu'} onClick={() => setCollapsed((c) => !c)}><FaTableColumns size={15} /></button>
+          </div>
+          <span className="adm-side-label adm-side-text">Menu</span>
+          <nav className="adm-side-nav" aria-label="Admin sections">
+            {SECTIONS.map(([k, label, , Icon]) => (
+              <button key={k} type="button" className="adm-side-item" aria-current={tab === k ? 'page' : undefined} title={label} onClick={() => go(k)}>
+                <Icon size={16} aria-hidden="true" />
+                <span className="adm-side-text">{label}</span>
+                {counts[k] !== undefined && <span className="adm-side-count adm-side-text">{counts[k]}</span>}
+              </button>
+            ))}
+          </nav>
+          <span className="adm-side-label adm-side-text">Quick add</span>
+          <div className="adm-side-nav">
+            <button type="button" className="adm-side-item" title="New event" onClick={addEvent}><FaPlus size={14} aria-hidden="true" /><span className="adm-side-text">New event</span></button>
+            <button type="button" className="adm-side-item" title="Income or expense" onClick={() => go('finance')}><FaIndianRupeeSign size={14} aria-hidden="true" /><span className="adm-side-text">Income or expense</span></button>
+            <a className="adm-side-item" href="/" target="_blank" rel="noreferrer" title="View website"><FaArrowUpRightFromSquare size={14} aria-hidden="true" /><span className="adm-side-text">View website</span></a>
+          </div>
+          <div className="adm-side-foot">
+            {/* eslint-disable-next-line @next/next/no-img-element -- a small fixed icon */}
+            <img className="adm-side-avatar" src="/icon.png" alt="" width="44" height="44" />
+            <span className="adm-side-who adm-side-text"><strong>Rotaract Khopoli</strong><span>{state[1]}</span></span>
+            <button type="button" className="adm-side-out" aria-label="Sign out" title="Sign out" onClick={signOut}><FaRightFromBracket size={14} /></button>
+          </div>
+        </aside>
+        <div className="adm-panel">
         <header className="adm-topbar">
           <div className="adm-brand">
             <strong>Club admin</strong>
@@ -371,6 +412,8 @@ export default function AdminApp() {
             : <p className="adm-notice">The finance sheet couldn’t be opened. {message?.text}</p>)}
           </div>
         </div>
+        </div>
+        </div>
       </div>
 
       {/* A floating dark bar along the bottom: the current section is a white pill with its name. Drawn at the
@@ -381,7 +424,6 @@ export default function AdminApp() {
             <button key={k} type="button" aria-current={tab === k ? 'page' : undefined} title={label} onClick={() => go(k)}>
               <Icon size={17} aria-hidden="true" />
               <span className="adm-dock-label"><span>{label}</span></span>
-              {dirty.includes(k) && <i className="adm-dot" />}
             </button>
           ))}
         </nav>,
@@ -390,7 +432,6 @@ export default function AdminApp() {
 
       {client && bar.on && createPortal(
         <div className={`adm-savebar is-${bar.tone}${bar.leaving ? ' is-leaving' : ''}`} role="status" aria-live="polite">
-          <span className="adm-savebar-dot" aria-hidden="true" />
           <span key={bar.text} className="adm-savebar-text">{bar.text}</span>
           {bar.actions === 'save' && (
             <span className="adm-savebar-actions">

@@ -2145,3 +2145,67 @@ body:has(.admin) .footer { display: none; }
 .adm-chart-card .adm-chart { flex: 1; height: auto; min-height: 190px; }
 .adm-savebar .adm-link { align-self: center; }
 .adm-dock button[aria-current='page'] .adm-dot { top: 7px; right: 10px; }
+
+/* ---------- Admin on computers: a translucent side menu on the left, content in a frosted panel ---------- */
+.adm-side, .adm-side-toggle, .adm-side-out { display: none; }
+.adm-status svg { flex: none; }
+.adm-status i, .adm-legend i { display: none; }
+.adm-status.is-ok { color: var(--green-dark); }
+.adm-status.is-warn { color: #9a6700; }
+.adm-status.is-busy { color: var(--rotary-blue); }
+.adm-status.is-busy svg { animation: adm-spin 1.1s linear infinite; }
+@keyframes adm-spin { to { transform: rotate(360deg); } }
+.adm-cal-day.has-event:not(.has-photo)::after { display: none; }
+.adm-cal-day.has-event:not(.has-photo) { background: #c9eec3; color: #1f5f2b; font-weight: 600; }
+@media (min-width: 961px) {
+  .admin { padding: 20px 0 40px; }
+  .adm-wrap { width: calc(100% - 40px); max-width: 1480px; }
+  .adm-app { display: grid; grid-template-columns: 272px minmax(0, 1fr); align-items: start; gap: 22px; transition: grid-template-columns .5s var(--adm-spring); }
+  .adm-app.is-collapsed { grid-template-columns: 84px minmax(0, 1fr); }
+  .adm-dock { display: none !important; }
+  .adm-side {
+    position: sticky; top: 20px; height: calc(100vh - 40px); display: flex; flex-direction: column; gap: 4px; overflow: hidden auto;
+    padding: 26px 16px 16px; border: 1px solid rgba(255, 255, 255, .38); border-radius: 32px; color: #fff; isolation: isolate;
+    background: linear-gradient(165deg, rgba(23, 69, 143, .8) 0%, rgba(108, 62, 170, .7) 40%, rgba(212, 19, 103, .6) 72%, rgba(253, 139, 107, .55) 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), 0 30px 60px -30px rgba(60, 20, 80, .55);
+    -webkit-backdrop-filter: blur(26px) saturate(1.35); backdrop-filter: blur(26px) saturate(1.35);
+    animation: adm-side-in .7s var(--adm-spring) both; scrollbar-width: none;
+  }
+  @keyframes adm-side-in { from { opacity: 0; transform: translateX(-24px); } }
+  .adm-side::before { content: ''; position: absolute; inset: 0; z-index: -1; background: radial-gradient(420px 260px at 0% 0%, rgba(255, 255, 255, .28), transparent 70%), radial-gradient(360px 300px at 100% 100%, rgba(255, 255, 255, .14), transparent 70%); pointer-events: none; }
+  .adm-side-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 40px; padding: 0 6px 12px 10px; }
+  .adm-side-head strong { color: #fff; font: 600 1.55rem/1.1 var(--font-head); letter-spacing: -.01em; white-space: nowrap; }
+  .adm-side-toggle { flex: none; display: grid; place-items: center; width: 38px; height: 38px; border: 1px solid rgba(255, 255, 255, .25); border-radius: 12px; background: rgba(255, 255, 255, .12); color: #fff; cursor: pointer; transition: background-color .25s; }
+  .adm-side-toggle:hover { background: rgba(255, 255, 255, .24); }
+  .adm-side-label { padding: 14px 14px 6px; color: rgba(255, 255, 255, .62); font-size: 13px; font-weight: 500; white-space: nowrap; }
+  .adm-side-nav { display: grid; gap: 4px; }
+  .adm-side-item { width: 100%; display: flex; align-items: center; gap: 14px; min-height: 48px; padding: 0 14px 0 16px; border: 0; border-radius: 16px; background: transparent; color: rgba(255, 255, 255, .88); font: 500 15px var(--font); text-align: left; white-space: nowrap; cursor: pointer; transition: background-color .3s var(--adm-spring), color .3s, transform .2s, box-shadow .3s; }
+  .adm-side-item svg { flex: none; }
+  .adm-side-item:hover { background: rgba(255, 255, 255, .12); color: #fff; }
+  .adm-side-item:active { transform: scale(.97); }
+  .adm-side-item[aria-current='page'] { background: rgba(255, 255, 255, .26); color: #fff; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), 0 12px 26px -16px rgba(0, 0, 0, .4); }
+  .adm-side-count { margin-left: auto; color: rgba(255, 255, 255, .78); font-size: 13.5px; font-variant-numeric: tabular-nums; }
+  .adm-side-foot { margin-top: auto; display: flex; align-items: center; gap: 12px; padding: 16px 6px 4px; border-top: 1px solid rgba(255, 255, 255, .22); }
+  .adm-side-avatar { flex: none; width: 44px; height: 44px; padding: 4px; border-radius: 50%; background: #fff; object-fit: contain; box-shadow: 0 6px 16px -8px rgba(0, 0, 0, .4); }
+  .adm-side-who { min-width: 0; flex: 1; display: grid; line-height: 1.3; }
+  .adm-side-who strong { overflow: hidden; color: #fff; font-size: 14.5px; text-overflow: ellipsis; white-space: nowrap; }
+  .adm-side-who span { overflow: hidden; color: rgba(255, 255, 255, .72); font-size: 12.5px; text-overflow: ellipsis; white-space: nowrap; }
+  .adm-side-out { flex: none; display: grid; place-items: center; width: 38px; height: 38px; border: 0; border-radius: 50%; background: rgba(255, 255, 255, .15); color: #fff; cursor: pointer; transition: background-color .25s; }
+  .adm-side-out:hover { background: rgba(255, 255, 255, .28); }
+  /* Collapsed: icons only */
+  .adm-app.is-collapsed .adm-side { padding-inline: 12px; }
+  .adm-app.is-collapsed .adm-side-text { display: none; }
+  .adm-app.is-collapsed .adm-side-head { justify-content: center; padding: 0 0 12px; }
+  .adm-app.is-collapsed .adm-side-item { justify-content: center; padding: 0; }
+  .adm-app.is-collapsed .adm-side-nav + .adm-side-nav { margin-top: 18px; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, .2); }
+  .adm-app.is-collapsed .adm-side-foot { flex-direction: column; padding-inline: 0; }
+  /* The content panel */
+  .adm-panel { min-width: 0; min-height: calc(100vh - 40px); padding: 26px 32px 40px; border: 1px solid rgba(255, 255, 255, .85); border-radius: 32px; background: rgba(255, 255, 255, .5); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), 0 30px 60px -40px rgba(40, 40, 20, .4); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); animation: adm-view-in .6s var(--adm-spring) both; }
+  .adm-panel .adm-topbar { justify-content: flex-end; margin-bottom: 4px; }
+  .adm-panel .adm-brand, .adm-panel .adm-topbar .adm-round[aria-label='Sign out'] { display: none; }
+  .admin .adm-panel .adm-card, .admin .adm-panel .adm-stat, .admin .adm-panel .adm-row { -webkit-backdrop-filter: none; backdrop-filter: none; background: linear-gradient(180deg, rgba(255, 255, 255, .92), rgba(255, 255, 255, .7)); }
+  .adm-savebar, .adm-savebar.is-error { bottom: 24px; }
+}
+@media (max-width: 960px) {
+  .adm-panel { display: contents; }
+}
