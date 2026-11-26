@@ -1,9 +1,11 @@
 'use client';
 
 import { useId } from 'react';
-import { FaCircleCheck, FaClockRotateLeft, FaPlus, FaTriangleExclamation } from 'react-icons/fa6';
+import { FaBell, FaCircleCheck, FaClockRotateLeft, FaPlus, FaTriangleExclamation } from 'react-icons/fa6';
 import { eventGaps } from './events';
 import { LISTS } from './team';
+import { budgetState, headsFor, spendingFor } from './budgets';
+import { rotaractYearOf, rupees } from './finance';
 import { SectionHead, Thumb, initials, optimized, useNextFrame, isCompleted, niceDate, plural, todayIso, whenSaved } from './shared';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -30,8 +32,39 @@ export function attentionItems({ draft, hasPhoto, memberHasPhoto }) {
   if (!draft.site.email) items.push({ key: 'email', text: 'No club email yet, so website messages go to a personal inbox.', go: 'site', action: 'Add email' });
   if (!Object.values(draft.site.social).some(Boolean)) items.push({ key: 'social', text: 'No social media links yet (Instagram, Facebook…).', go: 'site', action: 'Add links' });
   if (!draft.reviews.length) items.push({ key: 'reviews', text: 'No reviews yet. The Reviews section is hidden until there is one.', go: 'reviews', action: 'Add a review' });
+
+  // Smart reminders: what's coming up, and the money.
+  const soon = draft.events.filter((e) => e.date >= today && daysBetween(today, e.date) <= 7).sort((a, b) => a.date.localeCompare(b.date));
+  for (const e of soon.slice(0, 2).reverse()) { // added to the top, soonest first
+    const days = daysBetween(today, e.date);
+    items.unshift({ key: `soon-${e.slug || e.title}`, tone: 'info', text: `${days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : `In ${days} days`}: ${e.title || 'an event'}${e.venue ? ` at ${e.venue}` : ''}. Add photos and a report after it.`, go: 'events', filter: 'upcoming', action: 'See it' });
+  }
+  const month = Number(today.slice(5, 7));
+  if (month === 6 && yearStart === currentRotaryStart()) {
+    items.unshift({ key: 'july', tone: 'info', text: `A new Rotaract year starts on 1 July. Have the new board’s names, roles and photos ready for the Team page.`, go: 'team', action: 'Open Team' });
+  }
+  const f = draft.finance;
+  if (f) {
+    const year = rotaractYearOf(today);
+    const thisYear = f.entries.filter((e) => e.date && rotaractYearOf(e.date) === year);
+    if (thisYear.length && !Number(f.openingBalances?.[year])) items.push({ key: 'opening', text: `No opening balance for ${year} yet, so “Balance now” in Finance may be wrong.`, go: 'finance', action: 'Set it' });
+    const heads = headsFor(f, year);
+    const { byHead, unassigned } = spendingFor(f.entries, year, rotaractYearOf);
+    const start = Number(year.slice(0, 4));
+    const progress = Math.min(1, Math.max(0, daysBetween(`${start}-07-01`, today) / 365));
+    for (const h of heads) {
+      const spent = byHead[h.code]?.spent ?? 0;
+      const amount = Number(h.amount) || 0;
+      const st = budgetState(amount, spent, progress);
+      if (st.tone === 'red' && spent) items.push({ key: `budget-${h.code}`, text: amount ? `${h.code} (${h.name}) is over its budget by ${rupees(spent - amount)}.` : `${h.code} (${h.name}) has spent ${rupees(spent)} with no budget set.`, go: 'finance', filter: 'budgets', action: 'Budgets' });
+      else if (st.tone === 'amber') items.push({ key: `budget-${h.code}`, text: st.note === 'Spending fast' ? `${h.code} (${h.name}) is spending faster than the year: ${rupees(spent)} of ${rupees(amount)} used.` : `${h.code} (${h.name}) has used ${Math.round((spent / amount) * 100)}% of its budget (${rupees(amount - spent)} left).`, go: 'finance', filter: 'budgets', action: 'Budgets' });
+    }
+    if (unassigned.length) items.push({ key: 'unassigned', text: `${plural(unassigned.length, 'expense')} this year ${unassigned.length === 1 ? 'isn’t' : 'aren’t'} taken from any avenue budget.`, go: 'finance', filter: 'budgets', action: 'Pick avenues' });
+    if (thisYear.some((e) => e.type === 'expense') && !heads.some((h) => Number(h.amount) > 0)) items.push({ key: 'nobudget', text: `No avenue budgets set for ${year} yet.`, go: 'finance', filter: 'budgets', action: 'Set budgets' });
+  }
   return items;
 }
+const daysBetween = (a, b) => Math.round((Date.parse(`${b}T00:00:00Z`) - Date.parse(`${a}T00:00:00Z`)) / 86400000);
 
 /** Smooth line through points (Catmull-Rom turned into Bézier curves). */
 function smooth(points) {
@@ -220,7 +253,7 @@ export default function OverviewTab({ draft, hasPhoto, photoOf, memberPhoto, mem
             <ul className="adm-todo">
               {items.map((it) => (
                 <li key={it.key}>
-                  <FaTriangleExclamation className="adm-todo-icon" aria-hidden="true" />
+                  {it.tone === 'info' ? <FaBell className="adm-todo-icon is-info" aria-hidden="true" /> : <FaTriangleExclamation className="adm-todo-icon" aria-hidden="true" />}
                   <span>{it.text}</span>
                   <button type="button" className="adm-btn is-ghost is-small" onClick={() => go(it.go, it.filter)}>{it.action}</button>
                 </li>

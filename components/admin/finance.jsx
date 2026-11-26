@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { FaArrowDown, FaArrowUp, FaChevronLeft, FaDownload, FaPlus, FaTrashCan } from 'react-icons/fa6';
 import { PillSelect, Segmented } from '../ui';
 import { Empty, Field, SectionHead, monthLabel, niceDate, plural, tag, todayIso } from './shared';
+import Budgets, { headForAvenue, headsFor } from './budgets';
 
 /** The club's income and expenses (kept encrypted; only the signed-in admin page can read them). */
 
@@ -19,8 +20,20 @@ export const rotaractYearOf = (iso) => { const [y, m] = iso.split('-').map(Numbe
 
 export const blankEntry = (type) => ({ id: `${todayIso().replaceAll('-', '')}-${tag()}`, date: todayIso(), type, amount: '', category: type === 'income' ? INCOME_CATEGORIES[0] : EXPENSE_CATEGORIES[0], description: '', mode: 'UPI' });
 
-function EntryEditor({ entry, eventTitles, onChange, onDelete, onClose }) {
+const NO_AVENUE = 'Not from an avenue budget';
+const headLabel = (h) => `${h.code} · ${h.name}`;
+
+function EntryEditor({ entry, events, heads, onChange, onDelete, onClose }) {
   const set = (patch) => onChange({ ...entry, ...patch });
+  const eventTitles = events.map((e) => e.title).filter(Boolean);
+  // Linking an expense to an event takes it from that event's avenue budget, by itself.
+  const pickEvent = (title) => {
+    const ev = events.find((e) => e.title === title);
+    const code = ev ? headForAvenue(ev.avenue) : '';
+    set({ event: title, ...(entry.type === 'expense' && code && heads.some((h) => h.code === code) ? { avenue: code } : {}) });
+  };
+  const linked = events.find((e) => e.title === entry.event);
+  const autoAvenue = linked && entry.avenue && headForAvenue(linked.avenue) === entry.avenue;
   const income = entry.type === 'income';
   const categories = income ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
   return (
@@ -30,7 +43,7 @@ function EntryEditor({ entry, eventTitles, onChange, onDelete, onClose }) {
       </div>
       <h2 className="adm-editor-title">{entry.description || (income ? 'New income' : 'New expense')}</h2>
       <section className="adm-card">
-        <Segmented label="Type" options={[['income', 'Income (money in)'], ['expense', 'Expense (money out)']]} value={entry.type} onChange={(t) => set({ type: t, category: (t === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES)[0] })} />
+        <Segmented label="Type" options={[['income', 'Income (money in)'], ['expense', 'Expense (money out)']]} value={entry.type} onChange={(t) => set({ type: t, category: (t === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES)[0], avenue: '' })} />
         <div className="adm-grid">
           <Field label="Amount (₹)">
             {(id) => <input id={id} className="adm-amount" inputMode="decimal" placeholder="0" value={entry.amount} onChange={(e) => set({ amount: e.target.value.replace(/[^\d.]/g, '').replace(/(\..*)\./g, '$1') })} />}
@@ -52,8 +65,13 @@ function EntryEditor({ entry, eventTitles, onChange, onDelete, onClose }) {
             {(id) => <input id={id} maxLength={60} placeholder="UPI ref, bill no., cheque no." value={entry.reference ?? ''} onChange={(e) => set({ reference: e.target.value })} />}
           </Field>
           <Field label="Event (optional)" wide>
-            <PillSelect options={[NO_EVENT, ...eventTitles]} value={entry.event || NO_EVENT} ariaLabel="Event" onChange={(v) => set({ event: v === NO_EVENT ? '' : v })} />
+            <PillSelect options={[NO_EVENT, ...eventTitles]} value={entry.event || NO_EVENT} ariaLabel="Event" onChange={(v) => pickEvent(v === NO_EVENT ? '' : v)} />
           </Field>
+          {!income && (
+            <Field label="Taken from the budget of" hint={autoAvenue ? 'Set from the event’s avenue.' : 'Each avenue has its own budget (Finance → Budgets).'} wide>
+              <PillSelect options={[NO_AVENUE, ...heads.map(headLabel)]} value={heads.find((h) => h.code === entry.avenue) ? headLabel(heads.find((h) => h.code === entry.avenue)) : NO_AVENUE} ariaLabel="Avenue budget" onChange={(v) => set({ avenue: heads.find((h) => headLabel(h) === v)?.code ?? '' })} />
+            </Field>
+          )}
         </div>
       </section>
       <div className="adm-editor-foot">
@@ -95,14 +113,14 @@ function Breakdown({ title, rows, total, tone }) {
   );
 }
 
-export default function FinanceTab({ finance, events, update, ready }) {
+export default function FinanceTab({ finance, events, update, ready, page, setPage }) {
   const entries = finance.entries;
-  const years = useMemo(() => [...new Set([rotaractYearOf(todayIso()), ...entries.filter((e) => e.date).map((e) => rotaractYearOf(e.date))])].sort().reverse(), [entries]);
+  const budgetYears = finance.budgets;
+  const years = useMemo(() => [...new Set([rotaractYearOf(todayIso()), ...Object.keys(budgetYears ?? {}), ...entries.filter((e) => e.date).map((e) => rotaractYearOf(e.date))])].sort().reverse(), [entries, budgetYears]);
   const [year, setYear] = useState(years[0]);
   const [kind, setKind] = useState('all');
   const [query, setQuery] = useState('');
   const [editing, setEditing] = useState(null); // entry id
-  const eventTitles = useMemo(() => events.map((e) => e.title).filter(Boolean), [events]);
 
   const inYear = entries.filter((e) => e.date && rotaractYearOf(e.date) === year);
   const sum = (list, type) => list.filter((e) => e.type === type).reduce((n, e) => n + (Number(e.amount) || 0), 0);
@@ -138,7 +156,7 @@ export default function FinanceTab({ finance, events, update, ready }) {
   if (current) {
     return (
       <EntryEditor
-        entry={current} eventTitles={eventTitles}
+        entry={current} events={events} heads={headsFor(finance, current.date ? rotaractYearOf(current.date) : year)}
         onChange={(next) => update((f) => ({ ...f, entries: f.entries.map((e) => (e.id === next.id ? next : e)) }))}
         onDelete={() => { if (window.confirm('Delete this entry from the finance sheet?')) { update((f) => ({ ...f, entries: f.entries.filter((e) => e.id !== current.id) })); setEditing(null); } }}
         onClose={() => { if (current.date) setYear(rotaractYearOf(current.date)); setEditing(null); }}
@@ -155,14 +173,24 @@ export default function FinanceTab({ finance, events, update, ready }) {
       {!ready && <p className="adm-notice">The finance sheet needs saving switched on (GITHUB_TOKEN) and a key (FINANCE_KEY, or the admin password). See REMAINING-TASKS.md.</p>}
 
       <div className="adm-toolbar">
+        <Segmented label="Page" options={[['sheet', 'Income and expenses'], ['budgets', 'Avenue budgets']]} value={page} onChange={setPage} />
+      </div>
+      <div className="adm-toolbar">
         <div className="adm-year">
           <span className="adm-label">Rotaract year</span>
           <PillSelect options={years} value={year} ariaLabel="Rotaract year" onChange={setYear} />
         </div>
-        <button type="button" className="adm-btn is-ghost is-small" disabled={!inYear.length} onClick={() => downloadCsv([...inYear].sort((a, b) => a.date.localeCompare(b.date)), year)}>
+        {page === 'sheet' && <button type="button" className="adm-btn is-ghost is-small" disabled={!inYear.length} onClick={() => downloadCsv([...inYear].sort((a, b) => a.date.localeCompare(b.date)), year)}>
           <FaDownload size={12} aria-hidden="true" /> Download for Excel (CSV)
-        </button>
+        </button>}
       </div>
+
+      {page === 'budgets' ? (
+        <Budgets
+          finance={finance} year={year} years={years} update={update} rupees={rupees} rotaractYearOf={rotaractYearOf}
+          onPickAvenue={(id) => { setEditing(id); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+        />
+      ) : (<>
 
       <div className="adm-stats adm-money">
         <label className="adm-stat is-static">
@@ -207,6 +235,7 @@ export default function FinanceTab({ finance, events, update, ready }) {
           </ul>
         </div>
       ))}
+      </>)}
     </div>
   );
 }

@@ -2558,3 +2558,54 @@ body:has(.admin):not(:has(.adm-gate)) {
   .adm-side-letter { display: block; justify-self: start; width: 20px; text-align: center; font-weight: 600; opacity: 0; transition: opacity .15s ease; }
   .adm-app.is-collapsed .adm-side-letter { opacity: 1; transition: opacity .3s ease .18s; }
 }
+
+/* Sign-in art, bigger: a larger headline, and the phone fills all the space below it (grows with the window) */
+@media (min-width: 961px) {
+  .adm-login-art { --art-pad: clamp(48px, 5vw, 76px); display: flex; flex-direction: column; padding: clamp(44px, 8vh, 84px) var(--art-pad) 0; }
+  .adm-login-art .adm-login-hero { flex: none; }
+  .adm-login-art .adm-login-hero h2 { font-size: clamp(3.4rem, min(7vw, 10.5vh), 6.6rem); line-height: .96; }
+  .adm-login-art .adm-login-hero p { max-width: 430px; margin-top: 22px; font-size: clamp(16px, 2.1vh, 19px); }
+  .adm-login-phone { position: relative; left: auto; bottom: auto; flex: 1 1 0; min-height: 0; align-self: flex-start; width: calc(100% + var(--art-pad)); max-width: none; height: 100%; margin: 8px 0 0 calc(-1 * var(--art-pad)); object-fit: contain; object-position: left bottom; transform: none; }
+}
+
+/* Finance → Avenue budgets */
+.adm-badge.is-red { background: #fdecea; color: #b42318; }
+.adm-notice.is-soft { background: var(--surface-2); }
+.adm-toolbar-actions { display: inline-flex; flex-wrap: wrap; gap: 8px; }
+.adm-budgets { display: grid; gap: 16px; }
+.adm-budget-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 14px; margin: 0; padding: 0; list-style: none; }
+.adm-budget { display: grid; gap: 12px; align-content: start; min-width: 0; }
+.adm-budget-top { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.adm-budget-code { flex: none; padding: 3px 10px; border-radius: 10px; background: var(--ink); color: #fff; font: 700 12px/1.5 var(--font); letter-spacing: .04em; }
+.admin .adm-budget-name { flex: 1 1 auto; min-width: 0; padding: 4px 6px; border: 1px solid transparent; border-radius: 8px; background: transparent; color: var(--ink); font: 600 15px var(--font); text-overflow: ellipsis; }
+.admin .adm-budget-name:hover, .admin .adm-budget-name:focus { border-color: var(--line-strong); background: var(--surface); }
+.adm-budget-nums { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr); gap: 10px; align-items: end; }
+.adm-budget-nums .adm-money-input { font-size: 1.25rem; }
+.adm-budget-nums span { display: grid; gap: 2px; min-width: 0; }
+.adm-budget-nums small { color: var(--muted); font-size: 12px; }
+.adm-budget-nums strong { overflow: hidden; font: 600 1.05rem/1.2 var(--font-head); text-overflow: ellipsis; white-space: nowrap; }
+.adm-budget-nums strong.is-out { color: #b42318; }
+.adm-budget-bar { display: block; height: 8px; overflow: hidden; border-radius: 8px; background: var(--surface-2); }
+.adm-budget-bar i { display: block; height: 100%; border-radius: inherit; background: var(--green-dark, #15803d); transform-origin: left; transition: transform .6s var(--adm-spring, ease); }
+.adm-budget.is-amber .adm-budget-bar i { background: #d99a00; }
+.adm-budget.is-red .adm-budget-bar i { background: #d9534f; }
+.adm-budget-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 22px; }
+.adm-budget-foot .adm-link { display: inline-flex; align-items: center; gap: 6px; }
+.adm-budget-foot .adm-link:disabled { color: var(--muted); cursor: default; }
+.adm-budget-foot svg.is-flipped { transform: rotate(180deg); }
+.adm-budget-events { display: grid; gap: 6px; margin: 0; padding: 10px 0 0; border-top: 1px solid var(--line); list-style: none; animation: adm-view-in .35s var(--adm-spring, ease) both; }
+.adm-budget-events li { display: flex; align-items: baseline; gap: 10px; min-width: 0; font-size: 14px; }
+.adm-budget-events li > :first-child { flex: 1 1 auto; min-width: 0; overflow: hidden; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
+.adm-budget-events strong { flex: none; font-weight: 600; }
+
+/* Event editor: auto-fill from a photo */
+.adm-autofill { display: flex; align-items: center; gap: 14px; background: linear-gradient(100deg, rgba(212, 19, 103, .07), rgba(23, 69, 143, .06)); }
+.adm-autofill-icon { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: #fff; color: #d41367; box-shadow: 0 4px 12px -6px rgba(212, 19, 103, .5); }
+.adm-autofill-text { flex: 1 1 auto; display: grid; gap: 2px; min-width: 0; }
+.adm-autofill-text strong { font-size: 15px; }
+.adm-autofill-text span { color: var(--text-2); font-size: 13.5px; line-height: 1.45; }
+@media (max-width: 600px) { .adm-autofill { flex-wrap: wrap; } .adm-autofill .adm-btn { width: 100%; justify-content: center; } }
+.adm-todo-icon.is-info { color: #17458f; }
+.admin .adm-budget .adm-budget-name { height: auto; padding: 4px 8px; border: 1px solid transparent; border-radius: 10px; background: transparent; box-shadow: none; font: 600 16px var(--font); }
+.admin .adm-budget .adm-budget-name:hover, .admin .adm-budget .adm-budget-name:focus { border-color: var(--line-strong); background: var(--surface); }
+.adm-budget-foot-end { display: inline-flex; align-items: center; gap: 10px; }

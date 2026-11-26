@@ -11,6 +11,7 @@ import { GalleryTab, ReviewsTab, DetailsTab } from './more';
 import OverviewTab from './overview';
 import FinanceTab from './finance';
 import { Field, api, whenSaved } from './shared';
+import { tidyDraft } from './tidy';
 
 /**
  * The club's admin page (/admin): events, team, gallery, reviews and club details, without code.
@@ -115,6 +116,7 @@ export default function AdminApp() {
   const [tab, setTab] = useState('overview');
   const [editing, setEditing] = useState(null); // the event being edited (index)
   const [filter, setFilter] = useState('all'); // events list filter
+  const [financePage, setFinancePage] = useState('sheet'); // Finance: 'sheet' | 'budgets'
   const [message, setMessage] = useState(null); // { kind: 'error' | 'info', text }
   const [saving, setSaving] = useState(false);
   const [published, setPublished] = useState(null); // { commit, live, dismissed }
@@ -204,7 +206,7 @@ export default function AdminApp() {
     setPublished(null);
   };
 
-  const check = () => {
+  const check = (draft) => {
     for (const e of draft.events) {
       const name = e.title ? `“${e.title}”` : 'An event';
       if (!e.title.trim() || !e.slug || !e.date || !e.venue.trim() || !e.avenue || !e.summary.trim()) return [`${name} needs a title, web address, date, venue, avenue and short summary.`, 'events'];
@@ -227,22 +229,25 @@ export default function AdminApp() {
   };
 
   const save = async () => {
-    const problem = check();
+    // Auto-tidy the parts being saved first (extra spaces, name capitals, phone format, photos added twice).
+    const { draft: tidied, notes: tidiedNotes } = tidyDraft(draft, dirty);
+    const problem = check(tidied);
     if (problem) { notify(problem[0]); setTab(problem[1]); return; }
+    if (tidiedNotes.length) setDraft(tidied);
     setSaving(true);
     setMessage(null);
-    const text = JSON.stringify(draft);
+    const text = JSON.stringify(tidied);
     const used = Object.entries(uploads).filter(([src]) => text.includes(src.replace(/^\/images\/members\/|\.jpg$/g, '')));
     const contentDirty = dirty.filter((k) => CONTENT.includes(k));
     try {
       let commit = null;
       if (contentDirty.length || used.length) {
         const body = { base, uploads: used.map(([src, u]) => ({ path: `public${src}`, data: u.data })) };
-        for (const k of contentDirty) body[k] = forSaving(k, draft[k]);
+        for (const k of contentDirty) body[k] = forSaving(k, tidied[k]);
         const res = await api('POST', '/api/admin/content', body);
         commit = res.commit;
         // Saved events are no longer new (their web address is now fixed).
-        const settled = { ...draft, events: draft.events.map(({ _new, ...e }) => e) };
+        const settled = { ...tidied, events: tidied.events.map(({ _new, ...e }) => e) };
         setDraft((d) => ({ ...d, events: d.events.map(({ _new, ...e }) => e) }));
         setBase((b) => ({ ...b, ...res.base }));
         setSaved((s) => ({ ...s, ...Object.fromEntries(contentDirty.map((k) => [k, JSON.stringify(settled[k])])) }));
@@ -252,13 +257,14 @@ export default function AdminApp() {
         loadHistory();
       }
       if (dirty.includes('finance')) {
-        const res = await api('POST', '/api/admin/finance', { finance: draft.finance, base: financeBase });
+        const res = await api('POST', '/api/admin/finance', { finance: tidied.finance, base: financeBase });
         commit = res.commit;
         setFinanceBase(res.base);
-        setSaved((s) => ({ ...s, finance: JSON.stringify(draft.finance) }));
+        setSaved((s) => ({ ...s, finance: JSON.stringify(tidied.finance) }));
       }
       // Finance is only on the admin page, so a finance-only save has nothing new to show on the website.
-      setPublished(contentDirty.length || used.length ? { commit, live: false } : { commit, live: true, private: true });
+      const tidyNote = tidiedNotes.length ? ` Tidied up: ${tidiedNotes.join(', ')}.` : '';
+      setPublished(contentDirty.length || used.length ? { commit, live: false, tidyNote } : { commit, live: true, private: true, tidyNote });
     } catch (err) {
       notify(err.message);
       if (err.status === 401) setStatus((s) => ({ ...s, signedIn: false }));
@@ -303,6 +309,7 @@ export default function AdminApp() {
     if (section !== tab) setHue((h) => (h + 1) % ACTIVE_HUES.length);
     setTab(section);
     if (section === 'events') { setEditing(null); if (nextFilter) setFilter(nextFilter); }
+    if (section === 'finance') setFinancePage(nextFilter === 'budgets' ? 'budgets' : 'sheet');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -323,7 +330,7 @@ export default function AdminApp() {
       : saving ? { text: 'Saving your changes…', tone: 'busy', actions: null }
         : unsaved ? { text: `Not saved · ${[...dirty.map((k) => KINDS[k]), ...(pending && !dirty.length ? [`${pending} photo${pending > 1 ? 's' : ''}`] : [])].join(', ')}`, tone: 'warn', actions: 'save' }
           : published && !published.dismissed ? {
-            text: published.private ? 'Saved. The finance sheet is up to date.' : published.live ? 'Saved and live on the website.' : 'Saved. Live on the website in about two minutes.',
+            text: (published.private ? 'Saved. The finance sheet is up to date.' : published.live ? 'Saved and live on the website.' : 'Saved. Live on the website in about two minutes.') + (published.tidyNote ?? ''),
             tone: published.live ? 'ok' : 'busy', actions: 'close',
           } : null;
   const [bar, setBar] = useState({ on: false, leaving: false, text: '', tone: 'ok', actions: null });
@@ -369,7 +376,7 @@ export default function AdminApp() {
               <h2>Manage<br /><span>your club</span></h2>
               <p>Events, the team, photos and finance, in one place for the board.</p>
             </div>
-            <Image className="adm-login-phone" src="/images/admin-sign-in-overview.webp" alt="" width={1000} height={962} priority sizes="470px" />
+            <Image className="adm-login-phone" src="/images/admin-sign-in-overview.webp" alt="" width={1000} height={962} priority sizes="(min-width: 961px) 50vw, 1px" />
           </div>
           <div className="adm-login-main">
             <header className="adm-login-top">
@@ -403,7 +410,7 @@ export default function AdminApp() {
         {/* Computers: a translucent side menu on the left. Phones use the dark dock at the bottom instead. */}
         <aside className="adm-side" aria-label="Admin" style={{ '--adm-active': ACTIVE_HUES[hue] }} onPointerOver={tintHover}>
           <div className="adm-side-head">
-            <strong className="adm-side-text">Club admin</strong>
+            <strong className="adm-side-text">Admin Portal</strong>
             <button type="button" className="adm-side-toggle" aria-label={collapsed ? 'Expand the menu' : 'Collapse the menu'} title={collapsed ? 'Expand the menu' : 'Collapse the menu'} onClick={() => setCollapsed((c) => !c)}><FaTableColumns size={15} /></button>
           </div>
           <span className="adm-side-label"><span className="adm-side-letter" aria-hidden="true">M</span><span className="adm-side-text">Menu</span></span>
@@ -429,7 +436,7 @@ export default function AdminApp() {
         <div className="adm-panel">
         <header className="adm-topbar">
           <div className="adm-brand">
-            <strong>Club admin</strong>
+            <strong>Admin Portal</strong>
             <span>Rotaract Club of Khopoli</span>
           </div>
           <div className="adm-topbar-tools">
@@ -458,7 +465,7 @@ export default function AdminApp() {
           {view === 'reviews' && <ReviewsTab reviews={draft.reviews} update={update('reviews')} />}
           {view === 'site' && <DetailsTab site={draft.site} update={update('site')} />}
           {view === 'finance' && (draft.finance
-            ? <FinanceTab finance={draft.finance} events={draft.events} update={update('finance')} ready={financeReady && status.canSave} />
+            ? <FinanceTab finance={draft.finance} events={draft.events} update={update('finance')} ready={financeReady && status.canSave} page={financePage} setPage={setFinancePage} />
             : <p className="adm-notice">The finance sheet couldn’t be opened. {message?.text}</p>)}
           </div>
         </div>

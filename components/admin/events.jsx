@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { FaArrowUpRightFromSquare, FaChevronLeft, FaCopy, FaPlus, FaTrashCan, FaXmark } from 'react-icons/fa6';
+import { FaArrowUpRightFromSquare, FaChevronLeft, FaCopy, FaPlus, FaTrashCan, FaWandMagicSparkles, FaXmark } from 'react-icons/fa6';
 import { PillSelect, Segmented } from '../ui';
 import {
-  Badge, Empty, Field, PhotoButton, SectionHead, Thumb, isCompleted, monthLabel, niceDate, plural, preparePhoto, slugify, tag, todayIso,
+  Badge, Empty, Field, PhotoButton, SectionHead, Thumb, api, isCompleted, monthLabel, niceDate, plural, preparePhoto, slugify, tag, todayIso,
 } from './shared';
 
 /** What an event is still missing (only completed events are expected to have a photo and a write-up). */
@@ -18,7 +18,7 @@ export function eventGaps(e, hasPhoto, today = todayIso()) {
 
 export const blankEvent = (avenue) => ({ _new: true, slug: '', title: '', date: todayIso(), venue: '', avenue, summary: '', report: '', outcomes: [] });
 
-function EventEditor({ event, avenueOptions, photoSrc, photoUrl, onChange, onPhoto, onExtraPhotos, onDuplicate, onDelete, onClose, busy }) {
+function EventEditor({ event, avenueOptions, photoSrc, photoUrl, onChange, onPhoto, onExtraPhotos, onAutofill, onDuplicate, onDelete, onClose, busy }) {
   const set = (patch) => onChange({ ...event, ...patch });
   const isNew = Boolean(event._new);
   const outcomes = event.outcomes ?? [];
@@ -38,6 +38,15 @@ function EventEditor({ event, avenueOptions, photoSrc, photoUrl, onChange, onPho
         </div>
       </div>
       <h2 className="adm-editor-title">{isNew ? (event.title || 'New event') : event.title || 'Event'}</h2>
+
+      <section className="adm-card adm-autofill">
+        <span className="adm-autofill-icon" aria-hidden="true"><FaWandMagicSparkles size={16} /></span>
+        <div className="adm-autofill-text">
+          <strong>Auto-fill from a photo</strong>
+          <span>{isNew ? 'Choose a photo of the poster or invitation: the title, date, venue, avenue and summary are filled in for you to check.' : 'Choose a photo of the poster or report to fill in anything still empty.'}</span>
+        </div>
+        <PhotoButton label="Choose a photo" busy={busy === 'read'} className="adm-btn is-small" onFile={onAutofill} />
+      </section>
 
       <section className="adm-card">
         <h3>The basics</h3>
@@ -201,6 +210,27 @@ export default function EventsTab({ events, editing, setEditing, filter, setFilt
           const added = await upload(files.slice(0, room), 'extra');
           if (added.length) setCurrent((e) => ({ gallery: [...(e.gallery ?? []), ...added] }));
           if (files.length > room) notify('An event can have up to 12 extra photos.', 'info');
+        }}
+        onAutofill={async (file) => {
+          setBusy('read');
+          try {
+            const { data } = await preparePhoto(file, { max: 1600 });
+            const { fields } = await api('POST', '/api/admin/autofill', { image: data });
+            const fresh = Boolean(current._new);
+            const patch = {};
+            for (const [k, v] of Object.entries(fields)) {
+              if (k === 'avenue' && !avenueOptions.includes(v)) continue;
+              // A new event takes everything that was read; a saved one only fills what is still empty.
+              if (fresh || !String(current[k] ?? '').trim()) patch[k] = v;
+            }
+            if (patch.title && fresh && (!current.slug || current.slug === slugify(current.title))) patch.slug = slugify(patch.title);
+            if (patch.avenue) patch.otherAvenues = (current.otherAvenues ?? []).filter((a) => a !== patch.avenue);
+            const names = { title: 'title', date: 'date', endDate: 'last day', time: 'time', venue: 'venue', avenue: 'avenue', partner: 'partners', summary: 'summary' };
+            const filled = Object.keys(patch).filter((k) => names[k]).map((k) => names[k]);
+            if (!filled.length) { notify('Nothing new could be read from that photo.', 'info'); return; }
+            setCurrent(patch);
+            notify(`Filled in from the photo: ${filled.join(', ')}. Please check them before saving.`, 'info');
+          } catch (err) { notify(err.message); } finally { setBusy(null); }
         }}
         onDuplicate={() => {
           // A copy for a similar or repeating event: same details, new date and write-up.
