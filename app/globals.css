@@ -2471,3 +2471,6 @@ body:has(.adm-gate) { background: #fff; background-image: none; }
   .adm-login-main { border-radius: 0; padding: 28px 22px 22px; }
 }
 @media (prefers-reduced-motion: reduce) { .adm-login-main, .adm-login-art { animation: none; } }
+
+.adm-login-brand { display: inline-flex; align-items: center; gap: 10px; }
+.adm-login-brand img { width: 34px; height: 34px; flex: none; }

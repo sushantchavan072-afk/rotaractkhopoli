@@ -378,7 +378,10 @@ export default function AdminApp() {
           </div>
           <div className="adm-login-main">
             <header className="adm-login-top">
-              <span className="adm-login-brand">Club admin</span>
+              <span className="adm-login-brand">
+                {/* eslint-disable-next-line @next/next/no-img-element -- the site's own small icon */}
+                <img src="/icon.png" alt="" width="34" height="34" />RAC Khopoli
+              </span>
               <Link className="adm-login-link" href="/"><FaRegCircleUser size={16} aria-hidden="true" /> Website</Link>
             </header>
             <div className="adm-login-body">
