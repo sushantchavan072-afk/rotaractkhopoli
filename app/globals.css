@@ -2688,3 +2688,30 @@ body:has(.admin):not(:has(.adm-gate)) {
 .adm-brow.is-amber .adm-budget-bar i { background: #d99a00; }
 .adm-brow.is-red .adm-budget-bar i { background: #d9534f; }
 @media (max-width: 600px) { .admin .adm-brow .adm-brow-amount input { width: 104px; max-width: 104px; } }
+
+/* Gallery, simplified: plain photo tiles, small buttons on the photo, the full caption below */
+.adm-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); gap: 26px 18px; margin: 0; padding: 0; list-style: none; }
+.adm-tile { display: grid; gap: 8px; align-content: start; min-width: 0; }
+.adm-tile-img { position: relative; }
+.adm-tile-img .adm-thumb { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; border-radius: 18px; object-fit: cover; }
+.adm-tile-btn { display: grid; place-items: center; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 50%; background: rgba(255, 255, 255, .94); color: var(--ink); box-shadow: 0 4px 12px -4px rgba(0, 0, 0, .35); cursor: pointer; transition: transform .2s ease, opacity .2s ease; }
+.adm-tile-btn:active { transform: scale(.9); }
+.adm-tile-btn:disabled { opacity: .35; cursor: default; }
+.adm-tile-remove { position: absolute; top: 8px; right: 8px; }
+.adm-tile-remove:hover { color: #b42318; }
+.adm-tile-move { position: absolute; right: 8px; bottom: 8px; display: flex; gap: 6px; }
+.admin .adm-tile-caption { display: block; width: 100%; min-height: 0; padding: 4px 6px; border: 1px solid transparent; border-radius: 10px; background: transparent; box-shadow: none; color: var(--ink); font: 500 14.5px/1.45 var(--font); resize: none; overflow: hidden; }
+.admin .adm-tile-caption:hover { border-color: var(--line); }
+.admin .adm-tile-caption:focus { border-color: var(--line-strong); background: var(--surface); box-shadow: none; }
+.admin .adm-tile-caption.is-missing { border-color: #f1b7b0; border-style: dashed; }
+.admin .adm-tile-caption.is-missing::placeholder { color: #b42318; }
+@media (max-width: 600px) {
+  .adm-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 12px; }
+  .adm-tile-img .adm-thumb { border-radius: 14px; }
+  .adm-tile-btn { width: 30px; height: 30px; }
+  .admin .adm-tile-caption { font-size: 14px; padding: 2px 4px; }
+}
+.adm-tiles > li { animation: adm-rise .5s var(--adm-spring) both; }
+.adm-tiles > li:nth-child(n+9) { animation: none; }
+@media (prefers-reduced-motion: reduce) { .adm-tiles > li { animation: none; } }
+.adm-tile-btn:disabled { display: none; }

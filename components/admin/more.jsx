@@ -1,10 +1,22 @@
 'use client';
 
 import { useState } from 'react';
-import { FaArrowDown, FaArrowLeft, FaArrowRight, FaArrowUp, FaFacebookF, FaInstagram, FaLinkedinIn, FaPlus, FaXmark, FaYoutube } from 'react-icons/fa6';
+import { FaArrowDown, FaArrowUp, FaChevronLeft, FaChevronRight, FaFacebookF, FaInstagram, FaLinkedinIn, FaPlus, FaXmark, FaYoutube } from 'react-icons/fa6';
 import { Empty, Field, PhotoButton, SectionHead, Thumb, plural, preparePhoto, slugify, tag } from './shared';
 
 /* ---------------- Gallery ---------------- */
+
+/** A caption that grows with its text, so the whole caption is always visible. */
+function Caption({ value, onChange }) {
+  const fit = (el) => { if (el) { el.style.height = 'auto'; el.style.height = `${el.scrollHeight}px`; } };
+  return (
+    <textarea
+      ref={fit} aria-label="Caption" placeholder="Add a caption" rows={1} maxLength={160} value={value}
+      className={`adm-tile-caption${value.trim() ? '' : ' is-missing'}`}
+      onChange={(e) => { fit(e.target); onChange(e.target.value); }}
+    />
+  );
+}
 
 export function GalleryTab({ gallery, photoUrl, update, addUpload, notify }) {
   const [busy, setBusy] = useState(false);
@@ -26,23 +38,24 @@ export function GalleryTab({ gallery, photoUrl, update, addUpload, notify }) {
   };
   return (
     <div className="adm-tab">
-      <SectionHead title="Gallery" desc={`${plural(gallery.length, 'photo')} on the Gallery page, in this order. Each needs a short caption.`}>
+      <SectionHead title="Gallery" desc={`${plural(gallery.length, 'photo')} on the Gallery page. Tap a caption to change it; use the arrows to change the order.`}>
         <PhotoButton label="Add photos" icon={<FaPlus size={12} aria-hidden="true" />} className="adm-btn" busy={busy} multiple onFile={onFiles} />
       </SectionHead>
       {!gallery.length && <Empty title="No photos yet.">Add club photos: projects, meetings, fellowship.</Empty>}
-      <ul className="adm-gallery">
+      <ul className="adm-tiles">
         {gallery.map((g, i) => (
-          <li key={g.src} className="adm-card adm-shot">
-            <div className="adm-shot-img">
+          <li key={g.src} className="adm-tile">
+            <div className="adm-tile-img">
               <Thumb src={photoUrl(g.src)} alt={g.caption} fallback="Photo" w={640} />
-              <span className="adm-shot-n">{i + 1}</span>
+              <button type="button" className="adm-tile-btn adm-tile-remove" aria-label="Remove from the gallery" onClick={() => { if (window.confirm('Remove this photo from the gallery?')) update((list) => list.filter((_, j) => j !== i)); }}><FaXmark size={12} /></button>
+              {gallery.length > 1 && (
+                <span className="adm-tile-move">
+                  <button type="button" className="adm-tile-btn" aria-label="Move earlier" disabled={i === 0} onClick={() => move(i, -1)}><FaChevronLeft size={11} /></button>
+                  <button type="button" className="adm-tile-btn" aria-label="Move later" disabled={i === gallery.length - 1} onClick={() => move(i, 1)}><FaChevronRight size={11} /></button>
+                </span>
+              )}
             </div>
-            <textarea aria-label="Caption" placeholder="Describe the photo" rows={2} maxLength={160} value={g.caption} className={g.caption.trim() ? '' : 'is-missing'} onChange={(e) => update((list) => list.map((x, j) => (j === i ? { ...x, caption: e.target.value } : x)))} />
-            <div className="adm-shot-tools">
-              <button type="button" className="adm-icon" aria-label="Move earlier" disabled={i === 0} onClick={() => move(i, -1)}><FaArrowLeft size={12} /></button>
-              <button type="button" className="adm-icon" aria-label="Move later" disabled={i === gallery.length - 1} onClick={() => move(i, 1)}><FaArrowRight size={12} /></button>
-              <button type="button" className="adm-icon is-danger" aria-label="Remove from the gallery" onClick={() => { if (window.confirm('Remove this photo from the gallery?')) update((list) => list.filter((_, j) => j !== i)); }}><FaXmark size={13} /></button>
-            </div>
+            <Caption value={g.caption} onChange={(v) => update((list) => list.map((x, j) => (j === i ? { ...x, caption: v } : x)))} />
           </li>
         ))}
       </ul>
