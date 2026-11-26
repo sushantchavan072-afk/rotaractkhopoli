@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useDeferredValue, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { FaAddressCard, FaArrowLeft, FaArrowUpRightFromSquare, FaCalendarDays, FaHouse, FaImages, FaIndianRupeeSign, FaQuoteLeft, FaRightFromBracket, FaUsers, FaXmark, FaCircleCheck, FaPenToSquare, FaArrowsRotate, FaTableColumns, FaPlus } from 'react-icons/fa6';
@@ -314,6 +314,9 @@ export default function AdminApp() {
     return () => window.clearTimeout(t);
   }, [bar.leaving]);
 
+  // The menus switch at once; the section itself is built in the background (it can be interrupted), so the
+  // menu's animation never stutters while a long section like Team or Events is put together.
+  const view = useDeferredValue(tab);
   const [collapsed, setCollapsed] = useState(false);
   const counts = draft ? {
     events: draft.events.length,
@@ -386,25 +389,25 @@ export default function AdminApp() {
           </div>
         </header>
         <div className="adm-main">
-          <div key={`${tab}-${tab === 'events' ? editing ?? 'list' : ''}`} className="adm-view">
+          <div key={`${view}-${view === 'events' ? editing ?? 'list' : ''}`} className="adm-view">
           {!status.canSave && <p className="adm-notice">Saving isn’t switched on yet: add <code>GITHUB_TOKEN</code> in Vercel (see REMAINING-TASKS.md).</p>}
-          {tab === 'overview' && (
+          {view === 'overview' && (
             <OverviewTab
               draft={draft} hasPhoto={hasPhoto} photoOf={photoOf} memberPhoto={memberPhoto} memberHasPhoto={(p) => Boolean(memberPhoto(p))} go={go} addEvent={addEvent}
               history={history} onRestore={restore} restoring={restoring} canSave={status.canSave} unsaved={unsaved}
             />
           )}
-          {tab === 'events' && (
+          {view === 'events' && (
             <EventsTab
               events={draft.events} editing={editing} setEditing={setEditing} filter={filter} setFilter={setFilter}
               hasPhoto={hasPhoto} photoOf={photoOf} photoUrl={photoUrl} avenueOptions={avenueOptions} update={update('events')} addUpload={addUpload} notify={notify}
             />
           )}
-          {tab === 'team' && <TeamTab team={draft.team} photoOf={memberPhoto} update={update('team')} addUpload={addUpload} notify={notify} />}
-          {tab === 'gallery' && <GalleryTab gallery={draft.gallery} photoUrl={photoUrl} update={update('gallery')} addUpload={addUpload} notify={notify} />}
-          {tab === 'reviews' && <ReviewsTab reviews={draft.reviews} update={update('reviews')} />}
-          {tab === 'site' && <DetailsTab site={draft.site} update={update('site')} />}
-          {tab === 'finance' && (draft.finance
+          {view === 'team' && <TeamTab team={draft.team} photoOf={memberPhoto} update={update('team')} addUpload={addUpload} notify={notify} />}
+          {view === 'gallery' && <GalleryTab gallery={draft.gallery} photoUrl={photoUrl} update={update('gallery')} addUpload={addUpload} notify={notify} />}
+          {view === 'reviews' && <ReviewsTab reviews={draft.reviews} update={update('reviews')} />}
+          {view === 'site' && <DetailsTab site={draft.site} update={update('site')} />}
+          {view === 'finance' && (draft.finance
             ? <FinanceTab finance={draft.finance} events={draft.events} update={update('finance')} ready={financeReady && status.canSave} />
             : <p className="adm-notice">The finance sheet couldn’t be opened. {message?.text}</p>)}
           </div>

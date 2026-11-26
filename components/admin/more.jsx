@@ -34,7 +34,7 @@ export function GalleryTab({ gallery, photoUrl, update, addUpload, notify }) {
         {gallery.map((g, i) => (
           <li key={g.src} className="adm-card adm-shot">
             <div className="adm-shot-img">
-              <Thumb src={photoUrl(g.src)} alt={g.caption} fallback="Photo" />
+              <Thumb src={photoUrl(g.src)} alt={g.caption} fallback="Photo" w={640} />
               <span className="adm-shot-n">{i + 1}</span>
             </div>
             <textarea aria-label="Caption" placeholder="Describe the photo" rows={2} maxLength={160} value={g.caption} className={g.caption.trim() ? '' : 'is-missing'} onChange={(e) => update((list) => list.map((x, j) => (j === i ? { ...x, caption: e.target.value } : x)))} />

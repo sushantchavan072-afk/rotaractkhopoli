@@ -2277,3 +2277,18 @@ body:has(.admin) { background: #fff; background-image: none; }
   .adm-app.is-collapsed .adm-side-foot { display: block; }
   .adm-side-signout:hover { color: #b42318; }
 }
+
+/* ---------- Admin: smoothness (only transform and opacity animate; no blur on white; fewer row animations) ---------- */
+.admin .adm-card, .admin .adm-stat, .admin .adm-row, .admin .adm-empty, .adm-side, .adm-panel { -webkit-backdrop-filter: none; backdrop-filter: none; }
+.adm-view { animation-duration: .4s; }
+.adm-view > .adm-tab > *, .adm-view > .adm-editor > *, .adm-ov-grid > * { animation-duration: .5s; }
+.adm-list > li:nth-child(n+9), .adm-people > li:nth-child(n+7), .adm-gallery > li:nth-child(n+9) { animation: none; }
+.adm-list > li, .adm-people > li { content-visibility: auto; contain-intrinsic-size: auto 84px; }
+.admin .adm-stat, .admin .adm-row, .adm-next button, .adm-podium-person, .adm-round, .admin .adm-btn, .adm-cal-day, .adm-officer-tile { transition: transform .3s var(--adm-spring), border-color .2s, background-color .2s, color .2s; }
+.admin .adm-stat:hover, .admin .adm-row:hover, .adm-next button:hover, .adm-officer-tile:hover { transform: translateY(-2px); }
+.adm-progress-fill { animation: adm-fill-in .8s var(--adm-spring) .2s both; }
+@keyframes adm-fill-in { from { opacity: 0; transform: translateX(-16px); } }
+.adm-chart g { transform-box: fill-box; transform-origin: 50% 100%; animation: adm-chart-rise .9s var(--adm-spring) .1s both; }
+@keyframes adm-chart-rise { from { opacity: 0; transform: scaleY(.4); } }
+.adm-dock, .adm-savebar { will-change: transform; }
+.adm-officer-tile .adm-thumb { will-change: transform; }

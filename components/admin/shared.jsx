@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { FaCamera } from 'react-icons/fa6';
 
 /* ---------------- Helpers ---------------- */
@@ -57,6 +57,16 @@ export async function api(method, url, body) {
   const data = await res.json().catch(() => ({}));
   if (!res.ok) { const err = new Error(data.error || 'Something went wrong. Please try again.'); err.status = res.status; err.conflict = data.conflict; throw err; }
   return data;
+}
+
+/**
+ * False on the first frame, true from the next: a long section draws its top part first and the rest a frame
+ * later, so switching sections never stalls an animation.
+ */
+export function useNextFrame() {
+  const [ready, setReady] = useState(false);
+  useEffect(() => { const r = requestAnimationFrame(() => requestAnimationFrame(() => setReady(true))); return () => cancelAnimationFrame(r); }, []);
+  return ready;
 }
 
 /* ---------------- Building blocks ---------------- */
@@ -119,11 +129,18 @@ export function PhotoTap({ src, fallback, onFile, busy, label }) {
   );
 }
 
-export function Thumb({ src, alt = '', fallback, round = false, className = '' }) {
+/**
+ * A published photo at a small size through the site's image optimiser (a 42px avatar doesn't need an 800px
+ * file); local previews (blob:) and anything else are used as they are. w must be one of Next's image sizes.
+ */
+export const optimized = (src, w = 256) => (src && /^\/images\//.test(src) ? `/_next/image?url=${encodeURIComponent(src)}&w=${w}&q=72` : src);
+
+export function Thumb({ src, alt = '', fallback, round = false, className = '', w }) {
   const [broken, setBroken] = useState(null);
   if (!src || broken === src) return <span className={`adm-thumb is-empty${round ? ' is-round' : ''} ${className}`} aria-hidden="true">{fallback}</span>;
+  const size = w ?? (round ? 128 : 256);
   // eslint-disable-next-line @next/next/no-img-element -- previews of photos that may not be published yet
-  return <img className={`adm-thumb${round ? ' is-round' : ''} ${className}`} src={src} alt={alt} loading="lazy" onError={() => setBroken(src)} />;
+  return <img className={`adm-thumb${round ? ' is-round' : ''} ${className}`} src={optimized(src, size)} alt={alt} loading="lazy" decoding="async" onError={() => setBroken(src)} />;
 }
 
 export function Empty({ title, children }) {

@@ -4,7 +4,7 @@ import { useId } from 'react';
 import { FaCircleCheck, FaClockRotateLeft, FaPlus, FaTriangleExclamation } from 'react-icons/fa6';
 import { eventGaps } from './events';
 import { LISTS } from './team';
-import { SectionHead, Thumb, initials, isCompleted, niceDate, plural, todayIso, whenSaved } from './shared';
+import { SectionHead, Thumb, initials, optimized, useNextFrame, isCompleted, niceDate, plural, todayIso, whenSaved } from './shared';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const MONTHS_LONG = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -69,11 +69,10 @@ function ProjectsChart({ events, yearStart, label }) {
           <linearGradient id={`${id}h`} x1="0" x2={W} y1="0" y2="0" gradientUnits="userSpaceOnUse">
             <stop offset="0" stopColor="#8bd17c" /><stop offset=".35" stopColor="#f28b82" /><stop offset=".7" stopColor="#f6c453" /><stop offset="1" stopColor="#8bd17c" />
           </linearGradient>
-          <clipPath id={`${id}c`}><path d={area} /></clipPath>
+          <pattern id={`${id}p`} width="4.6" height="10" patternUnits="userSpaceOnUse"><rect width="1.8" height="10" fill="#fff" /></pattern>
+          <mask id={`${id}m`}><rect width={W} height={H} fill={`url(#${id}p)`} /></mask>
         </defs>
-        <g clipPath={`url(#${id}c)`}>
-          {Array.from({ length: Math.floor(W / 4.6) }, (_, i) => <rect key={i} x={i * 4.6} y="0" width="1.8" height={H} fill={`url(#${id}h)`} />)}
-        </g>
+        <g mask={`url(#${id}m)`}><path d={area} fill={`url(#${id}h)`} /></g>
       </svg>
       <div className="adm-chart-months" aria-hidden="true">{months.map(({ m }, i) => <span key={i}>{MONTHS[m][0]}</span>)}</div>
     </section>
@@ -103,7 +102,7 @@ function CalendarCard({ events, photoOf, go }) {
           const cls = `adm-cal-day${iso(d) === today ? ' is-today' : ''}${evs.length ? ' has-event' : ''}${photo ? ' has-photo' : ''}`;
           return (
             <button key={d} type="button" className={cls} title={evs.map((e) => e.title).join(', ') || undefined} onClick={evs.length ? () => go('events', 'all') : undefined} tabIndex={evs.length ? 0 : -1}
-              style={photo ? { backgroundImage: `linear-gradient(rgba(0,0,0,.28), rgba(0,0,0,.28)), url("${photo}")` } : undefined}>
+              style={photo ? { backgroundImage: `linear-gradient(rgba(0,0,0,.28), rgba(0,0,0,.28)), url("${optimized(photo, 96)}")` } : undefined}>
               {d}
             </button>
           );
@@ -142,7 +141,7 @@ function BoardCard({ team, memberPhoto, go }) {
       <div className="adm-officers">
         {shown.map((p) => (
           <button key={p.name} type="button" className="adm-officer-tile" onClick={() => go('team')}>
-            <Thumb src={memberPhoto(p)} fallback={initials(p.name)} />
+            <Thumb src={memberPhoto(p)} fallback={initials(p.name)} w={384} />
             <span className="adm-officer-caption">
               <strong>{p.name.replace(/^Rtr\.?\s*/i, '').split(' ')[0]}</strong>
               <span>{roleName(p.roles[0])}</span>
@@ -176,6 +175,7 @@ export default function OverviewTab({ draft, hasPhoto, photoOf, memberPhoto, mem
   const complete = done.filter((e) => !eventGaps(e, hasPhoto, today).length).length;
   const pct = done.length ? Math.round((complete / done.length) * 100) : 100;
   const items = attentionItems({ draft, hasPhoto, memberHasPhoto });
+  const lower = useNextFrame(); // the calendar, team and to-do cards follow a frame after the top of the page
   const stats = [
     { label: 'Upcoming events', value: upcoming.length, chip: upcoming[0] ? shortDate(upcoming[0].date) : null, tone: 'green', sub: upcoming[0] ? `Next: ${upcoming[0].title}` : 'None planned yet', go: () => go('events', 'upcoming') },
     { label: `Projects in ${draft.team.rotaractYear}`, value: inYear.length, chip: thisMonth ? `+${thisMonth}` : null, tone: 'green', sub: thisMonth ? `${plural(thisMonth, 'project')} this month` : `${draft.events.length} on the website in all`, go: () => go('events', 'all') },
@@ -211,8 +211,9 @@ export default function OverviewTab({ draft, hasPhoto, photoOf, memberPhoto, mem
           </ul>
           <button type="button" className="adm-link adm-card-foot" onClick={() => go('events', 'needs')}>Finish them</button>
         </section>
-        <CalendarCard events={draft.events} photoOf={photoOf} go={go} />
-        <BoardCard team={draft.team} memberPhoto={memberPhoto} go={go} />
+        {lower && <CalendarCard events={draft.events} photoOf={photoOf} go={go} />}
+        {lower && <BoardCard team={draft.team} memberPhoto={memberPhoto} go={go} />}
+        {lower && (
         <section className="adm-card adm-attention">
           <div className="adm-card-top"><h3>Needs attention</h3><span className="adm-hint">{items.length || ''}</span></div>
           {items.length ? (
@@ -238,6 +239,7 @@ export default function OverviewTab({ draft, hasPhoto, photoOf, memberPhoto, mem
             </div>
           </div>
         </section>
+        )}
       </div>
 
       <div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { FaArrowUpRightFromSquare, FaChevronLeft, FaCopy, FaPlus, FaTrashCan, FaXmark } from 'react-icons/fa6';
 import { PillSelect, Segmented } from '../ui';
 import {
@@ -109,7 +109,7 @@ function EventEditor({ event, avenueOptions, photoSrc, photoUrl, onChange, onPho
       <section className="adm-card">
         <h3>Photos</h3>
         <div className="adm-photo-row">
-          <Thumb src={photoSrc} alt="" fallback="No photo yet" className="is-cover" />
+          <Thumb src={photoSrc} alt="" fallback="No photo yet" className="is-cover" w={640} />
           <div className="adm-photo-actions">
             <span className="adm-label">Main photo</span>
             <small className="adm-hint">Shown on the event card and at the top of its page. A wide photo works best.</small>
@@ -161,8 +161,11 @@ export default function EventsTab({ events, editing, setEditing, filter, setFilt
     .filter(({ e }) => (filter === 'upcoming' ? !isCompleted(e, today) : filter === 'completed' ? isCompleted(e, today) : filter === 'needs' ? eventGaps(e, hasPhoto, today).length > 0 : true))
     .filter(({ e }) => !query || `${e.title} ${e.venue} ${e.avenue} ${e.partner ?? ''}`.toLowerCase().includes(query.toLowerCase()))
     .sort((a, b) => (filter === 'upcoming' ? (a.e.date || '').localeCompare(b.e.date || '') : (b.e.date || '').localeCompare(a.e.date || ''))), [events, filter, query, hasPhoto, today]);
+  // The first rows appear at once and the rest a frame later, so opening Events never stalls an animation.
+  const [allRows, setAllRows] = useState(false);
+  useEffect(() => { const r = requestAnimationFrame(() => setAllRows(true)); return () => cancelAnimationFrame(r); }, []);
   const groups = [];
-  for (const row of shown) {
+  for (const row of allRows ? shown : shown.slice(0, 12)) {
     const label = row.e.date ? monthLabel(row.e.date) : 'No date';
     if (groups.at(-1)?.label !== label) groups.push({ label, rows: [] });
     groups.at(-1).rows.push(row);

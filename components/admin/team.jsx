@@ -2,7 +2,7 @@
 
 import { useId, useMemo, useState } from 'react';
 import { FaArrowDown, FaArrowUp, FaPlus, FaWandMagicSparkles, FaXmark } from 'react-icons/fa6';
-import { PhotoTap, SectionHead, initials, plural, preparePhoto, slugify, tag } from './shared';
+import { PhotoTap, SectionHead, initials, plural, preparePhoto, slugify, tag, useNextFrame } from './shared';
 
 export const LISTS = [
   ['coreMembers', 'Office bearers', 'The core team, shown first on the Team and home pages.'],
@@ -13,9 +13,8 @@ export const LISTS = [
 /** The next Rotaract year after "2026–27": "2027–28". */
 export const nextYear = (y) => { const m = /^(\d{4})\D+(\d{2,4})$/.exec(y || ''); return m ? `${Number(m[1]) + 1}–${String(Number(m[2].slice(-2)) + 1).padStart(2, '0')}` : ''; };
 
-function RolesInput({ roles, onChange, suggestions }) {
+function RolesInput({ roles, onChange, listId }) {
   const [text, setText] = useState('');
-  const listId = useId();
   const add = () => { const r = text.trim(); if (r && !roles.includes(r)) onChange([...roles, r]); setText(''); };
   return (
     <div className="adm-roles">
@@ -27,12 +26,11 @@ function RolesInput({ roles, onChange, suggestions }) {
         onChange={(e) => setText(e.target.value)} onBlur={add}
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); add(); } }}
       />
-      <datalist id={listId}>{suggestions.map((s) => <option key={s} value={s} />)}</datalist>
     </div>
   );
 }
 
-function PeopleList({ title, desc, people, withBio, photoOf, onChange, onPhoto, busy, roleSuggestions }) {
+function PeopleList({ title, desc, people, withBio, photoOf, onChange, onPhoto, busy, roleList }) {
   const set = (i, patch) => onChange(people.map((p, j) => (j === i ? { ...p, ...patch } : p)));
   const move = (i, d) => { const next = [...people]; [next[i], next[i + d]] = [next[i + d], next[i]]; onChange(next); };
   return (
@@ -49,7 +47,7 @@ function PeopleList({ title, desc, people, withBio, photoOf, onChange, onPhoto, 
             <PhotoTap src={photoOf(p)} fallback={initials(p.name)} busy={busy === p.name} label={`${photoOf(p) ? 'Change' : 'Add'} ${p.name || 'this person'}'s photo`} onFile={(f) => onPhoto(p.name, f)} />
             <div className="adm-person-fields">
               <input className="adm-person-name" aria-label="Name" placeholder="Rtr. Full Name" maxLength={80} value={p.name} onChange={(e) => set(i, { name: e.target.value })} />
-              <RolesInput roles={p.roles} suggestions={roleSuggestions} onChange={(roles) => set(i, { roles })} />
+              <RolesInput roles={p.roles} listId={roleList} onChange={(roles) => set(i, { roles })} />
               {withBio && <textarea aria-label="Short bio" placeholder="One or two sentences about what they look after (optional)" rows={2} maxLength={300} value={p.bio ?? ''} onChange={(e) => set(i, { bio: e.target.value || undefined })} />}
             </div>
             <div className="adm-person-tools">
@@ -71,6 +69,8 @@ export default function TeamTab({ team, photoOf, update, addUpload, notify }) {
   const officer = (role) => team.officers.find((o) => o.role === role) ?? { role, name: '', email: '', phone: '' };
   const setOfficer = (role, patch) => set({ officers: ['President', 'Secretary'].map((r) => (r === role ? { ...officer(r), ...patch } : officer(r))) });
   const roleSuggestions = useMemo(() => [...new Set(LISTS.flatMap(([k]) => team[k].flatMap((p) => p.roles)))].sort(), [team]);
+  const roleList = useId(); // one list of role suggestions shared by every person's role field
+  const rest = useNextFrame(); // the board and chairpersons follow a frame after the office bearers
   const people = new Set(LISTS.flatMap(([k]) => team[k].map((p) => p.name).filter(Boolean))).size;
 
   // A new photo is used for that person everywhere they appear on the Team page.
@@ -130,8 +130,9 @@ export default function TeamTab({ team, photoOf, update, addUpload, notify }) {
           </div>
         ))}
       </section>
-      {LISTS.map(([k, title, desc]) => (
-        <PeopleList key={k} title={title} desc={desc} people={team[k]} withBio={k === 'coreMembers'} photoOf={photoOf} busy={busy} roleSuggestions={roleSuggestions} onPhoto={onPhoto} onChange={(v) => set({ [k]: v })} />
+      <datalist id={roleList}>{roleSuggestions.map((r) => <option key={r} value={r} />)}</datalist>
+      {LISTS.filter(([k]) => rest || k === 'coreMembers').map(([k, title, desc]) => (
+        <PeopleList key={k} title={title} desc={desc} people={team[k]} withBio={k === 'coreMembers'} photoOf={photoOf} busy={busy} roleList={roleList} onPhoto={onPhoto} onChange={(v) => set({ [k]: v })} />
       ))}
     </div>
   );
