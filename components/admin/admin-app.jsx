@@ -3,6 +3,7 @@
 import { useCallback, useDeferredValue, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
+import Image from 'next/image';
 import { FaAddressCard, FaArrowLeft, FaArrowUpRightFromSquare, FaCalendarDays, FaHouse, FaImages, FaIndianRupeeSign, FaQuoteLeft, FaRightFromBracket, FaUsers, FaXmark, FaRegEye, FaRegEyeSlash, FaArrowRightToBracket, FaArrowRight, FaCircleCheck, FaPenToSquare, FaArrowsRotate, FaTableColumns, FaPlus } from 'react-icons/fa6';
 import EventsTab, { blankEvent } from './events';
 import TeamTab, { LISTS } from './team';
@@ -367,14 +368,9 @@ export default function AdminApp() {
             <p className="adm-login-tag">Rotaract Club of Khopoli · events, team and finance in one place.</p>
             <div className="adm-login-hero">
               <span className="adm-login-rings"><i /><i /></span>
-              <h2>Run your<br />club</h2>
+              <h2>Manage<br />your club</h2>
             </div>
-            <div className="adm-login-preview">
-              <span className="adm-login-preview-label">Projects this year</span>
-              <strong>29</strong>
-              <span className="adm-login-bars">{[78, 52, 64, 40, 70, 88, 58].map((h, i) => <i key={i} style={{ '--h': `${h}%` }} />)}</span>
-              <span className="adm-login-days"><b>Jul</b><b>Aug</b><b>Sep</b><b>Oct</b><b>Nov</b><b>Dec</b><b>Jan</b></span>
-            </div>
+            <Image className="adm-login-phone" src="/images/admin-sign-in-phone.webp" alt="" width={1000} height={962} priority sizes="470px" />
           </div>
           <div className="adm-login-main">
             <header className="adm-login-top">
