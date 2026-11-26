@@ -365,9 +365,10 @@ export default function AdminApp() {
         <div className="adm-gate-blobs" aria-hidden="true"><i /><i /><i /></div>
         <div className="adm-login">
           <div className="adm-login-art" aria-hidden="true">
-            <p className="adm-login-tag">Rotaract Club of Khopoli · events, team and finance in one place.</p>
+            <p className="adm-login-tag">Rotaract Club of Khopoli</p>
             <div className="adm-login-hero">
-              <h2>Manage<br />your club</h2>
+              <h2>Manage<br /><span>your club</span></h2>
+              <p>Events, the team, photos and finance, in one place for the board.</p>
             </div>
             <Image className="adm-login-phone" src="/images/admin-sign-in-overview.webp" alt="" width={1000} height={962} priority sizes="470px" />
           </div>

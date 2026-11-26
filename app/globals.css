@@ -2491,3 +2491,25 @@ body:has(.adm-gate) { background: #fff; background-image: none; }
 .adm-login-rings i + i { width: min(250px, 29vh); height: min(250px, 29vh); }
 .adm-login-phone { left: 0; width: min(80%, 600px, 60vh); transform: none; }
 @keyframes adm-phone-in { from { opacity: 0; transform: translateY(70px); } }
+
+/* Sign-in art: left-aligned headline in Segoe UI */
+.adm-login-art { align-items: flex-start; padding: 56px 60px 0; }
+.adm-login-tag { color: rgba(255, 255, 255, .6); font: 600 12px var(--font); letter-spacing: .16em; text-align: left; text-transform: uppercase; }
+.adm-login-hero { display: block; margin-top: clamp(28px, 7vh, 88px); }
+.adm-login-hero h2 { margin: 0; color: #fff; font: 700 clamp(2.8rem, min(5.2vw, 8.4vh), 4.8rem)/1.02 var(--font); letter-spacing: -.035em; text-align: left; }
+.adm-login-hero h2 span { background: linear-gradient(95deg, #ff6a3d 0%, #f0533a 45%, #e0457b 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.adm-login-hero p { max-width: 340px; margin: 18px 0 0; color: rgba(255, 255, 255, .66); font: 400 16px/1.55 var(--font); }
+.adm-login-phone { width: min(74%, 560px, 52vh); }
+@media (max-height: 780px) { .adm-login-hero p { display: none; } .adm-login-phone { width: min(74%, 560px, 50vh); } }
+.adm-login-hero h2 { margin-left: -.055em; }
+
+/* Sign-in headline back in the original heading font (Urbanist), left-aligned */
+.adm-login-hero { width: 100%; }
+.adm-login-hero h2 { width: auto; margin-left: 0; font: 500 clamp(3rem, min(5.6vw, 9vh), 5rem)/.98 var(--font-head); letter-spacing: -.045em; }
+
+/* Admin background: the soft green with Rotaract cranberry pink instead of peach */
+body:has(.admin):not(:has(.adm-gate)) {
+  background-image: radial-gradient(1100px 700px at -10% -10%, #d6edc9 0%, transparent 60%), radial-gradient(1000px 800px at 110% 20%, rgba(212, 19, 103, .22) 0%, transparent 60%), radial-gradient(900px 700px at 50% 110%, rgba(212, 19, 103, .12) 0%, transparent 60%);
+}
+.adm-login-art .adm-login-hero { display: block; place-items: start; justify-items: start; align-self: stretch; text-align: left; }
+.adm-login-art .adm-login-hero h2, .adm-login-art .adm-login-hero p { margin-left: 0; margin-right: 0; text-align: left; }
