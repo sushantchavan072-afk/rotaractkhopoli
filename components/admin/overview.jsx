@@ -57,8 +57,8 @@ export function attentionItems({ draft, hasPhoto, memberHasPhoto }) {
       const spent = byHead[h.code]?.spent ?? 0;
       const amount = Number(h.amount) || 0;
       const st = budgetState(amount, spent, progress);
-      if (st.tone === 'red' && spent) items.push({ key: `budget-${h.code}`, text: amount ? `${h.code} (${h.name}) is over its budget by ${rupees(spent - amount)}.` : `${h.code} (${h.name}) has spent ${rupees(spent)} with no budget set.`, go: 'finance', filter: 'budgets', action: 'Budgets' });
-      else if (st.tone === 'amber') items.push({ key: `budget-${h.code}`, text: st.note === 'Spending fast' ? `${h.code} (${h.name}) is spending faster than the year: ${rupees(spent)} of ${rupees(amount)} used.` : `${h.code} (${h.name}) has used ${Math.round((spent / amount) * 100)}% of its budget (${rupees(amount - spent)} left).`, go: 'finance', filter: 'budgets', action: 'Budgets' });
+      if (st.tone === 'red' && spent) items.push({ key: `budget-${h.code}`, text: amount ? `${h.name} is over its budget by ${rupees(spent - amount)}.` : `${h.name} has spent ${rupees(spent)} with no budget set.`, go: 'finance', filter: 'budgets', action: 'Budgets' });
+      else if (st.tone === 'amber') items.push({ key: `budget-${h.code}`, text: st.note === 'Spending fast' ? `${h.name} is spending faster than the year: ${rupees(spent)} of ${rupees(amount)} used.` : `${h.name} has used ${Math.round((spent / amount) * 100)}% of its budget (${rupees(amount - spent)} left).`, go: 'finance', filter: 'budgets', action: 'Budgets' });
     }
     if (unassigned.length) items.push({ key: 'unassigned', text: `${plural(unassigned.length, 'expense')} this year ${unassigned.length === 1 ? 'isn’t' : 'aren’t'} taken from any avenue budget.`, go: 'finance', filter: 'budgets', action: 'Pick avenues' });
     if (thisYear.some((e) => e.type === 'expense') && !heads.some((h) => Number(h.amount) > 0)) items.push({ key: 'nobudget', text: `No avenue budgets set for ${year} yet.`, go: 'finance', filter: 'budgets', action: 'Set budgets' });

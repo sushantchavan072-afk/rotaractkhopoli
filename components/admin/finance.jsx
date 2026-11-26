@@ -21,7 +21,7 @@ export const rotaractYearOf = (iso) => { const [y, m] = iso.split('-').map(Numbe
 export const blankEntry = (type) => ({ id: `${todayIso().replaceAll('-', '')}-${tag()}`, date: todayIso(), type, amount: '', category: type === 'income' ? INCOME_CATEGORIES[0] : EXPENSE_CATEGORIES[0], description: '', mode: 'UPI' });
 
 const NO_AVENUE = 'Not from an avenue budget';
-const headLabel = (h) => `${h.code} · ${h.name}`;
+const headLabel = (h) => h.name;
 
 function EntryEditor({ entry, events, heads, onChange, onDelete, onClose }) {
   const set = (patch) => onChange({ ...entry, ...patch });
@@ -68,7 +68,7 @@ function EntryEditor({ entry, events, heads, onChange, onDelete, onClose }) {
             <PillSelect options={[NO_EVENT, ...eventTitles]} value={entry.event || NO_EVENT} ariaLabel="Event" onChange={(v) => pickEvent(v === NO_EVENT ? '' : v)} />
           </Field>
           {!income && (
-            <Field label="Taken from the budget of" hint={autoAvenue ? 'Set from the event’s avenue.' : 'Each avenue has its own budget (Finance → Budgets).'} wide>
+            <Field label="Taken from the budget of" hint={autoAvenue ? 'Set from the event’s avenue.' : 'Each avenue has its own budget (Finance → Avenue budgets).'} wide>
               <PillSelect options={[NO_AVENUE, ...heads.map(headLabel)]} value={heads.find((h) => h.code === entry.avenue) ? headLabel(heads.find((h) => h.code === entry.avenue)) : NO_AVENUE} ariaLabel="Avenue budget" onChange={(v) => set({ avenue: heads.find((h) => headLabel(h) === v)?.code ?? '' })} />
             </Field>
           )}
