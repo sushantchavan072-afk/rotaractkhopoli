@@ -2292,3 +2292,81 @@ body:has(.admin) { background: #fff; background-image: none; }
 @keyframes adm-chart-rise { from { opacity: 0; transform: scaleY(.4); } }
 .adm-dock, .adm-savebar { will-change: transform; }
 .adm-officer-tile .adm-thumb { will-change: transform; }
+
+/* ---------- Admin: the original soft gradient again ---------- */
+body:has(.admin) {
+  background-color: #eceee8;
+  background-image: radial-gradient(1100px 700px at -10% -10%, #d6edc9 0%, transparent 60%), radial-gradient(1000px 800px at 110% 20%, #f3dcc6 0%, transparent 60%), radial-gradient(900px 700px at 50% 110%, #efe6dc 0%, transparent 60%);
+  background-attachment: fixed;
+}
+@media (min-width: 961px) {
+  .adm-side { border-color: rgba(255, 255, 255, .85); background: rgba(255, 255, 255, .45); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), 0 30px 60px -36px rgba(40, 40, 20, .35); }
+  .adm-panel { border-color: rgba(255, 255, 255, .9); background: rgba(255, 255, 255, .92); box-shadow: 0 30px 70px -44px rgba(40, 40, 20, .4); }
+}
+
+/* ---------- Side menu: the current section in colour (a new one each time), no white box ---------- */
+@media (min-width: 961px) {
+  .adm-side-item[aria-current='page'], .adm-side-item[aria-current='page']:hover { background: transparent; box-shadow: none; color: var(--adm-active, var(--ink)); font-weight: 600; }
+  .adm-side-item { transition: color .45s var(--adm-spring), background-color .25s ease, transform .2s ease; }
+  .adm-side-item[aria-current='page'] svg { animation: adm-pop .5s var(--adm-bounce); }
+  .adm-side-item[aria-current='page'] .adm-side-count { color: var(--adm-active, var(--muted)); }
+  @keyframes adm-pop { 40% { transform: scale(1.25); } }
+}
+
+/* ---------- Side menu: smooth collapse and expand (icons never move; words fade, then the menu narrows) ---------- */
+@media (min-width: 961px) {
+  .adm-app, .adm-app.is-collapsed { transition: grid-template-columns .55s var(--adm-spring); }
+  .adm-app.is-collapsed { grid-template-columns: 80px minmax(0, 1fr); }
+  .adm-side, .adm-app.is-collapsed .adm-side { padding: 26px 16px 16px; }
+  .adm-side-head, .adm-app.is-collapsed .adm-side-head { justify-content: flex-start; gap: 0; padding: 0 0 12px 6px; }
+  .adm-side-head strong { flex: 1 1 auto; min-width: 0; max-width: 200px; overflow: hidden; }
+  .adm-side-item, .adm-app.is-collapsed .adm-side-item { justify-content: flex-start; padding: 0 14px 0 16px; }
+  .adm-app.is-collapsed .adm-side-text, .adm-side-text { display: revert; }
+  .adm-side-text { opacity: 1; transition: opacity .3s ease .18s, max-width .5s var(--adm-spring); }
+  .adm-side-head strong.adm-side-text { transition: opacity .3s ease .18s, max-width .5s var(--adm-spring), flex-basis .5s var(--adm-spring); }
+  .adm-app.is-collapsed .adm-side-text { opacity: 0; pointer-events: none; transition: opacity .15s ease, max-width .5s var(--adm-spring); }
+  .adm-app.is-collapsed .adm-side-head strong { max-width: 0; flex: 0 0 0; }
+  .adm-app.is-collapsed .adm-side-nav + .adm-side-nav { margin-top: 0; padding-top: 0; border-top: 0; }
+  .adm-app.is-collapsed .adm-side-foot { flex-direction: row; padding: 12px 0 0; }
+  .adm-side-label { overflow: hidden; }
+  .adm-side-toggle svg { transition: transform .55s var(--adm-spring); }
+  .adm-app.is-collapsed .adm-side-toggle svg { transform: rotate(180deg); }
+}
+
+/* ---------- Sign-in and loading: a centred frosted card over slowly drifting colours ---------- */
+.admin.adm-gate { position: relative; min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; padding: 32px 16px; overflow: hidden; }
+.adm-gate-blobs { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+.adm-gate-blobs i { position: absolute; width: 46vmax; height: 46vmax; border-radius: 50%; filter: blur(70px); opacity: .7; will-change: transform; }
+.adm-gate-blobs i:nth-child(1) { top: -14vmax; left: -10vmax; background: #b9e4a8; animation: adm-drift-a 22s ease-in-out infinite alternate; }
+.adm-gate-blobs i:nth-child(2) { top: 10vmax; right: -16vmax; background: #f6c9a6; animation: adm-drift-b 26s ease-in-out infinite alternate; }
+.adm-gate-blobs i:nth-child(3) { bottom: -20vmax; left: 20vmax; background: #f3b8c8; opacity: .45; animation: adm-drift-c 30s ease-in-out infinite alternate; }
+@keyframes adm-drift-a { to { transform: translate(14vmax, 10vmax) scale(1.1); } }
+@keyframes adm-drift-b { to { transform: translate(-12vmax, 8vmax) scale(.92); } }
+@keyframes adm-drift-c { to { transform: translate(10vmax, -12vmax) scale(1.08); } }
+.adm-gate-card {
+  position: relative; z-index: 1; width: min(420px, 100%); display: grid; justify-items: center; gap: 10px; padding: 38px 34px 28px; text-align: center;
+  border: 1px solid rgba(255, 255, 255, .85); border-radius: 34px; background: rgba(255, 255, 255, .55);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .95), 0 40px 80px -40px rgba(40, 40, 20, .45);
+  -webkit-backdrop-filter: blur(26px) saturate(1.3); backdrop-filter: blur(26px) saturate(1.3);
+  animation: adm-gate-in .8s var(--adm-bounce) both;
+}
+@keyframes adm-gate-in { from { opacity: 0; transform: translateY(24px) scale(.96); } }
+.adm-gate-logo { width: 170px; height: auto; margin-bottom: 6px; }
+.adm-gate-card h1 { margin: 0; font-size: clamp(2rem, 6vw, 2.5rem); font-weight: 500; letter-spacing: -.03em; }
+.adm-gate-card > .adm-hint { max-width: 300px; margin-bottom: 10px; }
+.adm-gate-card .adm-back-site { margin: 14px 0 0; }
+.adm-gate .adm-signin { width: 100%; display: grid; gap: 12px; text-align: left; animation: adm-rise .5s var(--adm-spring) .15s both; }
+.adm-gate .adm-signin h2 { margin: 0; text-align: center; font-size: 1.2rem; }
+.adm-gate .adm-signin input { height: 52px; border-radius: 999px; padding: 0 22px; background: rgba(255, 255, 255, .85); }
+.adm-signin-btn { width: 100%; min-height: 52px; border-radius: 999px; font-size: 15.5px; }
+.adm-spinner { width: 16px; height: 16px; border: 2px solid rgba(255, 255, 255, .35); border-top-color: #fff; border-radius: 50%; animation: adm-spin .8s linear infinite; }
+.adm-loader { width: 100%; display: grid; justify-items: center; gap: 14px; padding: 8px 0 4px; }
+.adm-loader-bar { position: relative; width: 100%; height: 10px; overflow: hidden; border-radius: 999px; background: rgba(255, 255, 255, .7); box-shadow: inset 0 1px 2px rgba(0, 0, 0, .06); }
+.adm-loader-bar i { position: absolute; top: 0; bottom: 0; left: 0; width: 45%; border-radius: 999px; background: linear-gradient(90deg, #8edb6c, #f6d06b, #f7a38e, #8edb6c); background-size: 200% 100%; animation: adm-load 1.5s var(--adm-spring) infinite, adm-load-hue 2.4s linear infinite; will-change: transform; }
+@keyframes adm-load { 0% { transform: translateX(-110%); } 100% { transform: translateX(240%); } }
+@keyframes adm-load-hue { to { background-position: 200% 0; } }
+.adm-loader-text { color: var(--text-2); font-size: 14px; animation: adm-breathe 1.8s ease-in-out infinite; }
+@keyframes adm-breathe { 50% { opacity: .55; } }
+@media (prefers-reduced-motion: reduce) {
+  .adm-gate-blobs i, .adm-gate-card, .adm-loader-bar i, .adm-loader-text, .adm-side-item[aria-current='page'] svg, .adm-spinner { animation: none; }
+}

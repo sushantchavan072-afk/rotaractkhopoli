@@ -133,7 +133,7 @@ export function PhotoTap({ src, fallback, onFile, busy, label }) {
  * A published photo at a small size through the site's image optimiser (a 42px avatar doesn't need an 800px
  * file); local previews (blob:) and anything else are used as they are. w must be one of Next's image sizes.
  */
-export const optimized = (src, w = 256) => (src && /^\/images\//.test(src) ? `/_next/image?url=${encodeURIComponent(src)}&w=${w}&q=72` : src);
+export const optimized = (src, w = 256) => (src && /^\/images\//.test(src) ? `/_next/image?url=${encodeURIComponent(src)}&w=${w}&q=75` : src);
 
 export function Thumb({ src, alt = '', fallback, round = false, className = '', w }) {
   const [broken, setBroken] = useState(null);

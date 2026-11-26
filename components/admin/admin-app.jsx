@@ -3,6 +3,7 @@
 import { useCallback, useDeferredValue, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
+import Image from 'next/image';
 import { FaAddressCard, FaArrowLeft, FaArrowUpRightFromSquare, FaCalendarDays, FaHouse, FaImages, FaIndianRupeeSign, FaQuoteLeft, FaRightFromBracket, FaUsers, FaXmark, FaCircleCheck, FaPenToSquare, FaArrowsRotate, FaTableColumns, FaPlus } from 'react-icons/fa6';
 import EventsTab, { blankEvent } from './events';
 import TeamTab, { LISTS } from './team';
@@ -29,6 +30,8 @@ const SECTIONS = [
   ['finance', 'Finance', 'Finance', FaIndianRupeeSign],
   ['site', 'Club details', 'Details', FaAddressCard],
 ];
+// The current section's name and icon take one of the club colours, a different one each time.
+const ACTIVE_HUES = ['#d41367', '#17458f', '#c2410c', '#15803d', '#7a3db8', '#0067c8', '#b45309', '#0e7490'];
 const UPLOAD_BUDGET = 3.4 * 1024 * 1024; // base64 photo data per save (Vercel's request limit is 4.5 MB)
 
 /* Events are edited with the report as plain text (a blank line between paragraphs) and saved as paragraphs. */
@@ -59,20 +62,28 @@ function SignIn({ onDone, notConfigured }) {
   };
   if (notConfigured) {
     return (
-      <div className="adm-card adm-signin">
+      <div className="adm-signin">
         <h2>Admin page not switched on yet</h2>
         <p className="adm-hint">Add <code>ADMIN_PASSWORD</code> (and <code>GITHUB_TOKEN</code> for saving) in Vercel’s environment variables, then redeploy. The steps are in REMAINING-TASKS.md.</p>
       </div>
     );
   }
   return (
-    <form className="adm-card adm-signin" onSubmit={submit}>
-      <h2>Sign in</h2>
-      <p className="adm-hint">For the club’s board. Use the admin password.</p>
+    <form className="adm-signin" onSubmit={submit}>
       <Field label="Password">{(id) => <input id={id} type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />}</Field>
       {error && <p className="adm-error" role="alert">{error}</p>}
-      <button type="submit" className="adm-btn" disabled={busy || !password}>{busy ? 'Signing in…' : 'Sign in'}</button>
+      <button type="submit" className="adm-btn adm-signin-btn" disabled={busy || !password}>{busy ? <><span className="adm-spinner" aria-hidden="true" /> Signing in…</> : 'Sign in'}</button>
     </form>
+  );
+}
+
+/** A fluid shimmer bar while something loads. */
+function Loader({ text }) {
+  return (
+    <div className="adm-loader" role="status">
+      <span className="adm-loader-bar" aria-hidden="true"><i /></span>
+      <span className="adm-loader-text">{text}</span>
+    </div>
   );
 }
 
@@ -280,6 +291,7 @@ export default function AdminApp() {
     setStatus((s) => ({ ...s, signedIn: false }));
   };
   const go = (section, nextFilter) => {
+    if (section !== tab) setHue((h) => (h + 1) % ACTIVE_HUES.length);
     setTab(section);
     if (section === 'events') { setEditing(null); if (nextFilter) setFilter(nextFilter); }
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -318,6 +330,7 @@ export default function AdminApp() {
   // menu's animation never stutters while a long section like Team or Events is put together.
   const view = useDeferredValue(tab);
   const [collapsed, setCollapsed] = useState(false);
+  const [hue, setHue] = useState(0);
   const counts = draft ? {
     events: draft.events.length,
     team: new Set(LISTS.flatMap(([k]) => draft.team[k].map((p) => p.name).filter(Boolean))).size,
@@ -330,17 +343,17 @@ export default function AdminApp() {
 
   if (!ready) {
     return (
-      <section className="admin">
-        <div className="container adm-wrap is-narrow">
-          <header className="adm-head">
-            <Link className="adm-back-site" href="/"><FaArrowLeft size={12} aria-hidden="true" /> Back to the website</Link>
-            <h1>Club admin</h1>
-            <p className="adm-hint">Add and edit events, photos, the team and the club’s details. Changes appear on the website about two minutes after you save.</p>
-          </header>
-          {!status && <p className="adm-hint">Loading…</p>}
+      <section className="admin adm-gate">
+        <div className="adm-gate-blobs" aria-hidden="true"><i /><i /><i /></div>
+        <div className="adm-gate-card">
+          <Image className="adm-gate-logo" src="/images/logos/rotaract-khopoli.png" alt="Rotaract Club of Khopoli" width={867} height={296} priority sizes="180px" />
+          <h1>Club admin</h1>
+          <p className="adm-hint">Events, photos, the team, finance and the club’s details, all in one place.</p>
+          {!status && <Loader text="Opening the admin page…" />}
           {status && !status.signedIn && <SignIn notConfigured={!status.configured} onDone={() => { setMessage(null); load(); }} />}
-          {status?.signedIn && !draft && !message && <p className="adm-hint">Loading the website’s content…</p>}
+          {status?.signedIn && !draft && !message && <Loader text="Loading the website’s content…" />}
           {message && <p className="adm-error" role="alert">{message.text}</p>}
+          <Link className="adm-back-site" href="/"><FaArrowLeft size={12} aria-hidden="true" /> Back to the website</Link>
         </div>
       </section>
     );
@@ -351,7 +364,7 @@ export default function AdminApp() {
       <div className="container adm-wrap">
         <div className={`adm-app${collapsed ? ' is-collapsed' : ''}`}>
         {/* Computers: a translucent side menu on the left. Phones use the dark dock at the bottom instead. */}
-        <aside className="adm-side" aria-label="Admin">
+        <aside className="adm-side" aria-label="Admin" style={{ '--adm-active': ACTIVE_HUES[hue] }}>
           <div className="adm-side-head">
             <strong className="adm-side-text">Club admin</strong>
             <button type="button" className="adm-side-toggle" aria-label={collapsed ? 'Expand the menu' : 'Collapse the menu'} title={collapsed ? 'Expand the menu' : 'Collapse the menu'} onClick={() => setCollapsed((c) => !c)}><FaTableColumns size={15} /></button>
