@@ -2370,3 +2370,17 @@ body:has(.admin) {
 @media (prefers-reduced-motion: reduce) {
   .adm-gate-blobs i, .adm-gate-card, .adm-loader-bar i, .adm-loader-text, .adm-side-item[aria-current='page'] svg, .adm-spinner { animation: none; }
 }
+/* Sign out: same size and line as the items above, with room from the menu's rounded corner */
+@media (min-width: 961px) {
+  .adm-side, .adm-app.is-collapsed .adm-side { padding-bottom: 22px; }
+  .adm-side-foot, .adm-app.is-collapsed .adm-side-foot { display: block; margin-top: auto; padding: 14px 0 0; border-top: 1px solid rgba(0, 0, 0, .07); }
+  .adm-side-signout { color: var(--text-2); }
+  .adm-side-signout:hover { background: rgba(180, 35, 24, .07); color: #b42318; }
+}
+
+/* Sign-in: minimal (title, password, button) */
+.adm-gate-card { width: min(360px, 100%); gap: 22px; padding: 40px 30px 32px; }
+.adm-gate-card h1 { font-size: 2rem; }
+.adm-gate .adm-signin { gap: 12px; }
+.adm-gate .adm-signin input { text-align: center; }
+.adm-gate .adm-error { text-align: center; }

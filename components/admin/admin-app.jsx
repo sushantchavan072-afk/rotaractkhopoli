@@ -3,7 +3,6 @@
 import { useCallback, useDeferredValue, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
-import Image from 'next/image';
 import { FaAddressCard, FaArrowLeft, FaArrowUpRightFromSquare, FaCalendarDays, FaHouse, FaImages, FaIndianRupeeSign, FaQuoteLeft, FaRightFromBracket, FaUsers, FaXmark, FaCircleCheck, FaPenToSquare, FaArrowsRotate, FaTableColumns, FaPlus } from 'react-icons/fa6';
 import EventsTab, { blankEvent } from './events';
 import TeamTab, { LISTS } from './team';
@@ -70,7 +69,7 @@ function SignIn({ onDone, notConfigured }) {
   }
   return (
     <form className="adm-signin" onSubmit={submit}>
-      <Field label="Password">{(id) => <input id={id} type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />}</Field>
+      <input type="password" aria-label="Password" placeholder="Password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
       {error && <p className="adm-error" role="alert">{error}</p>}
       <button type="submit" className="adm-btn adm-signin-btn" disabled={busy || !password}>{busy ? <><span className="adm-spinner" aria-hidden="true" /> Signing in…</> : 'Sign in'}</button>
     </form>
@@ -346,14 +345,11 @@ export default function AdminApp() {
       <section className="admin adm-gate">
         <div className="adm-gate-blobs" aria-hidden="true"><i /><i /><i /></div>
         <div className="adm-gate-card">
-          <Image className="adm-gate-logo" src="/images/logos/rotaract-khopoli.png" alt="Rotaract Club of Khopoli" width={867} height={296} priority sizes="180px" />
           <h1>Club admin</h1>
-          <p className="adm-hint">Events, photos, the team, finance and the club’s details, all in one place.</p>
-          {!status && <Loader text="Opening the admin page…" />}
+          {!status && <Loader text="Opening…" />}
           {status && !status.signedIn && <SignIn notConfigured={!status.configured} onDone={() => { setMessage(null); load(); }} />}
-          {status?.signedIn && !draft && !message && <Loader text="Loading the website’s content…" />}
+          {status?.signedIn && !draft && !message && <Loader text="Loading…" />}
           {message && <p className="adm-error" role="alert">{message.text}</p>}
-          <Link className="adm-back-site" href="/"><FaArrowLeft size={12} aria-hidden="true" /> Back to the website</Link>
         </div>
       </section>
     );
@@ -386,7 +382,7 @@ export default function AdminApp() {
             <a className="adm-side-item" href="/" target="_blank" rel="noreferrer" title="View website"><FaArrowUpRightFromSquare size={14} aria-hidden="true" /><span className="adm-side-text">View website</span></a>
           </div>
           <div className="adm-side-foot">
-            <button type="button" className="adm-side-item adm-side-signout" title="Sign out" onClick={signOut}><FaRightFromBracket size={15} aria-hidden="true" /><span className="adm-side-text">Sign out</span></button>
+            <button type="button" className="adm-side-item adm-side-signout" title="Sign out" onClick={signOut}><FaRightFromBracket size={16} aria-hidden="true" /><span className="adm-side-text">Sign out</span></button>
           </div>
         </aside>
         <div className="adm-panel">
