@@ -2474,3 +2474,5 @@ body:has(.adm-gate) { background: #fff; background-image: none; }
 
 .adm-login-brand { display: inline-flex; align-items: center; gap: 10px; }
 .adm-login-brand img { width: 34px; height: 34px; flex: none; }
+.adm-login-link svg { transition: transform .3s var(--adm-spring); }
+.adm-login-link:hover svg { transform: translateX(3px); }

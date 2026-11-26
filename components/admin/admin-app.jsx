@@ -3,7 +3,7 @@
 import { useCallback, useDeferredValue, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
-import { FaAddressCard, FaArrowLeft, FaArrowUpRightFromSquare, FaCalendarDays, FaHouse, FaImages, FaIndianRupeeSign, FaQuoteLeft, FaRightFromBracket, FaUsers, FaXmark, FaRegEye, FaRegEyeSlash, FaArrowRightToBracket, FaRegCircleUser, FaCircleCheck, FaPenToSquare, FaArrowsRotate, FaTableColumns, FaPlus } from 'react-icons/fa6';
+import { FaAddressCard, FaArrowLeft, FaArrowUpRightFromSquare, FaCalendarDays, FaHouse, FaImages, FaIndianRupeeSign, FaQuoteLeft, FaRightFromBracket, FaUsers, FaXmark, FaRegEye, FaRegEyeSlash, FaArrowRightToBracket, FaArrowRight, FaCircleCheck, FaPenToSquare, FaArrowsRotate, FaTableColumns, FaPlus } from 'react-icons/fa6';
 import EventsTab, { blankEvent } from './events';
 import TeamTab, { LISTS } from './team';
 import { GalleryTab, ReviewsTab, DetailsTab } from './more';
@@ -382,7 +382,7 @@ export default function AdminApp() {
                 {/* eslint-disable-next-line @next/next/no-img-element -- the site's own small icon */}
                 <img src="/icon.png" alt="" width="34" height="34" />RAC Khopoli
               </span>
-              <Link className="adm-login-link" href="/"><FaRegCircleUser size={16} aria-hidden="true" /> Visit Website</Link>
+              <Link className="adm-login-link" href="/">Visit Website <FaArrowRight size={13} aria-hidden="true" /></Link>
             </header>
             <div className="adm-login-body">
               <h1>Sign in</h1>
