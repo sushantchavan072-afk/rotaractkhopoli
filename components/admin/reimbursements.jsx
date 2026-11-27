@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { FaChevronLeft, FaPlus, FaTrashCan } from 'react-icons/fa6';
-import { PillSelect, Segmented } from '../ui';
+import { DatePicker, PillSelect, Segmented } from '../ui';
 import { Badge, Empty, Field, niceDate, plural, tag, todayIso } from './shared';
 import { headForAvenue, headsFor } from './budgets';
 
@@ -49,7 +49,7 @@ function ClaimEditor({ claim, claims, people, events, heads, categories, onChang
           </Field>
           <Field label="Amount (₹)">{(id) => <input id={id} className="adm-amount" inputMode="decimal" placeholder="0" value={claim.amount} onChange={(e) => set({ amount: e.target.value.replace(/[^\d.]/g, '').replace(/(\..*)\./g, '$1') })} />}</Field>
           <Field label="What for" wide>{(id) => <input id={id} maxLength={200} placeholder="For example: Banners for the blood donation camp" value={claim.description} onChange={(e) => set({ description: e.target.value })} />}</Field>
-          <Field label="Date of the bill">{(id) => <input id={id} type="date" value={claim.date} onChange={(e) => set({ date: e.target.value })} />}</Field>
+          <Field label="Date of the bill">{(id) => <DatePicker id={id} ariaLabel="Date of the bill" max={todayIso()} value={claim.date} onChange={(v) => set({ date: v })} />}</Field>
           <Field label="Category"><PillSelect options={categories} value={categories.includes(claim.category) ? claim.category : categories[0]} ariaLabel="Category" onChange={(v) => set({ category: v })} /></Field>
           <Field label="Event (optional)"><PillSelect options={[NO_EVENT, ...events.map((e) => e.title).filter(Boolean)]} value={claim.event || NO_EVENT} ariaLabel="Event" onChange={(v) => pickEvent(v === NO_EVENT ? '' : v)} /></Field>
           <Field label="Taken from the budget of" hint={claim.event && claim.avenue ? 'Set from the event’s avenue.' : undefined}>

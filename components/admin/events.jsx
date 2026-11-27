@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { FaArrowUpRightFromSquare, FaChevronLeft, FaCopy, FaPlus, FaTrashCan, FaXmark } from 'react-icons/fa6';
-import { PillSelect, Segmented } from '../ui';
+import { DatePicker, PillSelect, Segmented } from '../ui';
 import {
   Badge, Empty, Field, PhotoButton, SectionHead, Thumb, isCompleted, monthLabel, niceDate, plural, preparePhoto, slugify, tag, todayIso,
 } from './shared';
@@ -50,9 +50,9 @@ function EventEditor({ event, avenueOptions, photoSrc, photoUrl, onChange, onPho
               {(id) => <input id={id} value={event.slug} maxLength={80} onChange={(e) => set({ slug: slugify(e.target.value) })} />}
             </Field>
           )}
-          <Field label="Date">{(id) => <input id={id} type="date" value={event.date} onChange={(e) => set({ date: e.target.value })} />}</Field>
+          <Field label="Date">{(id) => <DatePicker id={id} ariaLabel="Date" value={event.date} onChange={(v) => set({ date: v, ...(event.endDate && event.endDate <= v ? { endDate: undefined } : {}) })} />}</Field>
           <Field label="Last day (optional)" hint="Only for events over several days.">
-            {(id) => <input id={id} type="date" value={event.endDate ?? ''} min={event.date} onChange={(e) => set({ endDate: e.target.value || undefined })} />}
+            {(id) => <DatePicker id={id} ariaLabel="Last day" placeholder="Same day" clearable value={event.endDate ?? ''} min={event.date ? event.date : undefined} onChange={(v) => set({ endDate: v || undefined })} />}
           </Field>
           <Field label="Time (optional)">{(id) => <input id={id} value={event.time ?? ''} maxLength={60} placeholder="6:00 PM – 8:00 PM" onChange={(e) => set({ time: e.target.value || undefined })} />}</Field>
           <Field label="Venue">{(id) => <input id={id} value={event.venue} maxLength={160} placeholder="For example: Rotary Bhavan, Khopoli" onChange={(e) => set({ venue: e.target.value })} />}</Field>

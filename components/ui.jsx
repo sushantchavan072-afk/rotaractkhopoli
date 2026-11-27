@@ -12,6 +12,7 @@ import {
   FaXmark as X, FaPlus as Plus, FaRegEnvelope as Mail, FaMagnifyingGlass as Search,
   FaRegCalendarPlus as CalendarPlus, FaShareNodes as Share2, FaCheck as Check, FaInstagram as Instagram,
   FaFacebookF as Facebook, FaLinkedinIn as Linkedin, FaYoutube as Youtube, FaHeart as Heart,
+  FaChevronLeft as ChevronLeft, FaChevronRight as ChevronRight, FaCalendarDays as CalendarIcon,
 } from 'react-icons/fa6';
 import RobotIcon from './ui/robot-icon';
 import {
@@ -813,7 +814,8 @@ export function Segmented({ options, value, onChange, label }) {
       const b = el.querySelector('[aria-pressed="true"]');
       if (!b) return;
       t.style.width = `${b.offsetWidth}px`;
-      t.style.transform = `translateX(${b.offsetLeft}px)`;
+      t.style.height = `${b.offsetHeight}px`;
+      t.style.transform = `translate(${b.offsetLeft}px, ${b.offsetTop}px)`; // the row can wrap on narrow screens
     };
     place();
     el.dataset.thumb = '';
@@ -948,6 +950,177 @@ export function PillSelect({ id, name, options, value: controlled, defaultValue,
             </li>
           ))}
         </ul>,
+        document.body,
+      )}
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------------- Date picker */
+
+const DP_MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const DP_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const dpIso = (y, m, d) => `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+const dpParts = (iso) => { const [y, m, d] = iso.split('-').map(Number); return { y, m: m - 1, d }; };
+const dpValid = (iso) => typeof iso === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(iso);
+const dpToday = () => { const t = new Date(); return dpIso(t.getFullYear(), t.getMonth(), t.getDate()); };
+const dpAdd = (iso, days) => { const { y, m, d } = dpParts(iso); const t = new Date(Date.UTC(y, m, d + days)); return dpIso(t.getUTCFullYear(), t.getUTCMonth(), t.getUTCDate()); };
+const dpAddMonths = (iso, n) => { const { y, m, d } = dpParts(iso); const last = new Date(Date.UTC(y, m + n + 1, 0)).getUTCDate(); const t = new Date(Date.UTC(y, m + n, Math.min(d, last))); return dpIso(t.getUTCFullYear(), t.getUTCMonth(), t.getUTCDate()); };
+const dpWeekday = (iso) => { const { y, m, d } = dpParts(iso); return (new Date(Date.UTC(y, m, d)).getUTCDay() + 6) % 7; }; // Monday = 0
+/** "Fri, 27 Nov 2026" (or "27 Nov" without the year, for birthdays). */
+export const formatDate = (iso, { year = true, weekday = true } = {}) => {
+  if (!dpValid(iso)) return '';
+  const { y, m, d } = dpParts(iso);
+  return `${weekday ? `${DP_DAYS[dpWeekday(iso)].slice(0, 3)}, ` : ''}${d} ${DP_MONTHS[m].slice(0, 3)}${year ? ` ${y}` : ''}`;
+};
+
+/**
+ * A date field in the site's own style: a pill that opens a calendar. Month and year can be picked from the
+ * header (handy for birthdays), "Today" jumps to today, and an optional field can be cleared. Keyboard:
+ * arrow keys move a day or a week, Page Up/Down a month, Home/End the week, Enter picks, Escape closes.
+ * value / onChange use "YYYY-MM-DD" ('' when empty).
+ */
+export function DatePicker({ id, value = '', onChange, min, max, ariaLabel, placeholder = 'Choose a date', clearable = false, showYear = true, startView = 'days', startYear }) {
+  const [open, setOpen] = useState(false);
+  const [view, setView] = useState('days'); // 'days' | 'months' | 'years'
+  const [cursor, setCursor] = useState(''); // the day that has keyboard focus (and sets the month shown)
+  const [pos, setPos] = useState(null);
+  const wrap = useRef(null);
+  const btn = useRef(null);
+  const pop = useRef(null);
+  const gridId = useId();
+  const today = dpToday();
+  const allowed = (iso) => (!min || iso >= min) && (!max || iso <= max);
+
+  const place = useCallback(() => {
+    const r = btn.current.getBoundingClientRect();
+    const width = Math.min(window.innerWidth - 24, 344); // a calendar-sized box, whatever the field's width
+    const left = Math.min(Math.max(12, r.left), window.innerWidth - width - 12);
+    setPos({ left, width, above: r.top, below: r.bottom });
+  }, []);
+  // Below the field when it fits, else above it, else as high as the screen allows: always fully on screen.
+  useLayoutEffect(() => {
+    const el = pop.current;
+    if (!open || !pos || !el) return;
+    const h = el.offsetHeight;
+    const room = window.innerHeight;
+    const up = room - pos.below < h + 16 && pos.above >= h + 16;
+    const top = room - pos.below >= h + 16 ? pos.below + 8 : up ? pos.above - h - 8 : Math.max(12, room - h - 12);
+    el.style.top = `${Math.round(top)}px`;
+    el.classList.toggle('is-up', up);
+  }, [open, pos, view, cursor]);
+  const show = () => {
+    place();
+    const base = dpValid(value) ? value : startYear ? dpIso(startYear, 0, 1) : allowed(today) ? today : (min || today);
+    setCursor(base);
+    setView(!dpValid(value) && startView === 'years' ? 'years' : 'days');
+    setOpen(true);
+  };
+  const close = (refocus = true) => { setOpen(false); if (refocus) btn.current?.focus(); };
+  const pick = (iso) => { if (!allowed(iso)) return; onChange?.(iso); close(); };
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const away = (e) => { if (!wrap.current?.contains(e.target) && !pop.current?.contains(e.target)) setOpen(false); };
+    document.addEventListener('pointerdown', away);
+    window.addEventListener('scroll', place, true);
+    window.addEventListener('resize', place);
+    return () => { document.removeEventListener('pointerdown', away); window.removeEventListener('scroll', place, true); window.removeEventListener('resize', place); };
+  }, [open, place]);
+  // Keep keyboard focus on the highlighted day (or month / year).
+  useEffect(() => {
+    if (!open) return;
+    const el = pop.current?.querySelector('[data-focus="true"]');
+    el?.focus({ preventScroll: true });
+  }, [open, cursor, view]);
+
+  const shown = cursor && dpValid(cursor) ? dpParts(cursor) : dpParts(today);
+  const first = dpIso(shown.y, shown.m, 1);
+  const lead = dpWeekday(first);
+  const daysIn = new Date(Date.UTC(shown.y, shown.m + 1, 0)).getUTCDate();
+  const cells = Array.from({ length: Math.ceil((lead + daysIn) / 7) * 7 }, (_, i) => dpAdd(first, i - lead));
+  const yearStart = shown.y - (((shown.y % 12) + 12) % 12);
+
+  const onKey = (e) => {
+    if (e.key === 'Escape') { e.preventDefault(); close(); return; }
+    if (view !== 'days') return;
+    const moves = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 };
+    if (e.key in moves) { e.preventDefault(); setCursor((c) => dpAdd(c, moves[e.key])); return; }
+    if (e.key === 'PageUp' || e.key === 'PageDown') { e.preventDefault(); setCursor((c) => dpAddMonths(c, (e.key === 'PageUp' ? -1 : 1) * (e.shiftKey ? 12 : 1))); return; }
+    if (e.key === 'Home') { e.preventDefault(); setCursor((c) => dpAdd(c, -dpWeekday(c))); return; }
+    if (e.key === 'End') { e.preventDefault(); setCursor((c) => dpAdd(c, 6 - dpWeekday(c))); return; }
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(cursor); }
+  };
+  const step = (dir) => {
+    if (view === 'days') setCursor((c) => dpAddMonths(c, dir));
+    else if (view === 'months') setCursor((c) => dpAddMonths(c, dir * 12));
+    else setCursor((c) => dpAddMonths(c, dir * 144));
+  };
+  const label = view === 'days' ? `${DP_MONTHS[shown.m]} ${shown.y}` : view === 'months' ? String(shown.y) : `${yearStart} – ${yearStart + 11}`;
+  const text = dpValid(value) ? formatDate(value, { year: showYear }) : placeholder;
+
+  return (
+    <div ref={wrap} className={`pill-select date-picker ${open ? 'is-open' : ''}`}>
+      <button
+        ref={btn} id={id} type="button" className="pill-select-btn"
+        aria-haspopup="dialog" aria-expanded={open} aria-label={ariaLabel ? `${ariaLabel}: ${dpValid(value) ? formatDate(value, { year: showYear }) : 'not set'}` : undefined}
+        onClick={() => (open ? close(false) : show())}
+        onKeyDown={(e) => { if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); show(); } }}
+      >
+        <span className={`pill-select-value${dpValid(value) ? '' : ' is-placeholder'}`}>{text}</span>
+        <span className="pill-select-chev date-picker-icon" aria-hidden="true"><CalendarIcon size={13} /></span>
+      </button>
+      {open && pos && createPortal(
+        <div
+          ref={pop} className="date-pop" role="dialog" aria-label={ariaLabel || 'Choose a date'} onKeyDown={onKey}
+          style={{ left: pos.left, width: pos.width, top: pos.below + 8 }}
+        >
+          <div className="date-pop-head">
+            <button type="button" className="date-pop-nav" aria-label={view === 'days' ? 'Previous month' : view === 'months' ? 'Previous year' : 'Earlier years'} onClick={() => step(-1)}><ChevronLeft size={12} /></button>
+            <button type="button" className="date-pop-title" aria-label={view === 'days' ? `${label}: choose a month or year` : view === 'months' ? `${label}: choose a year` : label} onClick={() => setView(view === 'days' ? 'months' : view === 'months' ? 'years' : 'days')}>
+              {label} <ChevronDown size={10} aria-hidden="true" />
+            </button>
+            <button type="button" className="date-pop-nav" aria-label={view === 'days' ? 'Next month' : view === 'months' ? 'Next year' : 'Later years'} onClick={() => step(1)}><ChevronRight size={12} /></button>
+          </div>
+
+          {view === 'days' && (
+            <div className="date-pop-grid" role="grid" id={gridId} aria-label={label}>
+              {DP_DAYS.map((d) => <span key={d} className="date-pop-dow" aria-hidden="true">{d.slice(0, 2)}</span>)}
+              {cells.map((iso) => {
+                const { m, d } = dpParts(iso);
+                const outside = m !== shown.m;
+                return (
+                  <button
+                    key={iso} type="button" role="gridcell" tabIndex={iso === cursor ? 0 : -1} data-focus={iso === cursor}
+                    className={`date-pop-day${outside ? ' is-outside' : ''}${iso === today ? ' is-today' : ''}${iso === value ? ' is-picked' : ''}`}
+                    aria-selected={iso === value} aria-label={formatDate(iso)} disabled={!allowed(iso)}
+                    onClick={() => pick(iso)}
+                  >{d}</button>
+                );
+              })}
+            </div>
+          )}
+          {view === 'months' && (
+            <div className="date-pop-list">
+              {DP_MONTHS.map((name, m) => (
+                <button key={name} type="button" data-focus={m === shown.m} className={`date-pop-cell${m === shown.m ? ' is-picked' : ''}`} onClick={() => { setCursor(dpIso(shown.y, m, Math.min(shown.d, new Date(Date.UTC(shown.y, m + 1, 0)).getUTCDate()))); setView('days'); }}>{name.slice(0, 3)}</button>
+              ))}
+            </div>
+          )}
+          {view === 'years' && (
+            <div className="date-pop-list">
+              {Array.from({ length: 12 }, (_, i) => yearStart + i).map((y) => (
+                <button key={y} type="button" data-focus={y === shown.y} className={`date-pop-cell${y === shown.y ? ' is-picked' : ''}`} onClick={() => { setCursor(dpIso(y, shown.m, Math.min(shown.d, new Date(Date.UTC(y, shown.m + 1, 0)).getUTCDate()))); setView('months'); }}>{y}</button>
+              ))}
+            </div>
+          )}
+
+          <div className="date-pop-foot">
+            {allowed(today) && <button type="button" className="date-pop-link" onClick={() => pick(today)}>Today</button>}
+            {view !== 'days' && <button type="button" className="date-pop-link" onClick={() => setView('days')}>Back to days</button>}
+            {clearable && dpValid(value) && <button type="button" className="date-pop-link is-clear" onClick={() => { onChange?.(''); close(); }}>Clear</button>}
+          </div>
+        </div>,
         document.body,
       )}
     </div>

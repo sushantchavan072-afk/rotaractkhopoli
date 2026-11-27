@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { FaCakeCandles, FaChevronLeft, FaEnvelope, FaPhone, FaPlus, FaTrashCan, FaUsers, FaWhatsapp } from 'react-icons/fa6';
-import { PillSelect, Segmented } from '../ui';
+import { DatePicker, PillSelect, Segmented } from '../ui';
 import { Badge, Empty, Field, SectionHead, niceDate, plural, tag, todayIso } from './shared';
 import { LISTS } from './team';
 
@@ -79,8 +79,8 @@ function MemberEditor({ member, onChange, onDelete, onClose }) {
           <Field label="Name" wide>{(id) => <input id={id} value={member.name} maxLength={80} placeholder="For example: Rtr. Priya Patil" onChange={(e) => set({ name: e.target.value })} />}</Field>
           <Field label="Phone (optional)">{(id) => <input id={id} type="tel" inputMode="tel" value={member.phone ?? ''} maxLength={20} placeholder="10-digit mobile number" onChange={(e) => set({ phone: e.target.value || undefined })} />}</Field>
           <Field label="Email (optional)">{(id) => <input id={id} type="email" value={member.email ?? ''} maxLength={120} onChange={(e) => set({ email: e.target.value || undefined })} />}</Field>
-          <Field label="Birthday (optional)" hint="Only the day and month are used.">{(id) => <input id={id} type="date" value={member.birthday ?? ''} onChange={(e) => set({ birthday: e.target.value || undefined })} />}</Field>
-          <Field label="Member since (optional)">{(id) => <input id={id} type="date" value={member.since ?? ''} onChange={(e) => set({ since: e.target.value || undefined })} />}</Field>
+          <Field label="Birthday (optional)" hint="Only the day and month are used.">{(id) => <DatePicker id={id} ariaLabel="Birthday" placeholder="Not added" clearable startView="years" startYear={2000} max={todayIso()} value={member.birthday ?? ''} onChange={(v) => set({ birthday: v || undefined })} />}</Field>
+          <Field label="Member since (optional)">{(id) => <DatePicker id={id} ariaLabel="Member since" placeholder="Not added" clearable max={todayIso()} value={member.since ?? ''} onChange={(v) => set({ since: v || undefined })} />}</Field>
           <label className="adm-check is-wide"><input type="checkbox" checked={Boolean(member.left)} onChange={(e) => set({ left: e.target.checked || undefined })} /> Has left the club (kept for the records, not asked for dues)</label>
         </div>
       </section>

@@ -2781,3 +2781,44 @@ body:has(.admin):not(:has(.adm-gate)) {
 }
 .adm-dues-fee { white-space: nowrap; }
 .admin .adm-dues-fee .adm-brow-amount input { flex: none; width: 120px; max-width: 120px; height: 40px; padding: 0 12px; border: 1px solid var(--line-strong); border-radius: 12px; background: var(--surface); font: 600 15px var(--font); text-align: right; }
+
+/* ---------- Date picker: a pill like the dropdowns, opening a calendar ---------- */
+.date-picker .date-picker-icon svg { margin-top: -1px; }
+.date-pop { position: fixed; z-index: 130; padding: 14px; border: 1px solid var(--line); border-radius: 24px; background: var(--surface); box-shadow: 0 24px 48px -20px rgba(0, 0, 0, .28); transform-origin: top center; animation: pill-select-in .22s cubic-bezier(.2, .7, .2, 1); }
+.date-pop.is-up { transform-origin: bottom center; animation-name: pill-select-in-up; }
+.date-pop-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.date-pop-nav { flex: none; display: grid; place-items: center; width: 38px; height: 38px; padding: 0; border: 1px solid var(--line-strong); border-radius: 50%; background: var(--surface); color: var(--ink); cursor: pointer; transition: border-color .2s, background-color .2s; }
+.date-pop-nav:hover { border-color: var(--ink); }
+.date-pop-title { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border: 0; border-radius: 20px; background: none; color: var(--ink); font: 600 16px var(--font); cursor: pointer; transition: background-color .2s; }
+.date-pop-title:hover { background: var(--surface-2); }
+.date-pop-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.date-pop-dow { padding: 4px 0 6px; color: var(--muted); font-size: 12.5px; font-weight: 500; text-align: center; }
+.date-pop-day { aspect-ratio: 1; min-height: 38px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--ink); font: 500 14.5px var(--font); cursor: pointer; transition: background-color .15s, color .15s; }
+.date-pop-day:hover:not(:disabled) { background: var(--surface-2); }
+.date-pop-day.is-outside { color: var(--muted-2, #a9a9a4); }
+.date-pop-day.is-today { box-shadow: inset 0 0 0 1.5px var(--ink); }
+.date-pop-day.is-picked, .date-pop-day.is-picked:hover { background: var(--ink); color: var(--on-ink, #fff); box-shadow: none; }
+.date-pop-day:disabled { color: var(--line-strong); cursor: not-allowed; text-decoration: line-through; }
+.date-pop-day:focus-visible, .date-pop-cell:focus-visible, .date-pop-nav:focus-visible, .date-pop-title:focus-visible, .date-pop-link:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.date-pop-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding: 4px 0; }
+.date-pop-cell { min-height: 48px; padding: 0; border: 0; border-radius: 16px; background: var(--surface-2); color: var(--ink); font: 500 15px var(--font); cursor: pointer; transition: background-color .15s, color .15s; }
+.date-pop-cell:hover { background: #e9e9e6; }
+.date-pop-cell.is-picked { background: var(--ink); color: var(--on-ink, #fff); }
+.date-pop-foot { display: flex; align-items: center; gap: 18px; min-height: 22px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+.date-pop-foot:empty { display: none; }
+.date-pop-link { padding: 0; border: 0; background: none; color: var(--ink); font: 600 14px var(--font); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.date-pop-link.is-clear { margin-left: auto; color: #b42318; }
+@media (prefers-reduced-motion: reduce) { .date-pop { animation: none; } }
+
+/* Tab rows wrap onto a second line on narrow screens instead of running off the edge */
+.segmented { flex-wrap: wrap; max-width: 100%; row-gap: 4px; }
+.segmented-thumb { top: 0; bottom: auto; }
+.adm-toolbar .segmented { overflow: visible; }
+.segmented button { white-space: nowrap; }
+@media (max-width: 600px) { .segmented { border-radius: 26px; } }
+@media (prefers-reduced-motion: reduce) { .segmented[data-ready] .segmented-thumb { transition: none; } }
+
+/* Writing boxes grow with their text (browsers that support it), so nothing is hidden mid-sentence */
+.admin textarea { field-sizing: content; min-height: 5.5em; max-height: 70vh; }
+.admin textarea.adm-tile-caption { min-height: 0; }
+.date-pop-day { min-height: 0; height: auto; }

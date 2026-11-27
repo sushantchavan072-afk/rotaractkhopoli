@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { FaArrowDown, FaArrowUp, FaChevronLeft, FaDownload, FaPlus, FaTrashCan } from 'react-icons/fa6';
-import { PillSelect, Segmented } from '../ui';
+import { DatePicker, PillSelect, Segmented } from '../ui';
 import { Empty, Field, SectionHead, monthLabel, niceDate, plural, tag, todayIso } from './shared';
 import Budgets, { headForAvenue, headsFor } from './budgets';
 import Reimbursements, { owedClaims } from './reimbursements';
@@ -49,7 +49,7 @@ function EntryEditor({ entry, events, heads, onChange, onDelete, onClose }) {
           <Field label="Amount (₹)">
             {(id) => <input id={id} className="adm-amount" inputMode="decimal" placeholder="0" value={entry.amount} onChange={(e) => set({ amount: e.target.value.replace(/[^\d.]/g, '').replace(/(\..*)\./g, '$1') })} />}
           </Field>
-          <Field label="Date">{(id) => <input id={id} type="date" value={entry.date} onChange={(e) => set({ date: e.target.value })} />}</Field>
+          <Field label="Date">{(id) => <DatePicker id={id} ariaLabel="Date" value={entry.date} onChange={(v) => set({ date: v })} />}</Field>
           <Field label="What for" wide>
             {(id) => <input id={id} maxLength={200} placeholder={income ? 'For example: Membership dues for 2026–27' : 'For example: Saplings for the tree plantation drive'} value={entry.description} onChange={(e) => set({ description: e.target.value })} />}
           </Field>
