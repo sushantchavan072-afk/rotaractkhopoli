@@ -163,7 +163,13 @@ export default function FinanceTab({ finance, events, update, ready, page, setPa
       <EntryEditor
         entry={current} events={events} heads={headsFor(finance, current.date ? rotaractYearOf(current.date) : year)}
         onChange={(next) => update((f) => ({ ...f, entries: f.entries.map((e) => (e.id === next.id ? next : e)) }))}
-        onDelete={() => { if (window.confirm('Delete this entry from the finance sheet?')) { update((f) => ({ ...f, entries: f.entries.filter((e) => e.id !== current.id) })); setEditing(null); } }}
+        onDelete={() => {
+          const claim = (finance.claims ?? []).find((c) => c.entry === current.id);
+          if (!window.confirm(claim ? `Delete this entry? It is the payment for ${claim.person}'s reimbursement, which goes back to “still owed”.` : 'Delete this entry from the finance sheet?')) return;
+          // A reimbursement paid by this entry is owed again.
+          update((f) => ({ ...f, entries: f.entries.filter((e) => e.id !== current.id), claims: (f.claims ?? []).map((c) => (c.entry === current.id ? { ...c, status: 'approved', entry: undefined } : c)) }));
+          setEditing(null);
+        }}
         onClose={() => { if (current.date) setYear(rotaractYearOf(current.date)); setEditing(null); }}
       />
     );
@@ -205,7 +211,7 @@ export default function FinanceTab({ finance, events, update, ready, page, setPa
           <span className="adm-stat-label">Opening balance</span>
           <span className="adm-money-input">₹<input
             inputMode="decimal" aria-label={`Opening balance for ${year}`} value={finance.openingBalances[year] ?? ''} placeholder="0"
-            onChange={(e) => { const v = e.target.value.replace(/[^\d.-]/g, ''); update((f) => ({ ...f, openingBalances: { ...f.openingBalances, [year]: v } })); }}
+            onChange={(e) => { const v = e.target.value.replace(/[^\d.-]/g, '').replace(/(?!^)-/g, '').replace(/(\..*)\./g, '$1'); update((f) => ({ ...f, openingBalances: { ...f.openingBalances, [year]: v } })); }}
           /></span>
           <span className="adm-stat-sub">Money in hand and bank on 1 July</span>
         </label>

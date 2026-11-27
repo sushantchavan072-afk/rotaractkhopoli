@@ -190,7 +190,7 @@ function Dues({ finance, update, year, years, setYear, rotaractYearOf, rupees })
     <>
       <div className="adm-toolbar">
         <div className="adm-year"><span className="adm-label">Rotaract year</span><PillSelect options={years} value={year} ariaLabel="Rotaract year" onChange={setYear} /></div>
-        <label className="adm-dues-fee">Dues per member <span className="adm-brow-amount"><span aria-hidden="true">₹</span><input inputMode="decimal" aria-label={`Dues per member for ${year}`} placeholder="0" value={fee || ''} onChange={(e) => setDues((d) => ({ ...d, fee: e.target.value.replace(/[^\d.]/g, '') }))} /></span></label>
+        <label className="adm-dues-fee">Dues per member <span className="adm-brow-amount"><span aria-hidden="true">₹</span><input inputMode="decimal" aria-label={`Dues per member for ${year}`} placeholder="0" value={fee || ''} onChange={(e) => setDues((d) => ({ ...d, fee: e.target.value.replace(/[^\d.]/g, '').replace(/(\..*)\./g, '$1') }))} /></span></label>
       </div>
       <div className="adm-stats adm-money adm-budget-stats">
         <div className="adm-stat is-static"><span className="adm-stat-label">Collected</span><strong className={collected ? 'is-in' : ''}>{rupees(collected)}</strong><span className="adm-stat-sub">{rows.length - pending.length} of {rows.length} paid</span></div>
@@ -233,10 +233,12 @@ function Dues({ finance, update, year, years, setYear, rotaractYearOf, rupees })
 }
 
 const STATUS = { new: ['New', 'blue'], contacted: ['Contacted', 'amber'], joined: ['Joined', 'green'], declined: ['Not joining', 'grey'] };
-const daysSince = (iso, today) => Math.max(0, daysBetween(iso.slice(0, 10), today));
+// The local date a request arrived (it is stored in UTC).
+const localDay = (iso) => { const d = new Date(iso); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+export const daysSince = (iso, today) => Math.max(0, daysBetween(localDay(iso), today));
 const ago = (iso, today) => { const d = daysSince(iso, today); return d === 0 ? 'Today' : d === 1 ? 'Yesterday' : `${d} days ago`; };
 
-function Requests({ joins, setJoins, members, onJoined, notify, ready }) {
+function Requests({ joins, setJoins, members, onJoined, notify, ready, error }) {
   const [show, setShow] = useState('open');
   const [busy, setBusy] = useState(null);
   const today = todayIso();
@@ -250,6 +252,7 @@ function Requests({ joins, setJoins, members, onJoined, notify, ready }) {
       done?.();
     } catch (err) { notify(err.message); } finally { setBusy(null); }
   };
+  if (error) return <p className="adm-notice">Join requests couldn’t be loaded: {error}</p>;
   if (!ready) return <p className="adm-notice">Join requests need saving switched on (GITHUB_TOKEN) and a key (FINANCE_KEY, or the admin password).</p>;
   const isOpen = (r) => r.status === 'new' || r.status === 'contacted';
   const shown = joins.filter((r) => (show === 'open' ? isOpen(r) : show === 'all' ? true : r.status === show));
@@ -279,6 +282,7 @@ function Requests({ joins, setJoins, members, onJoined, notify, ready }) {
                   {waiting && <Badge tone="red">Waiting {daysSince(r.at, today)} days</Badge>}
                   {seenBefore(r) && <Badge tone="amber">Applied before</Badge>}
                   {already && r.status !== 'joined' && <Badge tone="green">Already a member</Badge>}
+                  {!already && r.status === 'joined' && <Badge tone="red">Not on the member list</Badge>}
                 </span>
               </div>
               <p className="adm-request-why">{r.why}</p>
@@ -292,6 +296,7 @@ function Requests({ joins, setJoins, members, onJoined, notify, ready }) {
                   {r.status === 'new' && <button type="button" className="adm-btn is-ghost is-small" disabled={busy === r.id} onClick={() => change(r, { status: 'contacted' })}>Contacted</button>}
                   {isOpen(r) && <button type="button" className="adm-btn is-small" disabled={busy === r.id} onClick={() => change(r, { status: 'joined' }, () => onJoined(r, already))}>Joined</button>}
                   {isOpen(r) && <button type="button" className="adm-link" disabled={busy === r.id} onClick={() => change(r, { status: 'declined' })}>Not joining</button>}
+                  {!already && r.status === 'joined' && <button type="button" className="adm-btn is-small" onClick={() => onJoined(r, null)}>Add to Members</button>}
                   {!isOpen(r) && <button type="button" className="adm-link" disabled={busy === r.id} onClick={() => change(r, { status: 'contacted' })}>Reopen</button>}
                   <button type="button" className="adm-link is-danger" disabled={busy === r.id} onClick={() => { if (window.confirm(`Delete ${r.name}'s request? (For spam or duplicates.)`)) change(r, { remove: true }); }}>Delete</button>
                 </span>
@@ -304,7 +309,7 @@ function Requests({ joins, setJoins, members, onJoined, notify, ready }) {
   );
 }
 
-export default function MembersTab({ finance, update, team, joins, setJoins, joinsReady, notify, rupees, rotaractYearOf, page, setPage, ready }) {
+export default function MembersTab({ finance, update, team, joins, setJoins, joinsReady, joinsError, notify, rupees, rotaractYearOf, page, setPage, ready }) {
   const [editing, setEditing] = useState(null);
   const members = finance.members ?? [];
   const thisYear = rotaractYearOf(todayIso());
@@ -338,7 +343,7 @@ export default function MembersTab({ finance, update, team, joins, setJoins, joi
       </div>
       {page === 'list' && <MemberList finance={finance} update={update} team={team} year={thisYear} rotaractYearOf={rotaractYearOf} rupees={rupees} onEdit={(id) => { setEditing(id); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />}
       {page === 'dues' && <Dues finance={finance} update={update} year={year} years={years} setYear={setYear} rotaractYearOf={rotaractYearOf} rupees={rupees} />}
-      {page === 'requests' && <Requests joins={joins} setJoins={setJoins} members={members} onJoined={onJoined} notify={notify} ready={joinsReady} />}
+      {page === 'requests' && <Requests joins={joins} setJoins={setJoins} members={members} onJoined={onJoined} notify={notify} ready={joinsReady} error={joinsError} />}
     </div>
   );
 }

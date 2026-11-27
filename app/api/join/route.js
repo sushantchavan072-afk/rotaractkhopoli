@@ -1,7 +1,7 @@
 import { json, sameOrigin, clientIp } from '../../../lib/admin/auth';
 import { githubConfigured } from '../../../lib/admin/github';
 import { financeReady } from '../../../lib/admin/finance';
-import { cleanApplication, addRequest } from '../../../lib/admin/joins';
+import { cleanApplication, addRequest, JoinsBusyError } from '../../../lib/admin/joins';
 
 /**
  * The Join page's membership application. Saved (encrypted) for the Admin Portal's Join requests inbox.
@@ -38,6 +38,8 @@ export async function POST(request) {
     await addRequest(app);
     return json({ saved: true });
   } catch (e) {
+    // Busy or full: the form then sends it the usual way (form service or email) instead.
+    if (e instanceof JoinsBusyError) return json({ saved: false, reason: 'busy' }, 503);
     console.error('join request', e?.message);
     return json({ saved: false }, 502);
   }

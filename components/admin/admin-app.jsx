@@ -125,6 +125,7 @@ export default function AdminApp() {
   const [membersPage, setMembersPage] = useState('list'); // Members: 'list' | 'dues' | 'requests'
   const [joins, setJoins] = useState([]); // join requests from the website
   const [joinsReady, setJoinsReady] = useState(false);
+  const [joinsError, setJoinsError] = useState('');
   const [message, setMessage] = useState(null); // { kind: 'error' | 'info', text }
   const [saving, setSaving] = useState(false);
   const [published, setPublished] = useState(null); // { commit, live, dismissed }
@@ -141,10 +142,11 @@ export default function AdminApp() {
       const [c, f, j] = await Promise.all([
         api('GET', '/api/admin/content'),
         api('GET', '/api/admin/finance').catch((err) => ({ error: err })),
-        api('GET', '/api/admin/joins').catch(() => ({ requests: [], ready: false })),
+        api('GET', '/api/admin/joins').catch((err) => ({ requests: [], ready: false, error: err.status === 423 ? 'the key that opens them was changed (FINANCE_KEY, or ADMIN_PASSWORD when FINANCE_KEY is not set). Put the old value back in Vercel.' : err.message })),
       ]);
       setJoins(j.requests ?? []);
       setJoinsReady(j.ready !== false);
+      setJoinsError(j.error ?? '');
       if (f.error) setMessage({ kind: 'error', text: f.error.message });
       setFinanceBase(f.base ?? null);
       setFinanceReady(!f.error && f.ready !== false);
@@ -496,7 +498,7 @@ export default function AdminApp() {
           {view === 'reviews' && <ReviewsTab reviews={draft.reviews} update={update('reviews')} />}
           {view === 'site' && <DetailsTab site={draft.site} update={update('site')} />}
           {view === 'members' && (draft.finance
-            ? <MembersTab finance={draft.finance} update={update('finance')} team={draft.team} joins={joins} setJoins={setJoins} joinsReady={joinsReady} notify={notify} rupees={rupees} rotaractYearOf={rotaractYearOf} page={membersPage} setPage={setMembersPage} ready={financeReady && status.canSave} />
+            ? <MembersTab finance={draft.finance} update={update('finance')} team={draft.team} joins={joins} setJoins={setJoins} joinsReady={joinsReady} joinsError={joinsError} notify={notify} rupees={rupees} rotaractYearOf={rotaractYearOf} page={membersPage} setPage={setMembersPage} ready={financeReady && status.canSave} />
             : <p className="adm-notice">The member list couldn’t be opened. {message?.text}</p>)}
           {view === 'finance' && (draft.finance
             ? <FinanceTab finance={draft.finance} events={draft.events} update={update('finance')} ready={financeReady && status.canSave} page={financePage} setPage={setFinancePage} people={people} />

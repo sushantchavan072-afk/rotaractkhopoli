@@ -7,7 +7,7 @@ import { eventGaps } from './events';
 import { LISTS } from './team';
 import { budgetState, headsFor, spendingFor } from './budgets';
 import { rotaractYearOf, rupees } from './finance';
-import { birthdayLabel, duesFor, upcomingBirthdays, whatsapp } from './members';
+import { birthdayLabel, daysSince, duesFor, upcomingBirthdays, whatsapp } from './members';
 import { owedClaims } from './reimbursements';
 import { SectionHead, Thumb, initials, optimized, useNextFrame, isCompleted, niceDate, plural, todayIso, whenSaved } from './shared';
 
@@ -93,7 +93,7 @@ export function attentionItems({ draft, hasPhoto, memberHasPhoto, joins = [] }) 
   // Join requests from the website that nobody has answered yet.
   const fresh = joins.filter((r) => r.status === 'new');
   if (fresh.length) {
-    const oldest = Math.max(...fresh.map((r) => daysBetween(r.at.slice(0, 10), today)));
+    const oldest = Math.max(...fresh.map((r) => daysSince(r.at, today)));
     items.unshift({ key: 'joins', tone: oldest >= 3 ? undefined : 'info', text: `${plural(fresh.length, 'new join request')} from the website${oldest >= 3 ? `; the oldest has waited ${oldest} days` : ''}.`, go: 'members', filter: 'requests', action: 'Reply' });
   }
   return items;
