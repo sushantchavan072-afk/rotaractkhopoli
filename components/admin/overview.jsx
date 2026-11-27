@@ -2,11 +2,13 @@
 
 import { useId, useState } from 'react';
 import { PillSelect } from '../ui';
-import { FaBell, FaCircleCheck, FaClockRotateLeft, FaPlus, FaTriangleExclamation } from 'react-icons/fa6';
+import { FaBell, FaCakeCandles, FaCircleCheck, FaClockRotateLeft, FaPlus, FaTriangleExclamation } from 'react-icons/fa6';
 import { eventGaps } from './events';
 import { LISTS } from './team';
 import { budgetState, headsFor, spendingFor } from './budgets';
 import { rotaractYearOf, rupees } from './finance';
+import { birthdayLabel, duesFor, upcomingBirthdays, whatsapp } from './members';
+import { owedClaims } from './reimbursements';
 import { SectionHead, Thumb, initials, optimized, useNextFrame, isCompleted, niceDate, plural, todayIso, whenSaved } from './shared';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -17,7 +19,7 @@ const currentRotaryStart = () => { const d = new Date(); return d.getMonth() >= 
 const shortDate = (iso) => { const [, m, d] = iso.split('-').map(Number); return `${d} ${MONTHS[m - 1]}`; };
 
 /** Things on the website that are missing or out of date, each with where to fix it. */
-export function attentionItems({ draft, hasPhoto, memberHasPhoto }) {
+export function attentionItems({ draft, hasPhoto, memberHasPhoto, joins = [] }) {
   const today = todayIso();
   const items = [];
   const yearStart = Number.parseInt(draft.team.rotaractYear, 10);
@@ -62,6 +64,37 @@ export function attentionItems({ draft, hasPhoto, memberHasPhoto }) {
     }
     if (unassigned.length) items.push({ key: 'unassigned', text: `${plural(unassigned.length, 'expense')} this year ${unassigned.length === 1 ? 'isn’t' : 'aren’t'} taken from any avenue budget.`, go: 'finance', filter: 'budgets', action: 'Pick avenues' });
     if (thisYear.some((e) => e.type === 'expense') && !heads.some((h) => Number(h.amount) > 0)) items.push({ key: 'nobudget', text: `No avenue budgets set for ${year} yet.`, go: 'finance', filter: 'budgets', action: 'Set budgets' });
+
+    // Reimbursements: members waiting a week or more to be paid back.
+    const owed = owedClaims(f);
+    const late = owed.filter((c) => daysBetween(c.date, today) >= 7);
+    if (late.length) {
+      const total = owed.reduce((n, c) => n + (Number(c.amount) || 0), 0);
+      const oldest = Math.max(...late.map((c) => daysBetween(c.date, today)));
+      items.push({ key: 'claims', text: `${plural(owed.length, 'reimbursement')} (${rupees(total)}) still owed to members; the oldest is ${oldest} days old.`, go: 'finance', filter: 'claims', action: 'Pay back' });
+    }
+
+    // Dues: a month into the Rotaract year, who still hasn't paid.
+    const dues = duesFor(f, year, rotaractYearOf);
+    if (dues.fee && dues.pending.length && progress > 1 / 12) {
+      items.push({ key: 'dues', text: `${plural(dues.pending.length, 'member')} ${dues.pending.length === 1 ? 'hasn’t' : 'haven’t'} paid ${year} dues yet (${rupees(dues.owed)} to come).`, go: 'members', filter: 'dues', action: 'Dues' });
+    }
+
+    // Birthdays today (with a ready WhatsApp wish) and in the next few days.
+    const bdays = upcomingBirthdays(f.members ?? [], 6, today);
+    for (const { m } of bdays.filter((b) => b.days === 0)) {
+      const wish = whatsapp(m.phone, `Happy birthday, ${m.name.replace(/^Rtr\.?\s*/i, '').split(' ')[0]}! 🎉 Wishing you a wonderful year ahead. From all of us at the Rotaract Club of Khopoli.`);
+      items.unshift({ key: `bday-${m.id}`, tone: 'bday', text: `It’s ${m.name}’s birthday today!`, ...(wish ? { href: wish, action: 'Wish on WhatsApp' } : { go: 'members', action: 'Members' }) });
+    }
+    const later = bdays.filter((b) => b.days > 0);
+    if (later.length) items.push({ key: 'bdays', tone: 'bday', text: `Birthdays this week: ${later.map(({ m, days }) => `${m.name.replace(/^Rtr\.?\s*/i, '')} (${days === 1 ? 'tomorrow' : birthdayLabel(m.birthday)})`).join(', ')}.`, go: 'members', action: 'See them' });
+  }
+
+  // Join requests from the website that nobody has answered yet.
+  const fresh = joins.filter((r) => r.status === 'new');
+  if (fresh.length) {
+    const oldest = Math.max(...fresh.map((r) => daysBetween(r.at.slice(0, 10), today)));
+    items.unshift({ key: 'joins', tone: oldest >= 3 ? undefined : 'info', text: `${plural(fresh.length, 'new join request')} from the website${oldest >= 3 ? `; the oldest has waited ${oldest} days` : ''}.`, go: 'members', filter: 'requests', action: 'Reply' });
   }
   return items;
 }
@@ -208,7 +241,7 @@ function BoardCard({ team, memberPhoto, go }) {
   );
 }
 
-export default function OverviewTab({ draft, hasPhoto, photoOf, memberPhoto, memberHasPhoto, go, addEvent, history, onRestore, restoring, canSave, unsaved }) {
+export default function OverviewTab({ draft, hasPhoto, photoOf, memberPhoto, memberHasPhoto, go, addEvent, history, onRestore, restoring, canSave, unsaved, joins }) {
   const today = todayIso();
   const upcoming = draft.events.filter((e) => !isCompleted(e, today)).sort((a, b) => a.date.localeCompare(b.date));
   const yearStart = Number.parseInt(draft.team.rotaractYear, 10) || currentRotaryStart();
@@ -224,7 +257,7 @@ export default function OverviewTab({ draft, hasPhoto, photoOf, memberPhoto, mem
   const done = (monthEvents ?? draft.events).filter((e) => isCompleted(e, today));
   const complete = done.filter((e) => !eventGaps(e, hasPhoto, today).length).length;
   const pct = done.length ? Math.round((complete / done.length) * 100) : 100;
-  const items = attentionItems({ draft, hasPhoto, memberHasPhoto });
+  const items = attentionItems({ draft, hasPhoto, memberHasPhoto, joins });
   const lower = useNextFrame(); // the calendar, team and to-do cards follow a frame after the top of the page
   const monthUpcoming = monthEvents?.filter((e) => !isCompleted(e, today)) ?? [];
   const stats = month ? [
@@ -284,9 +317,11 @@ export default function OverviewTab({ draft, hasPhoto, photoOf, memberPhoto, mem
             <ul className="adm-todo">
               {items.map((it) => (
                 <li key={it.key}>
-                  {it.tone === 'info' ? <FaBell className="adm-todo-icon is-info" aria-hidden="true" /> : <FaTriangleExclamation className="adm-todo-icon" aria-hidden="true" />}
+                  {it.tone === 'bday' ? <FaCakeCandles className="adm-todo-icon is-bday" aria-hidden="true" /> : it.tone === 'info' ? <FaBell className="adm-todo-icon is-info" aria-hidden="true" /> : <FaTriangleExclamation className="adm-todo-icon" aria-hidden="true" />}
                   <span>{it.text}</span>
-                  <button type="button" className="adm-btn is-ghost is-small" onClick={() => go(it.go, it.filter)}>{it.action}</button>
+                  {it.href
+                    ? <a className="adm-btn is-ghost is-small" href={it.href} target="_blank" rel="noreferrer">{it.action}</a>
+                    : <button type="button" className="adm-btn is-ghost is-small" onClick={() => go(it.go, it.filter)}>{it.action}</button>}
                 </li>
               ))}
             </ul>

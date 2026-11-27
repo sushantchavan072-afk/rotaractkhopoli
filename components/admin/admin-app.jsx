@@ -4,15 +4,16 @@ import { useCallback, useDeferredValue, useEffect, useRef, useState } from 'reac
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import Image from 'next/image';
-import { FaAddressCard, FaArrowLeft, FaArrowUpRightFromSquare, FaCalendarDays, FaHouse, FaImages, FaIndianRupeeSign, FaQuoteLeft, FaRightFromBracket, FaUsers, FaXmark, FaRegEye, FaRegEyeSlash, FaArrowRightToBracket, FaArrowRight, FaCircleCheck, FaPenToSquare, FaArrowsRotate, FaTableColumns, FaPlus } from 'react-icons/fa6';
+import { FaAddressCard, FaArrowLeft, FaArrowUpRightFromSquare, FaCalendarDays, FaHouse, FaImages, FaIndianRupeeSign, FaQuoteLeft, FaRightFromBracket, FaUsers, FaXmark, FaRegEye, FaRegEyeSlash, FaArrowRightToBracket, FaArrowRight, FaCircleCheck, FaPenToSquare, FaArrowsRotate, FaTableColumns, FaPlus, FaAddressBook } from 'react-icons/fa6';
 import EventsTab, { blankEvent } from './events';
 import TeamTab, { LISTS } from './team';
 import { GalleryTab, ReviewsTab, DetailsTab } from './more';
 import OverviewTab from './overview';
-import FinanceTab from './finance';
+import FinanceTab, { rotaractYearOf, rupees } from './finance';
+import MembersTab from './members';
 import { Field, api, whenSaved } from './shared';
 import { tidyDraft } from './tidy';
-import { LuCalendarDays, LuHouse, LuIdCard, LuImages, LuIndianRupee, LuQuote, LuUsers } from 'react-icons/lu';
+import { LuCalendarDays, LuContactRound, LuHouse, LuIdCard, LuImages, LuIndianRupee, LuQuote, LuUsers } from 'react-icons/lu';
 
 /**
  * The club's admin page (/admin): events, team, gallery, reviews and club details, without code.
@@ -27,13 +28,14 @@ const SECTIONS = [
   ['overview', 'Overview', 'Home', FaHouse],
   ['events', 'Events', 'Events', FaCalendarDays],
   ['team', 'Team', 'Team', FaUsers],
+  ['members', 'Members', 'Members', FaAddressBook],
   ['gallery', 'Gallery', 'Gallery', FaImages],
   ['reviews', 'Reviews', 'Reviews', FaQuoteLeft],
   ['finance', 'Finance', 'Finance', FaIndianRupeeSign],
   ['site', 'Club details', 'Details', FaAddressCard],
 ];
 // The phone navbar uses line icons (in the same order as SECTIONS).
-const DOCK_ICONS = { overview: LuHouse, events: LuCalendarDays, team: LuUsers, gallery: LuImages, reviews: LuQuote, finance: LuIndianRupee, site: LuIdCard };
+const DOCK_ICONS = { overview: LuHouse, events: LuCalendarDays, team: LuUsers, members: LuContactRound, gallery: LuImages, reviews: LuQuote, finance: LuIndianRupee, site: LuIdCard };
 // The current section's name and icon take one of the club colours, a different one each time.
 const ACTIVE_HUES = ['#d41367', '#17458f', '#c2410c', '#15803d', '#7a3db8', '#0067c8', '#b45309', '#0e7490'];
 const UPLOAD_BUDGET = 3.4 * 1024 * 1024; // base64 photo data per save (Vercel's request limit is 4.5 MB)
@@ -119,7 +121,10 @@ export default function AdminApp() {
   const [tab, setTab] = useState('overview');
   const [editing, setEditing] = useState(null); // the event being edited (index)
   const [filter, setFilter] = useState('all'); // events list filter
-  const [financePage, setFinancePage] = useState('sheet'); // Finance: 'sheet' | 'budgets'
+  const [financePage, setFinancePage] = useState('sheet'); // Finance: 'sheet' | 'budgets' | 'claims'
+  const [membersPage, setMembersPage] = useState('list'); // Members: 'list' | 'dues' | 'requests'
+  const [joins, setJoins] = useState([]); // join requests from the website
+  const [joinsReady, setJoinsReady] = useState(false);
   const [message, setMessage] = useState(null); // { kind: 'error' | 'info', text }
   const [saving, setSaving] = useState(false);
   const [published, setPublished] = useState(null); // { commit, live, dismissed }
@@ -133,10 +138,13 @@ export default function AdminApp() {
   }, []);
   const loadContent = useCallback(async (s) => {
     try {
-      const [c, f] = await Promise.all([
+      const [c, f, j] = await Promise.all([
         api('GET', '/api/admin/content'),
         api('GET', '/api/admin/finance').catch((err) => ({ error: err })),
+        api('GET', '/api/admin/joins').catch(() => ({ requests: [], ready: false })),
       ]);
+      setJoins(j.requests ?? []);
+      setJoinsReady(j.ready !== false);
       if (f.error) setMessage({ kind: 'error', text: f.error.message });
       setFinanceBase(f.base ?? null);
       setFinanceReady(!f.error && f.ready !== false);
@@ -228,6 +236,10 @@ export default function AdminApp() {
     for (const e of draft.finance?.entries ?? []) {
       if (!e.date || !(Number(e.amount) > 0) || !e.description.trim()) return ['Every finance entry needs a date, an amount and what it was for.', 'finance'];
     }
+    if ((draft.finance?.members ?? []).some((m) => !m.name.trim())) return ['Every member needs a name (Members).', 'members'];
+    for (const c of draft.finance?.claims ?? []) {
+      if (!c.person.trim() || !(Number(c.amount) > 0) || !c.description.trim() || !c.date) return ['Every reimbursement needs who paid, an amount, what it was for and a date (Finance → Reimbursements).', 'finance', 'claims'];
+    }
     return null;
   };
 
@@ -235,7 +247,7 @@ export default function AdminApp() {
     // Auto-tidy the parts being saved first (extra spaces, name capitals, phone format, photos added twice).
     const { draft: tidied, notes: tidiedNotes } = tidyDraft(draft, dirty);
     const problem = check(tidied);
-    if (problem) { notify(problem[0]); setTab(problem[1]); return; }
+    if (problem) { notify(problem[0]); setTab(problem[1]); if (problem[2]) setFinancePage(problem[2]); if (problem[1] === 'members') setMembersPage('list'); return; }
     if (tidiedNotes.length) setDraft(tidied);
     setSaving(true);
     setMessage(null);
@@ -312,7 +324,8 @@ export default function AdminApp() {
     if (section !== tab) setHue((h) => (h + 1) % ACTIVE_HUES.length);
     setTab(section);
     if (section === 'events') { setEditing(null); if (nextFilter) setFilter(nextFilter); }
-    if (section === 'finance') setFinancePage(nextFilter === 'budgets' ? 'budgets' : 'sheet');
+    if (section === 'finance') setFinancePage(['budgets', 'claims'].includes(nextFilter) ? nextFilter : 'sheet');
+    if (section === 'members') setMembersPage(['dues', 'requests'].includes(nextFilter) ? nextFilter : 'list');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -323,6 +336,16 @@ export default function AdminApp() {
     setTab('events');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+  // Which parts of the private records changed: the finance sheet, members (and dues), or both.
+  const financeParts = () => {
+    const was = JSON.parse(saved?.finance ?? 'null') ?? {};
+    const now = draft?.finance ?? {};
+    const diff = (keys) => keys.some((k) => JSON.stringify(was[k] ?? null) !== JSON.stringify(now[k] ?? null));
+    const parts = [];
+    if (diff(['entries', 'budgets', 'openingBalances', 'claims'])) parts.push('Finance');
+    if (diff(['members', 'dues'])) parts.push('Members');
+    return parts.length ? parts : ['Finance'];
+  };
   const state = saving ? ['busy', 'Saving…']
     : unsaved ? ['warn', 'Unsaved changes']
       : published && !published.live ? ['busy', 'Publishing…']
@@ -331,9 +354,9 @@ export default function AdminApp() {
   const barNow = !(status?.signedIn && draft) ? null
     : message ? { text: message.text, tone: message.kind === 'error' ? 'error' : 'info', actions: unsaved && !saving ? 'save' : 'close' }
       : saving ? { text: 'Saving your changes…', tone: 'busy', actions: null }
-        : unsaved ? { text: `Not saved · ${[...dirty.map((k) => KINDS[k]), ...(pending && !dirty.length ? [`${pending} photo${pending > 1 ? 's' : ''}`] : [])].join(', ')}`, tone: 'warn', actions: 'save' }
+        : unsaved ? { text: `Not saved · ${[...dirty.flatMap((k) => (k === 'finance' ? financeParts() : [KINDS[k]])), ...(pending && !dirty.length ? [`${pending} photo${pending > 1 ? 's' : ''}`] : [])].join(', ')}`, tone: 'warn', actions: 'save' }
           : published && !published.dismissed ? {
-            text: (published.private ? 'Saved. The finance sheet is up to date.' : published.live ? 'Saved and live on the website.' : 'Saved. Live on the website in about two minutes.') + (published.tidyNote ?? ''),
+            text: (published.private ? 'Saved. Private records are up to date.' : published.live ? 'Saved and live on the website.' : 'Saved. Live on the website in about two minutes.') + (published.tidyNote ?? ''),
             tone: published.live ? 'ok' : 'busy', actions: 'close',
           } : null;
   const [bar, setBar] = useState({ on: false, leaving: false, text: '', tone: 'ok', actions: null });
@@ -365,8 +388,13 @@ export default function AdminApp() {
     gallery: draft.gallery.length,
     reviews: draft.reviews.length,
     finance: draft.finance?.entries.length,
+    members: draft.finance ? (draft.finance.members ?? []).filter((m) => !m.left).length : undefined,
   } : {};
   const ready = status?.signedIn && draft;
+  const people = draft ? [...new Set([
+    ...(draft.finance?.members ?? []).filter((m) => !m.left).map((m) => m.name),
+    ...LISTS.flatMap(([k]) => draft.team[k].map((p) => p.name)),
+  ].filter(Boolean))] : [];
   const client = typeof document !== 'undefined';
 
   if (!ready) {
@@ -454,7 +482,7 @@ export default function AdminApp() {
           {view === 'overview' && (
             <OverviewTab
               draft={draft} hasPhoto={hasPhoto} photoOf={photoOf} memberPhoto={memberPhoto} memberHasPhoto={(p) => Boolean(memberPhoto(p))} go={go} addEvent={addEvent}
-              history={history} onRestore={restore} restoring={restoring} canSave={status.canSave} unsaved={unsaved}
+              history={history} onRestore={restore} restoring={restoring} canSave={status.canSave} unsaved={unsaved} joins={joins}
             />
           )}
           {view === 'events' && (
@@ -467,8 +495,11 @@ export default function AdminApp() {
           {view === 'gallery' && <GalleryTab gallery={draft.gallery} photoUrl={photoUrl} update={update('gallery')} addUpload={addUpload} notify={notify} />}
           {view === 'reviews' && <ReviewsTab reviews={draft.reviews} update={update('reviews')} />}
           {view === 'site' && <DetailsTab site={draft.site} update={update('site')} />}
+          {view === 'members' && (draft.finance
+            ? <MembersTab finance={draft.finance} update={update('finance')} team={draft.team} joins={joins} setJoins={setJoins} joinsReady={joinsReady} notify={notify} rupees={rupees} rotaractYearOf={rotaractYearOf} page={membersPage} setPage={setMembersPage} ready={financeReady && status.canSave} />
+            : <p className="adm-notice">The member list couldn’t be opened. {message?.text}</p>)}
           {view === 'finance' && (draft.finance
-            ? <FinanceTab finance={draft.finance} events={draft.events} update={update('finance')} ready={financeReady && status.canSave} page={financePage} setPage={setFinancePage} />
+            ? <FinanceTab finance={draft.finance} events={draft.events} update={update('finance')} ready={financeReady && status.canSave} page={financePage} setPage={setFinancePage} people={people} />
             : <p className="adm-notice">The finance sheet couldn’t be opened. {message?.text}</p>)}
           </div>
         </div>

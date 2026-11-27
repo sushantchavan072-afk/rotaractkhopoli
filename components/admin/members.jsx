@@ -233,11 +233,13 @@ function Dues({ finance, update, year, years, setYear, rotaractYearOf, rupees })
 }
 
 const STATUS = { new: ['New', 'blue'], contacted: ['Contacted', 'amber'], joined: ['Joined', 'green'], declined: ['Not joining', 'grey'] };
-const ago = (iso) => { const d = Math.floor((Date.now() - Date.parse(iso)) / DAY); return d <= 0 ? 'Today' : d === 1 ? 'Yesterday' : `${d} days ago`; };
+const daysSince = (iso, today) => Math.max(0, daysBetween(iso.slice(0, 10), today));
+const ago = (iso, today) => { const d = daysSince(iso, today); return d === 0 ? 'Today' : d === 1 ? 'Yesterday' : `${d} days ago`; };
 
 function Requests({ joins, setJoins, members, onJoined, notify, ready }) {
   const [show, setShow] = useState('open');
   const [busy, setBusy] = useState(null);
+  const today = todayIso();
   const change = async (r, patch, done) => {
     setBusy(r.id);
     try {
@@ -263,18 +265,18 @@ function Requests({ joins, setJoins, members, onJoined, notify, ready }) {
       {!shown.length && <Empty title={show === 'open' ? 'No open requests.' : 'Nothing here yet.'}>New applications from the Join page appear here.</Empty>}
       <ul className="adm-requests">
         {shown.map((r) => {
-          const waiting = r.status === 'new' && (Date.now() - Date.parse(r.at)) / DAY >= 3;
+          const waiting = r.status === 'new' && daysSince(r.at, today) >= 3;
           const already = member(r);
           return (
             <li key={r.id} className="adm-card adm-request">
               <div className="adm-request-top">
                 <div className="adm-request-who">
                   <strong>{r.name}</strong>
-                  <span>{ago(r.at)}{r.occupation ? ` · ${r.occupation}` : ''}{r.avenue ? ` · ${r.avenue}` : ''}</span>
+                  <span>{ago(r.at, today)}{r.occupation ? ` · ${r.occupation}` : ''}{r.avenue ? ` · ${r.avenue}` : ''}</span>
                 </div>
                 <span className="adm-badges">
                   <Badge tone={STATUS[r.status][1]}>{STATUS[r.status][0]}</Badge>
-                  {waiting && <Badge tone="red">Waiting {Math.floor((Date.now() - Date.parse(r.at)) / DAY)} days</Badge>}
+                  {waiting && <Badge tone="red">Waiting {daysSince(r.at, today)} days</Badge>}
                   {seenBefore(r) && <Badge tone="amber">Applied before</Badge>}
                   {already && r.status !== 'joined' && <Badge tone="green">Already a member</Badge>}
                 </span>

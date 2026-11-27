@@ -94,6 +94,15 @@ export function tidyDraft(draft, parts) {
         for (const k of ['party', 'reference']) if (typeof e[k] === 'string') out[k] = note(e[k], squash(e[k]), 'extra spaces');
         return out;
       }),
+      members: (draft.finance.members ?? []).map((m) => {
+        const name = tidyName(m.name);
+        if (name !== m.name) notes.add(squash(m.name) === name ? 'extra spaces' : 'name capitals');
+        const out = { ...m, name };
+        if (m.phone) out.phone = note(m.phone, tidyPhone(m.phone), 'phone number format');
+        if (m.email) out.email = note(m.email, squash(m.email).toLowerCase(), 'email in small letters');
+        return out;
+      }),
+      claims: (draft.finance.claims ?? []).map((c) => ({ ...c, person: note(c.person, squash(c.person), 'extra spaces'), description: note(c.description, squash(c.description), 'extra spaces') })),
     };
   }
 
