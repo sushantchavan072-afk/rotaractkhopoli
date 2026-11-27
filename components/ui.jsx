@@ -830,10 +830,13 @@ export function Segmented({ options, value, onChange, label }) {
  * layer on top of the page (so cards and sections below can never cover it) and follows its button
  * when the page scrolls or resizes.
  */
-export function PillSelect({ id, name, options, value: controlled, defaultValue, onChange, ariaLabel, className = '' }) {
+export function PillSelect({ id, name, options, value: controlled, defaultValue, onChange, ariaLabel, className = '', multiple = false, placeholder = 'None' }) {
   const initial = defaultValue ?? options[0];
   const [inner, setInner] = useState(initial);
   const value = controlled ?? inner;
+  // multiple: `value` is an array; picking an option ticks or unticks it and the list stays open.
+  const picked = (o) => (multiple ? (value ?? []).includes(o) : o === value);
+  const shown = multiple ? ((value ?? []).length ? value.join(', ') : placeholder) : value;
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
   const [pos, setPos] = useState(null); // where the open list sits on screen
@@ -853,11 +856,12 @@ export function PillSelect({ id, name, options, value: controlled, defaultValue,
   }, [options.length]);
   const show = () => {
     place();
-    setActive(Math.max(0, options.indexOf(value)));
+    setActive(multiple ? 0 : Math.max(0, options.indexOf(value)));
     setOpen(true);
   };
   const close = (refocus = true) => { setOpen(false); if (refocus) btn.current?.focus(); };
   const choose = (v) => {
+    if (multiple) { const list = value ?? []; onChange?.(list.includes(v) ? list.filter((x) => x !== v) : options.filter((o) => o === v || list.includes(o))); return; }
     if (controlled === undefined) setInner(v);
     if (v !== value) onChange?.(v);
     close();
@@ -909,28 +913,28 @@ export function PillSelect({ id, name, options, value: controlled, defaultValue,
       <button
         ref={btn} id={id} type="button" className="pill-select-btn"
         aria-haspopup="listbox" aria-expanded={open} aria-controls={open ? listId : undefined}
-        aria-label={ariaLabel ? `${ariaLabel}: ${value}` : undefined}
+        aria-label={ariaLabel ? `${ariaLabel}: ${shown}` : undefined}
         onClick={() => (open ? close(false) : show())}
         onKeyDown={(e) => { if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); show(); } }}
       >
-        <span className="pill-select-value">{value}</span>
+        <span className={`pill-select-value${multiple && !(value ?? []).length ? ' is-placeholder' : ''}`}>{shown}</span>
         <span className="pill-select-chev" aria-hidden="true"><ChevronDown size={12} /></span>
       </button>
-      {name && <input type="hidden" name={name} value={value} />}
+      {name && <input type="hidden" name={name} value={multiple ? (value ?? []).join(', ') : value} />}
       {open && pos && createPortal(
         <ul
-          ref={list} id={listId} className={`pill-select-list ${pos.up ? 'is-up' : ''}`} role="listbox" tabIndex={-1}
+          ref={list} id={listId} className={`pill-select-list ${pos.up ? 'is-up' : ''}${multiple ? ' is-multi' : ''}`} role="listbox" tabIndex={-1} aria-multiselectable={multiple || undefined}
           style={{ left: pos.left, width: pos.width, top: pos.top, bottom: pos.bottom, maxHeight: pos.maxHeight }}
           aria-label={ariaLabel} aria-activedescendant={`${listId}-${active}`} onKeyDown={onListKey}
         >
           {options.map((o, i) => (
             <li
-              key={o} id={`${listId}-${i}`} role="option" aria-selected={o === value}
+              key={o} id={`${listId}-${i}`} role="option" aria-selected={picked(o)}
               className={`pill-select-option ${i === active ? 'is-active' : ''}`}
               onPointerMove={() => setActive(i)} onClick={() => choose(o)}
             >
               <span>{o}</span>
-              {o === value && <Check size={12} aria-hidden="true" />}
+              {picked(o) && <Check size={12} aria-hidden="true" />}
             </li>
           ))}
         </ul>,

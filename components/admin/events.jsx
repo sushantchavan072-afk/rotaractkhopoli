@@ -68,17 +68,13 @@ function EventEditor({ event, avenueOptions, photoSrc, photoUrl, onChange, onPho
           <Field label="With (optional)" hint="Partner clubs or organisations.">
             {(id) => <input id={id} value={event.partner ?? ''} maxLength={300} onChange={(e) => set({ partner: e.target.value || undefined })} />}
           </Field>
-          <div className="field adm-field is-wide">
-            <span className="adm-label">Also counts towards (optional)</span>
-            <div className="adm-chips">
-              {avenueOptions.filter((a) => a !== event.avenue).map((a) => (
-                <button
-                  key={a} type="button" className="adm-chip" aria-pressed={others.includes(a)}
-                  onClick={() => { const next = others.includes(a) ? others.filter((x) => x !== a) : [...others, a]; set({ otherAvenues: next.length ? next : undefined }); }}
-                >{a}</button>
-              ))}
-            </div>
-          </div>
+          <Field label="Also counts towards (optional)" hint="Other avenues this event is listed under on the website.">
+            <PillSelect
+              multiple placeholder="No other avenue" ariaLabel="Also counts towards"
+              options={avenueOptions.filter((a) => a !== event.avenue)} value={others}
+              onChange={(next) => set({ otherAvenues: next.length ? next : undefined })}
+            />
+          </Field>
         </div>
       </section>
 
