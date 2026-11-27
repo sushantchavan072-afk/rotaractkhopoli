@@ -966,6 +966,7 @@ export function Join() {
             title="Membership application"
             intro="Tell us a little about yourself."
             subject="Membership application"
+            saveTo="/api/join"
             submitLabel="Submit Application"
             fields={[
               { name: 'name', label: 'Your full name', required: true, placeholder: 'Full name', autoComplete: 'name' },

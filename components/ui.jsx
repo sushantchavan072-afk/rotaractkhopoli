@@ -411,7 +411,7 @@ function SubscribeForm() {
  * fields: [{ name, label, type?, placeholder?, required?, options?, rows?, minLength?, pattern?, title?, autoComplete? }]
  * prefill: name of a field to fill from the ?about= query parameter (e.g. from an event page).
  */
-export function MailForm({ title, intro, subject, fields, submitLabel = 'Send Message', prefill }) {
+export function MailForm({ title, intro, subject, fields, submitLabel = 'Send Message', prefill, saveTo }) {
   const [state, setState] = useState('idle');
   const formRef = useRef(null);
   useEffect(() => {
@@ -426,16 +426,26 @@ export function MailForm({ title, intro, subject, fields, submitLabel = 'Send Me
     const values = Object.fromEntries(fields.map((f) => [f.label, String(data.get(f.name) ?? '').trim()]));
     const who = String(data.get('name') ?? '').trim();
     setState('sending');
+    // saveTo: the answers are also saved for the Admin Portal (e.g. Join requests). When that works and no form
+    // service is set up, it counts as sent (the email app isn't opened).
+    let saved = false;
+    if (saveTo) {
+      try {
+        const res = await fetch(saveTo, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.fromEntries([...data.entries()].map(([k, v]) => [k, String(v)]))) });
+        saved = res.ok;
+      } catch { /* sent the usual way below */ }
+    }
     try {
-      setState(await deliver(subject, `${subject}${who ? ` from ${who}` : ''}`, values));
-      if (FORM_ENDPOINT) e.target.reset();
-    } catch { setState('error'); }
+      setState(FORM_ENDPOINT || !saved ? await deliver(subject, `${subject}${who ? ` from ${who}` : ''}`, values) : 'sent');
+      if (FORM_ENDPOINT || saved) e.target.reset();
+    } catch { setState(saved ? 'sent' : 'error'); }
   }
   return (
     <div className="form-card">
       <h2>{title}</h2>
       {intro && <p>{intro}</p>}
       <form ref={formRef} onSubmit={onSubmit}>
+        {saveTo && <input className="form-trap" type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" />}
         {fields.map((f) => {
           const id = `f-${f.name}`;
           return (

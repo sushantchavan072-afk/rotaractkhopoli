@@ -5,6 +5,7 @@ import { FaArrowDown, FaArrowUp, FaChevronLeft, FaDownload, FaPlus, FaTrashCan }
 import { PillSelect, Segmented } from '../ui';
 import { Empty, Field, SectionHead, monthLabel, niceDate, plural, tag, todayIso } from './shared';
 import Budgets, { headForAvenue, headsFor } from './budgets';
+import Reimbursements, { owedClaims } from './reimbursements';
 
 /** The club's income and expenses (kept encrypted; only the signed-in admin page can read them). */
 
@@ -113,7 +114,7 @@ function Breakdown({ title, rows, total, tone }) {
   );
 }
 
-export default function FinanceTab({ finance, events, update, ready, page, setPage }) {
+export default function FinanceTab({ finance, events, update, ready, page, setPage, people = [] }) {
   const entries = finance.entries;
   const budgetYears = finance.budgets;
   const years = useMemo(() => [...new Set([rotaractYearOf(todayIso()), ...Object.keys(budgetYears ?? {}), ...entries.filter((e) => e.date).map((e) => rotaractYearOf(e.date))])].sort().reverse(), [entries, budgetYears]);
@@ -121,6 +122,7 @@ export default function FinanceTab({ finance, events, update, ready, page, setPa
   const [kind, setKind] = useState('all');
   const [query, setQuery] = useState('');
   const [editing, setEditing] = useState(null); // entry id
+  const [claim, setClaim] = useState(null); // reimbursement being edited
 
   const inYear = entries.filter((e) => e.date && rotaractYearOf(e.date) === year);
   const sum = (list, type) => list.filter((e) => e.type === type).reduce((n, e) => n + (Number(e.amount) || 0), 0);
@@ -153,6 +155,9 @@ export default function FinanceTab({ finance, events, update, ready, page, setPa
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  if (claim && page === 'claims') {
+    return <Reimbursements finance={finance} update={update} events={events} people={people} categories={EXPENSE_CATEGORIES} rupees={rupees} rotaractYearOf={rotaractYearOf} editing={claim} setEditing={setClaim} />;
+  }
   if (current) {
     return (
       <EntryEditor
@@ -166,15 +171,18 @@ export default function FinanceTab({ finance, events, update, ready, page, setPa
 
   return (
     <div className="adm-tab">
-      <SectionHead title="Finance" desc="The club’s income and expenses. Private: stored encrypted, and only visible here on the admin page.">
+      <SectionHead title="Finance" desc="The club’s income, expenses, budgets and reimbursements. Private: stored encrypted, only visible here.">
         <button type="button" className="adm-btn" onClick={() => add('income')}><FaPlus size={12} aria-hidden="true" /> Income</button>
         <button type="button" className="adm-btn is-ghost" onClick={() => add('expense')}><FaPlus size={12} aria-hidden="true" /> Expense</button>
       </SectionHead>
       {!ready && <p className="adm-notice">The finance sheet needs saving switched on (GITHUB_TOKEN) and a key (FINANCE_KEY, or the admin password). See REMAINING-TASKS.md.</p>}
 
       <div className="adm-toolbar">
-        <Segmented label="Page" options={[['sheet', 'Income and expenses'], ['budgets', 'Avenue budgets']]} value={page} onChange={setPage} />
+        <Segmented label="Page" options={[['sheet', 'Income and expenses'], ['budgets', 'Avenue budgets'], ['claims', owedClaims(finance).length ? `Reimbursements (${owedClaims(finance).length})` : 'Reimbursements']]} value={page} onChange={setPage} />
       </div>
+      {page === 'claims' ? (
+        <Reimbursements finance={finance} update={update} events={events} people={people} categories={EXPENSE_CATEGORIES} rupees={rupees} rotaractYearOf={rotaractYearOf} editing={claim} setEditing={setClaim} />
+      ) : (<>
       <div className="adm-toolbar">
         <div className="adm-year">
           <span className="adm-label">Rotaract year</span>
@@ -235,6 +243,7 @@ export default function FinanceTab({ finance, events, update, ready, page, setPa
           </ul>
         </div>
       ))}
+      </>)}
       </>)}
     </div>
   );

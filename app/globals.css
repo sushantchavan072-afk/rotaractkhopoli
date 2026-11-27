@@ -2720,3 +2720,4 @@ body:has(.admin):not(:has(.adm-gate)) {
 .pill-select-value.is-placeholder { color: var(--muted); }
 .pill-select-list.is-multi .pill-select-option[aria-selected='true'] { background: var(--surface-2); color: var(--ink); font-weight: 600; }
 .pill-select-list.is-multi .pill-select-option[aria-selected='true'].is-active { background: #e9e9e6; }
+.form-trap { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
