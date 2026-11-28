@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { FaChevronLeft, FaPlus, FaTrashCan } from 'react-icons/fa6';
 import { DatePicker, PillSelect, Segmented } from '../ui';
-import { Badge, Empty, Field, niceDate, plural, tag, todayIso } from './shared';
+import { Badge, Empty, Field, PhotoButton, api, niceDate, plural, preparePhoto, tag, todayIso } from './shared';
 import { headForAvenue, headsFor } from './budgets';
 
 /**
@@ -23,6 +23,11 @@ export const blankClaim = () => ({ id: `r-${todayIso().replaceAll('-', '')}-${ta
 
 function ClaimEditor({ claim, claims, people, events, heads, categories, onChange, onDelete, onClose }) {
   const set = (patch) => onChange({ ...claim, ...patch });
+  const [busy, setBusy] = useState(false);
+  const attach = async (file) => {
+    setBusy(true);
+    try { const { data } = await preparePhoto(file, { max: 1600 }); set({ receipt: (await api('POST', '/api/admin/receipts', { data })).id }); } catch (err) { window.alert(err.message); } finally { setBusy(false); }
+  };
   const [other, setOther] = useState(Boolean(claim.person) && !people.includes(claim.person));
   const pickEvent = (title) => {
     const ev = events.find((e) => e.title === title);
@@ -54,6 +59,14 @@ function ClaimEditor({ claim, claims, people, events, heads, categories, onChang
           <Field label="Event (optional)"><PillSelect options={[NO_EVENT, ...events.map((e) => e.title).filter(Boolean)]} value={claim.event || NO_EVENT} ariaLabel="Event" onChange={(v) => pickEvent(v === NO_EVENT ? '' : v)} /></Field>
           <Field label="Taken from the budget of" hint={claim.event && claim.avenue ? 'Set from the event’s avenue.' : undefined}>
             <PillSelect options={[NO_AVENUE, ...heads.map((h) => h.name)]} value={heads.find((h) => h.code === claim.avenue)?.name ?? NO_AVENUE} ariaLabel="Avenue budget" onChange={(v) => set({ avenue: heads.find((h) => h.name === v)?.code })} />
+          </Field>
+          <Field label="Receipt" hint={claim.receipt ? 'Stored encrypted; only visible here.' : 'A photo of the bill. Stored encrypted; only visible here.'} wide>
+            <div className="adm-receipt">
+              {/* eslint-disable-next-line @next/next/no-img-element -- private, signed-in image; next/image would fetch it without the cookie */}
+              {claim.receipt && <a href={`/api/admin/receipts?id=${claim.receipt}`} target="_blank" rel="noreferrer"><img src={`/api/admin/receipts?id=${claim.receipt}`} alt="Receipt" /></a>}
+              <PhotoButton label={claim.receipt ? 'Change photo' : 'Attach receipt photo'} busy={busy} onFile={attach} />
+              {claim.receipt && <button type="button" className="adm-link is-danger" onClick={() => set({ receipt: undefined })}>Remove</button>}
+            </div>
           </Field>
           <Field label="Note (optional)" wide>{(id) => <input id={id} maxLength={200} placeholder="Bill number, who approved it…" value={claim.note ?? ''} onChange={(e) => set({ note: e.target.value || undefined })} />}</Field>
         </div>
@@ -88,7 +101,12 @@ export default function Reimbursements({ finance, update, events, people, catego
   }
 
   // Paying adds the expense to the finance sheet (with the claim's event and avenue) and links it to the claim.
-  const pay = (list) => update((f) => {
+  const pay = (list) => {
+    const missing = list.filter((c) => !c.receipt).length;
+    if (missing && !window.confirm(`${plural(missing, 'claim has', 'claims have')} no receipt attached. Pay anyway?`)) return;
+    payNow(list);
+  };
+  const payNow = (list) => update((f) => {
     const made = list.map((c) => ({ c, entry: { id: `${today.replaceAll('-', '')}-${tag()}`, date: today, type: 'expense', amount: Number(c.amount), category: c.category || 'Project costs', description: `Reimbursement: ${c.description}`, party: c.person, mode: 'UPI', ...(c.event ? { event: c.event } : {}), ...(c.avenue ? { avenue: c.avenue } : {}) } }));
     const byId = new Map(made.map(({ c, entry }) => [c.id, entry.id]));
     return { ...f, entries: [...made.map((m) => m.entry), ...f.entries], claims: (f.claims ?? []).map((c) => (byId.has(c.id) ? { ...c, status: 'paid', entry: byId.get(c.id) } : c)) };
@@ -146,6 +164,7 @@ export default function Reimbursements({ finance, update, events, people, catego
                 <span className="adm-badges">
                   <Badge tone={STATUS[c.status][1]}>{STATUS[c.status][0]}</Badge>
                   {(c.status === 'pending' || c.status === 'approved') && age(c, today) > 14 && <Badge tone="red">{age(c, today)} days</Badge>}
+                  {c.status !== 'rejected' && <Badge tone={c.receipt ? 'green' : 'amber'}>{c.receipt ? 'Receipt' : 'No receipt'}</Badge>}
                 </span>
                 <span className="adm-claim-actions">
                   {c.status === 'pending' && <button type="button" className="adm-link" onClick={() => setClaim(c.id, { status: 'approved' })}>Approve</button>}
