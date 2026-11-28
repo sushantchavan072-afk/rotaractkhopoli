@@ -71,10 +71,11 @@ const hits = new Map();
 function limited(ip) {
   const now = Date.now();
   const recent = (hits.get(ip) ?? []).filter((t) => now - t < 10 * 60 * 1000);
-  recent.push(now);
-  hits.set(ip, recent);
   if (hits.size > 5000) hits.clear();
-  return recent.length > 20;
+  hits.set(ip, recent);
+  if (recent.length >= 20) return true; // over the limit: not counted, so a flood can't grow the list
+  recent.push(now);
+  return false;
 }
 
 /**
