@@ -26,7 +26,7 @@ import { Team, WorldMap } from '@/components/ui/lazy';
 import ClubCalendar from '@/components/ui/club-calendar';
 import { placeOnMap, MAP_SIZE } from '../lib/world-map';
 import { eventPhoto } from '../lib/event-photo';
-import { breadcrumbJsonLd, eventJsonLd, postJsonLd, faqJsonLd } from '../lib/seo';
+import { breadcrumbJsonLd, eventJsonLd, postJsonLd, faqJsonLd, ldJson } from '../lib/seo';
 
 const ICONS = { HandHeart, GraduationCap, Users, Globe2, Megaphone, HeartHandshake, Sparkles, ShieldCheck, UserPlus, Lightbulb, Package, Handshake };
 const eventImage = eventPhoto;
@@ -545,7 +545,7 @@ export function AvenueDetail({ slug }) {
   const others = avenues.filter((x) => x.slug !== slug);
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd([['Avenues of Service', '/avenues'], [a.name, `/avenues/${a.slug}`]])) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(breadcrumbJsonLd([['Avenues of Service', '/avenues'], [a.name, `/avenues/${a.slug}`]])) }} />
       <PageHero layout="split" eyebrow={a.focus} title={a.name} desc={a.description}>
         <Btn href={`/contact?about=${encodeURIComponent(`${a.name} project idea`)}`} icon={false}>Suggest a Project</Btn>
       </PageHero>
@@ -621,7 +621,7 @@ export function EventDetail({ slug }) {
   const jsonLd = [eventJsonLd(e, eventImage(e)), breadcrumbJsonLd([['Events', '/events'], [e.title, `/events/${e.slug}`]])];
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(jsonLd) }} />
       <section className="detail-hero">
         <div className="container">
           <Eyebrow>{e.avenue}</Eyebrow>
@@ -700,7 +700,7 @@ export function BlogPost({ slug }) {
   const jsonLd = [postJsonLd(p), breadcrumbJsonLd([['Blog', '/blog'], [p.title, `/blog/${p.slug}`]])];
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(jsonLd) }} />
       <section className="post-hero">
         <div className="container">
           <Link href="/blog" className="back-link"><ArrowLeft size={13} aria-hidden="true" /> All articles</Link>
@@ -928,7 +928,7 @@ export function RotaryInfo() {
 export function Faqs() {
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd(allFaqs)) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(faqJsonLd(allFaqs)) }} />
       <PageHero eyebrow="Questions answered" title="Frequently asked questions" desc="About the club, membership, events and how Rotaract connects to Rotary." />
       <Section><div className="faq-page"><FaqSearch groups={faqGroups} /></div></Section>
       <CommunityCTA />

@@ -1171,6 +1171,7 @@ export function EventsExplorer({ events, perPage = 6 }) {
 
 export function EventActions({ event }) {
   const [copied, setCopied] = useState(false);
+  const now = useNow(); // null on the server, so the static page and the browser agree
   const addToCalendar = () => downloadIcs([event], `${event.slug}.ics`);
   async function share() {
     const data = { title: event.title, text: event.summary, url: window.location.href };
@@ -1182,7 +1183,7 @@ export function EventActions({ event }) {
   }
   return (
     <div className="event-actions">
-      {!isPast(event) && <button type="button" className="chip-btn" onClick={addToCalendar}><CalendarPlus size={16} aria-hidden="true" /> Add to Calendar</button>}
+      {now !== null && !isPast(event, now) && <button type="button" className="chip-btn" onClick={addToCalendar}><CalendarPlus size={16} aria-hidden="true" /> Add to Calendar</button>}
       <button type="button" className="chip-btn" onClick={share}><Share2 size={16} aria-hidden="true" /> {copied ? 'Link Copied' : 'Share'}</button>
     </div>
   );

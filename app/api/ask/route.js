@@ -108,7 +108,9 @@ export async function GET() {
 
 export async function POST(request) {
   const origin = request.headers.get('origin');
-  if (origin && new URL(origin).host !== request.headers.get('host')) return json({ error: 'Not allowed.' }, 403);
+  let foreign = false;
+  try { foreign = Boolean(origin) && new URL(origin).host !== request.headers.get('host'); } catch { foreign = true; } // e.g. "Origin: null"
+  if (foreign) return json({ error: 'Not allowed.' }, 403);
   const ip = (request.headers.get('x-forwarded-for') ?? '').split(',')[0].trim() || 'local';
   if (limited(ip)) return json({ error: 'That’s a lot of questions in a short time. Please try again in a few minutes.' }, 429);
 

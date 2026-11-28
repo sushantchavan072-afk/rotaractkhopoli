@@ -7,7 +7,7 @@ import CustomCursor from '@/components/ui/custom-cursor';
 import AskLauncher from '@/components/ui/ask-launcher';
 import ContextMenu from '@/components/ui/context-menu';
 import {club, SITE_URL} from '../data/club';
-import {siteJsonLd} from '../lib/seo';
+import {siteJsonLd, ldJson} from '../lib/seo';
 
 export const metadata = {
   metadataBase: new URL(SITE_URL),
@@ -35,7 +35,7 @@ export default function RootLayout({ children }){
       </head>
       <body>
         <MouseTrail />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(siteJsonLd) }} />
         <Header/>
         <main id="main" tabIndex={-1}>{children}</main>
         <Footer/>

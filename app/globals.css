@@ -1663,7 +1663,6 @@ body:has(.nav.is-open) .ask-fab { opacity: 0; pointer-events: none; }
 .adm-status.is-busy i { background: var(--rotary-blue); animation: adm-pulse 1.2s ease-in-out infinite; }
 @keyframes adm-pulse { 50% { opacity: .3; } }
 .adm-main { min-width: 0; }
-.adm-mobile-head, .adm-tabbar { display: none; }
 
 /* Sections and cards */
 .adm-tab, .adm-editor { grid-template-columns: minmax(0, 1fr); }
@@ -1865,14 +1864,7 @@ body:has(.admin) .site-header { display: none; }
   .adm-side { display: none; }
   .adm-mobile-head { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
   .adm-mobile-head strong { margin-right: auto; color: var(--ink); font: 600 1.35rem var(--font-head); }
-  .adm-tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 95; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); padding: 6px 4px calc(6px + env(safe-area-inset-bottom)); border-top: 1px solid var(--line); background: rgba(255, 255, 255, .94); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
-  .adm-tabbar button { min-width: 0; display: grid; justify-items: center; gap: 3px; padding: 4px 0; border: 0; background: none; color: var(--muted); font: 500 10.5px var(--font); cursor: pointer; }
-  .adm-tabbar-icon { position: relative; display: grid; place-items: center; width: 40px; height: 30px; border-radius: 16px; transition: background-color .2s, color .2s; }
-  .adm-tabbar button[aria-current='page'] { color: var(--ink); }
-  .adm-tabbar button[aria-current='page'] .adm-tabbar-icon { background: var(--ink); color: #fff; }
-  .adm-tabbar .adm-dot { position: absolute; top: 1px; right: 8px; }
   .adm-savebar { bottom: calc(76px + env(safe-area-inset-bottom)); }
-  body:has(.adm-tabbar) .footer { padding-bottom: 96px; }
   .adm-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .adm-two { grid-template-columns: minmax(0, 1fr); }
 }
@@ -2394,21 +2386,9 @@ body:has(.admin) {
 /* ---------- Admin sign-in: a split card (dark art panel, white sign-in panel) ---------- */
 .adm-login { position: relative; z-index: 1; width: min(1180px, 100%); min-height: min(720px, calc(100dvh - 64px)); display: grid; grid-template-columns: 1fr 1fr; overflow: hidden; border-radius: 40px; background: #2a2420; box-shadow: 0 50px 100px -40px rgba(30, 20, 10, .5); animation: adm-gate-in .8s var(--adm-bounce) both; }
 .adm-login-art { position: relative; display: flex; flex-direction: column; align-items: center; padding: 56px 48px 0; overflow: hidden; color: #fff; }
-.adm-login-tag { margin: 0; color: rgba(255, 255, 255, .78); font-size: 14px; text-align: center; }
 .adm-login-hero { position: relative; display: grid; place-items: center; margin-top: 11%; }
-.adm-login-rings { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
-.adm-login-rings i { position: absolute; width: 300px; height: 300px; border: 1px solid rgba(255, 255, 255, .08); border-radius: 50%; }
-.adm-login-rings i + i { width: 220px; height: 220px; }
 .adm-login-hero h2 { position: relative; margin: 0; color: #fff; font: 500 clamp(3rem, 5.6vw, 4.6rem)/.95 var(--font-head); letter-spacing: -.045em; text-align: center; }
-.adm-login-preview { position: absolute; left: 50%; bottom: -36px; width: 270px; display: grid; gap: 6px; padding: 22px 22px 46px; border-radius: 30px 30px 0 0; background: linear-gradient(180deg, #fbfaf8, #e9e6e2); color: var(--ink); transform: translateX(-50%) rotate(-9deg); box-shadow: 0 40px 70px -30px rgba(0, 0, 0, .7); animation: adm-preview-in 1.1s var(--adm-spring) .25s both; }
 @keyframes adm-preview-in { from { opacity: 0; transform: translateX(-50%) translateY(60px) rotate(-3deg); } }
-.adm-login-preview-label { color: var(--muted); font-size: 11.5px; }
-.adm-login-preview strong { font: 500 2.4rem/1 var(--font-head); letter-spacing: -.03em; }
-.adm-login-bars { height: 92px; display: grid; grid-template-columns: repeat(7, 1fr); align-items: end; gap: 7px; margin-top: 8px; }
-.adm-login-bars i { position: relative; height: 100%; overflow: hidden; border-radius: 10px; background: #fff; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .04); }
-.adm-login-bars i::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: var(--h); border-radius: 10px; background: linear-gradient(180deg, #f4a093, #e8603c); }
-.adm-login-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 7px; color: var(--muted); font-size: 9.5px; text-align: center; }
-.adm-login-days b { font-weight: 500; }
 .adm-login-main { position: relative; display: flex; flex-direction: column; padding: 44px 56px 36px; border-radius: 40px; background: #fff; }
 .adm-login-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
 .adm-login-brand { color: var(--ink); font: 600 1.35rem var(--font-head); letter-spacing: -.01em; }
@@ -2440,7 +2420,6 @@ body:has(.admin) {
   .adm-login-body { padding: 24px 0; }
   .admin.adm-gate { padding: 16px; }
 }
-@media (prefers-reduced-motion: reduce) { .adm-login, .adm-login-preview, .adm-forgot-hint { animation: none; } }
 /* Side menu: nothing gets squeezed when the window is short; rows tighten a little instead */
 @media (min-width: 961px) {
   .adm-side > *, .adm-side-nav > * { flex-shrink: 0; }
@@ -2479,22 +2458,17 @@ body:has(.adm-gate) { background: #fff; background-image: none; }
 
 /* Sign-in art: "Manage your club" over the rings, the phone in hand rising from the bottom */
 .adm-login-hero { margin-top: clamp(28px, 6vh, 72px); }
-.adm-login-rings i { width: min(380px, 44vh); height: min(380px, 44vh); }
-.adm-login-rings i + i { width: min(290px, 34vh); height: min(290px, 34vh); }
 .adm-login-hero h2 { font-size: clamp(3rem, min(6vw, 9vh), 5rem); }
 .adm-login-phone { position: absolute; left: 50%; bottom: 0; width: min(66%, 470px, 54vh); height: auto; transform: translateX(-54%); filter: drop-shadow(0 30px 40px rgba(0, 0, 0, .45)); animation: adm-phone-in 1.1s var(--adm-spring) .2s both; pointer-events: none; }
 @keyframes adm-phone-in { from { opacity: 0; transform: translateX(-54%) translateY(70px); } }
 @media (prefers-reduced-motion: reduce) { .adm-login-phone { animation: none; } }
 /* The hand enters from the panel's left edge (the photo is cut there); rings stay around the headline */
 .adm-login-hero { margin-top: clamp(44px, 10vh, 120px); }
-.adm-login-rings i { width: min(330px, 38vh); height: min(330px, 38vh); }
-.adm-login-rings i + i { width: min(250px, 29vh); height: min(250px, 29vh); }
 .adm-login-phone { left: 0; width: min(80%, 600px, 60vh); transform: none; }
 @keyframes adm-phone-in { from { opacity: 0; transform: translateY(70px); } }
 
 /* Sign-in art: left-aligned headline in Segoe UI */
 .adm-login-art { align-items: flex-start; padding: 56px 60px 0; }
-.adm-login-tag { color: rgba(255, 255, 255, .6); font: 600 12px var(--font); letter-spacing: .16em; text-align: left; text-transform: uppercase; }
 .adm-login-hero { display: block; margin-top: clamp(28px, 7vh, 88px); }
 .adm-login-hero h2 { margin: 0; color: #fff; font: 700 clamp(2.8rem, min(5.2vw, 8.4vh), 4.8rem)/1.02 var(--font); letter-spacing: -.035em; text-align: left; }
 .adm-login-hero h2 span { background: linear-gradient(95deg, #ff6a3d 0%, #f0533a 45%, #e0457b 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
@@ -2825,3 +2799,4 @@ body:has(.admin):not(:has(.adm-gate)) {
 .adm-receipt { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
 .adm-receipt img { display: block; width: 96px; height: 96px; border-radius: 14px; object-fit: cover; background: var(--surface-2); }
 .adm-receipt .adm-link { align-self: center; }
+@media (prefers-reduced-motion: reduce) { .adm-login, .adm-forgot-hint { animation: none; } }
